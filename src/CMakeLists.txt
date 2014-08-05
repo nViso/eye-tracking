@@ -17,10 +17,10 @@ ${CMAKE_CURRENT_SOURCE_DIR}
 
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
-SET( LIBRARY_OUTPUT_PATH ${OPENCV_HOTSHOTS_BINARY_DIR}/../lib CACHE PATH
+SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../lib CACHE PATH
      "Output directory for the OpenCV_hotshots library" )
 SET( EXECUTABLE_OUTPUT_PATH 
-     ${OPENCV_HOTSHOTS_BINARY_DIR}/../bin CACHE PATH
+     ${PROJECT_BINARY_DIR}/../bin CACHE PATH
      "Output directory for the OpenCV_hotshots executables" )
 
 SUBDIRS(jzp_lib)
