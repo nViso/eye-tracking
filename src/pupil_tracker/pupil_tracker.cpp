@@ -9,6 +9,7 @@
 #include "opencv_hotshots/ft/ft.hpp"
 #include "jzp_lib/jzplib_all.h"
 
+// test pushing to github by xcode
 int main(int argc, const char * argv[])
 {
     
