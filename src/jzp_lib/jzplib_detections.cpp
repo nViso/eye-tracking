@@ -318,9 +318,12 @@ Point findEyeCenterByColorSegmentation(Mat image, float coordinateWeight, int km
     Mat colorpoints, kmeansPoints;
     
     img = equalizeImage(image);
+    
     medianBlur(img, img, blurSize);
+//    imshow("equlized",img);
     cvtColor(image, gray_img, CV_BGR2GRAY);
     gray_img = imcomplement(gray_img);
+//    imagesc("grayeye",mat2gray(gray_img));
     vector<Mat> layers(3);
     split(img, layers);
     for (int i = 0 ; i < layers.size(); i++) {
@@ -369,7 +372,7 @@ Point findEyeCenterByColorSegmentation(Mat image, float coordinateWeight, int km
             index_img.at<float>(r,c) +=1;
         }
     }
-    
+//    imagesc("layered",mat2gray(index_img));
     Mat layerweighted_img = index_img.mul(index_img);
     layerweighted_img = mat2gray(layerweighted_img);
     gray_img.convertTo(gray_img, CV_32FC1,1/255.0);
@@ -378,6 +381,7 @@ Point findEyeCenterByColorSegmentation(Mat image, float coordinateWeight, int km
     Mat score = calculateImageSymmetryScore(composed);
     Mat scoresum;
     reduce(score.rowRange(0, composed.cols/6), scoresum, 0, CV_REDUCE_SUM,CV_32FC1);
+//    plotVectors("live", scoresum.t());
     double minVal , maxVal;
     Point minLoc, maxLoc;
     minMaxLoc(scoresum,&minVal,&maxVal,&minLoc,&maxLoc);
@@ -409,49 +413,10 @@ Point findEyeCenterByColorSegmentation(Mat image, float coordinateWeight, int km
         }
     }
     
-    // get iris radius
-    bestIndex_img.convertTo(bestIndex_img, CV_32FC1);
-    Mat irisRange;
-    reduce(bestIndex_img, irisRange, 0, CV_REDUCE_SUM,CV_32FC1);
-    irisRange = diff(irisRange.t());
-    minMaxLoc(irisRange,&minVal,&maxVal,&minLoc,&maxLoc);
-    int irisLeft = maxLoc.y;
-    int irisRight = minLoc.y;
-    if (irisRight < irisLeft) {
-        int temp = irisLeft;
-        irisLeft = irisRight;
-        irisRight = temp;
-    }
-    int irisRadius= (irisRight - irisLeft+1)/2;
-    if ((irisRight - irisLeft)%2 == 1) {
-        irisRight +=1;
-    }
+    Point massCenter = findMassCenter_BinaryBiggestBlob(bestIndex_img);
     
-    // special disk template which fill the top and leave the buttom.
-    Mat diskTemplate(irisRadius*2+1,irisRadius*2+1,CV_32FC1,Scalar::all(0));
-    circle(diskTemplate, Point(irisRadius,irisRadius), irisRadius, Scalar::all(1),-1);
-    diskTemplate.rowRange(0, irisRadius) = Scalar::all(1);
-    Mat penalty =Mat(diskTemplate == 0);
-    penalty.convertTo(penalty, CV_32FC1);
-    penalty *= -1.0f/255.0f;
-    diskTemplate += penalty;
-//    cout<<diskTemplate.size();
     
-    Mat irisSearchBG = bestIndex_img.colRange(irisLeft, irisRight+1);
-    vconcat(Mat::zeros(diskTemplate.size(), diskTemplate.type()), irisSearchBG, irisSearchBG);
-    vconcat(irisSearchBG, Mat::zeros(diskTemplate.size(), diskTemplate.type()), irisSearchBG);
-//    cout<<irisSearchBG.size();
-    
-//    imagesc("disk", mat2gray(diskTemplate));
-    
-    Mat xc;
-    matchTemplate(irisSearchBG, diskTemplate, xc, CV_TM_CCORR);
-//    plotVectors("xc", xc);
-//    cout<<xc.size()<<endl;
-    minMaxLoc(xc,&minVal,&maxVal,&minLoc,&maxLoc);
-    int verticalCenter = maxLoc.y+irisRadius-diskTemplate.cols;
-//    cout<<verticalCenter<<endl;
-    return Point(initialHC,verticalCenter);
+    return Point(initialHC,massCenter.y);
 }
 
 

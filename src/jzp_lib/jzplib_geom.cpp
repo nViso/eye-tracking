@@ -36,7 +36,7 @@ float calculateEyePairTileAngle(vector<Point2f> canthusPts) {
     float tile3 = rad2deg(tileRadianBtwn2Pts(canthusPts[2], canthusPts[1]));
     float tile4 = rad2deg(tileRadianBtwn2Pts(canthusPts[0], canthusPts[3]));
     float tile5 = (tile3+tile4)/2.0f;
-    float tile6 = (tile1+tile2+tile5)/3;
+    float tile6 = tile1*0.5f + tile2*0.25f + tile5*0.25f;
     
     return tile6;
 }

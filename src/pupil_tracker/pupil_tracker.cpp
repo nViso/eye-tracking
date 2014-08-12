@@ -30,6 +30,7 @@ int main(int argc, const char * argv[])
     
     while(cam.get(CV_CAP_PROP_POS_AVI_RATIO) < 0.999999){
         Mat im = captureImage(cam);
+        im = imresize(im, 0.7f);
         tracker.track(im);
 
         
@@ -64,8 +65,6 @@ int main(int argc, const char * argv[])
         rightEyeCenter += rightEyeRect.tl();
         rightEyeCenter += cropRect.tl();
         
-        plotLiveData("leftEyeCenterX", leftEyeCenter.x);
-        plotLiveData("leftEyeCenterY", leftEyeCenter.y);
         Point leftEC_unrotated = rotatePointByRotationMatrix(leftEyeCenter, Mback);
         Point rightEC_unroated =rotatePointByRotationMatrix(rightEyeCenter, Mback);
         
@@ -75,10 +74,12 @@ int main(int argc, const char * argv[])
         circle(im, leftEC_unrotated, 3, Scalar(0,255,0));
         circle(im, rightEC_unroated, 3, Scalar(0,255,0));
         drawPoints(rotated_img, rotatedCanthusPts);
+        drawPoints(rotated_img, rotatedNosePts);
         drawPoints(im, canthusPts);
         
         tracker.timer.display_fps(cropped,Point(1,cropped.rows-1));
-        imshow("cropped",imresize(cropped,3.0f));
+        imshow("cropped",imresize(cropped,2.0f));
+        imshow("rotated",rotated_img);
         
         
         
