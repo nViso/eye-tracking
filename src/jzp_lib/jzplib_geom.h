@@ -25,6 +25,7 @@ Point2f caculateEyePairCenter(vector<Point2f> canthusPts);
 Point2f rotatePointByRotationMatrix(Point2f src,Mat M);
 vector<Point2f> rotatePointsByRotationMatrix(vector<Point2f> original, Mat RM);
 Mat rotatePointsByRotationMatrix_C2(Mat pointPerRow, Mat RM) ;
+void fliplr(vector<Point2f>& points,Size imageSize);
 
 Point rectBL(Rect rect);
 Point rectTR(Rect rect);

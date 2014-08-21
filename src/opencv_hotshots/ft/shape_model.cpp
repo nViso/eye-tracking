@@ -71,11 +71,14 @@ train(const vector<vector<Point2f> > &points,
       const int kmax)
 {
     //vectorize points
+    // 把N张图片中的n个点的坐标排成一个N*2n的矩阵
     Mat X = this->pts2mat(points);
     int N = X.cols,n = X.rows/2;
     
     //align shapes
-    Mat Y = this->procrustes(X);
+    // 把这些shape先用procustes方法对齐
+    Y = this->procrustes(X);
+    
     
     //compute rigid transformation
     Mat R = this->calc_rigid_basis(Y);
@@ -127,7 +130,7 @@ pts2mat(const vector<vector<Point2f> > &points)
 {
     int N = points.size(); assert(N > 0);
     int n = points[0].size();
-    for(int i = 1; i < N; i++)assert(int(points[i].size()) == n);
+    for(int i = 1; i < N; i++) assert(int(points[i].size()) == n);
     Mat X(2*n,N,CV_32F);
     for(int i = 0; i < N; i++){
         Mat x = X.col(i),y = Mat(points[i]).reshape(1,2*n); y.copyTo(x);
@@ -201,14 +204,17 @@ calc_rigid_basis(const Mat &X)
         R.fl(2*i,2) =  1.0;            R.fl(2*i+1,2) =  0.0;
         R.fl(2*i,3) =  0.0;            R.fl(2*i+1,3) =  1.0;
     }
+    
     //Gram-Schmidt orthonormalization
+    // 此处是用gram-schmidt正交法进行FAST PCA.
     for(int i = 0; i < 4; i++){
         Mat r = R.col(i);
         for(int j = 0; j < i; j++){
             Mat b = R.col(j); r -= b*(b.t()*r);
         }
         normalize(r,r);
-    }return R;
+    }
+    return R;
 }
 //==============================================================================
 void
@@ -231,7 +237,7 @@ shape_model::
 write(FileStorage &fs) const
 {
     assert(fs.isOpened()); 
-    fs << "{" << "V"  << V << "e"  << e << "C" << C << "}";
+    fs << "{" << "V"  << V << "e"  << e << "C" << C << "Y"<<Y<< "}";
 }  
 //==============================================================================
 void
@@ -240,6 +246,17 @@ read(const FileNode& node)
 {
     assert(node.type() == FileNode::MAP);
     node["V"] >> V; node["e"] >> e; node["C"] >> C;
+    node["Y"] >> Y;
     p = Mat::zeros(e.rows,1,CV_32F);
 }
 //==============================================================================
+vector<vector<Point2f> > shape_model::matY2pts() {
+    vector<vector<Point2f> > points;
+    for(int i = 0 ; i <Y.cols ; i ++) {
+        points.push_back(vector<Point2f>());
+        Mat col = Y.col(i).clone();
+        col  =col.reshape(2);
+        col.copyTo(points[i]);
+    }
+    return points;
+}

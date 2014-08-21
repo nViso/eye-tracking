@@ -94,3 +94,10 @@ Rect findBiggestSquare(Mat original_img) {
     
     return squareRect;
 }
+
+
+void fliplr(vector<Point2f>& points,Size imageSize) {
+    for (int i = 0 ; i < points.size(); i++) {
+        points[i].x = imageSize.width - points[i].x;
+    }
+}

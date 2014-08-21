@@ -14,6 +14,7 @@
  */
 
 #include "opencv_hotshots/ft/ft.hpp"
+#include "jzp_lib/jzplib_all.h"
 //==========================================================
 void
 draw_string(Mat img,                       //image to draw on
@@ -87,12 +88,14 @@ int main(int argc,char** argv)
                 p.at<float>(0) = scale; p.at<float>(2) = tranx; p.at<float>(3) = trany;
                 p.at<float>(k) = scale*val[j]*3.0*sqrt(smodel.e.at<float>(k));
                 p.copyTo(smodel.p); img = Scalar::all(255);
-                char str[256]; sprintf(str,"mode: %d, val: %f sd",k-3,val[j]/3.0);
-                draw_string(img,str);
                 vector<Point2f> q = smodel.calc_shape();
+//                q.erase(q.begin()+2, q.begin()+4);
+                cout<<"contour area "<<contourArea(q)<<endl;
+                char str[256]; sprintf(str,"mode: %d,area: %f, val: %f sd,  ",k-3,contourArea(q),val[j]/3.0);
+                draw_string(img,str);
                 draw_shape(img,q,smodel.C);
                 imshow("shape model",img);
-                if(waitKey(10) == 'q')return 0;
+                if(waitKey(100) == 'q')return 0;
             }
         }
     }return 0;

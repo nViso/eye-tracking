@@ -367,11 +367,11 @@ int main(int argc,char** argv)
     string ifile;
     int type = parse_ifile(argc,argv,ifile);
     string fname = odir + "annotations.yaml"; //file to save annotation data to
-    
+    cout<<fname<<endl;
     //get data
     namedWindow(annotation.wname);
     if (type==3) {
-        string fname =string(argv[2]);
+        fname =string(argv[2]);
         annotation.data = load_ft_jzp(fname);
     }
     else if(type == 2){ //MUCT data
@@ -440,7 +440,7 @@ int main(int argc,char** argv)
         annotation.replicate_annotations(0);
     }
     
-    save_ft(fname.c_str(),annotation.data);
+    save_ft(annotation.data.baseDir+"annotations.yaml",annotation.data);
     
     //annotate connectivity
     setMouseCallback(annotation.wname,pc_MouseCallback,0);
@@ -452,7 +452,7 @@ int main(int argc,char** argv)
     while(1){ annotation.draw_connections();
         imshow(annotation.wname,annotation.image); if(waitKey(0) == 'q')break;
     }
-    save_ft(fname.c_str(),annotation.data);
+    save_ft(annotation.data.baseDir+"annotations.yaml",annotation.data);
     
     //annotate symmetry
     setMouseCallback(annotation.wname,ps_MouseCallback,0);
@@ -468,7 +468,7 @@ int main(int argc,char** argv)
     while(1){ annotation.draw_symmetry();
         imshow(annotation.wname,annotation.image); if(waitKey(0) == 'q')break;
     }
-    save_ft(fname.c_str(),annotation.data);
+    save_ft(annotation.data.baseDir+"annotations.yaml",annotation.data);
     
     //annotate the rest
     if(type != 2){
@@ -490,6 +490,6 @@ int main(int argc,char** argv)
                 annotation.idx = annotation.data.imnames.size()-1;
         }
     }
-    save_ft(fname.c_str(),annotation.data); destroyWindow("Annotate"); return 0;
+    save_ft(annotation.data.baseDir+"annotations.yaml",annotation.data); destroyWindow("Annotate"); return 0;
 }
 //==============================================================================

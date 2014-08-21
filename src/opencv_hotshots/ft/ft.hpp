@@ -27,14 +27,15 @@
 
 //==============================================================================
 template <class T>
-T load_ft(const char* fname){
+T load_ft(const string fname){
     T x;
     FileStorage f(fname,FileStorage::READ);
     f["ft object"] >> x; f.release(); return x;
 }
 //==============================================================================
 template<class T>
-void save_ft(const char* fname,const T& x){
+void save_ft(const string fname,const T& x){
+    cout<<fname<<endl;
     FileStorage f(fname,FileStorage::WRITE);
     f << "ft object" << x; f.release();
 }

@@ -25,7 +25,8 @@ public:
   Mat V;                                   //shape basis (2nxk) CV_32F
   Mat e;                                   //parameter variance (kx1) CV_32F
   Mat C;                                   //connectivity (cx2) CV_32S
-
+  Mat Y;                                   //the original points vectors after procrustes analysis
+    
   int npts(){return V.rows/2;}             //number of points in shape model
 
   void 
@@ -58,19 +59,21 @@ public:
   void 
   read(const FileNode& node);              //file storage node to read from
 
-protected:
   void clamp(const float c = 3.0);         //clamping factor (or standard dev)
 
-  Mat                                      //[x1;y1;...;xn;yn] (2nx1) CV_32F 
+  static Mat                                      //[x1;y1;...;xn;yn] (2nx1) CV_32F
   pts2mat(const vector<vector<Point2f> > &p); //points to vectorise
 
-  Mat                                      //procrustes aligned shapes/column
+   Mat                                      //procrustes aligned shapes/column
   procrustes(const Mat &X,                 //shapes to align
          const int itol = 100,         //maximum number of iterations
          const float ftol = 1e-6);     //convergence tolerance
 
   Mat                                      //rigid basis (2nx4) CV_32F
   calc_rigid_basis(const Mat &X);          //procrustes algned shapes/column
+    
+    // turn the matrix Y back into the original points series.
+    vector<vector<Point2f> > matY2pts();
 };
 //==============================================================================
 #endif

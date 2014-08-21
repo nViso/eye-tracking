@@ -202,7 +202,7 @@ Mat captureImage(VideoCapture capture) {
     
     capture >> original_img;
     flip(original_img, original_img, 1);
-    color_img =  original_img(findBiggestSquare(original_img)).clone();
+    color_img =  original_img; //(findBiggestSquare(original_img)).clone();
 //    original_img.release();
     return color_img;
 }
