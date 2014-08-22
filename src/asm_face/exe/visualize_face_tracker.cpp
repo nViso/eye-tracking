@@ -9,13 +9,24 @@
  *   http://www.packtpub.com/cool-projects-with-opencv/book
  *****************************************************************************/
 /*
- visualize_face_detector: Visualize the placement of points on the face
+ visualize_face_tracker: perform face tracking from a video/camera stream
  Jason Saragih (2012)
  */
+#include "asm_face/ft.hpp"
 
-#include "opencv_hotshots/ft/ft.hpp"
 #define fl at<float>
-const char* usage = "usage: ./visualise_face detector [video_file]";
+const char* usage = "usage: ./visualise_face_tracker tracker [video_file]";
+//==============================================================================
+void
+draw_string(Mat img,                       //image to draw on
+            const string text)             //text to draw
+{
+    Size size = getTextSize(text,FONT_HERSHEY_COMPLEX,0.6f,1,NULL);
+    putText(img,text,Point(0,size.height),FONT_HERSHEY_COMPLEX,0.6f,
+            Scalar::all(0),1,CV_AA);
+    putText(img,text,Point(1,size.height+1),FONT_HERSHEY_COMPLEX,0.6f,
+            Scalar::all(255),1,CV_AA);
+}
 //==============================================================================
 bool
 parse_help(int argc,char** argv)
@@ -30,8 +41,8 @@ parse_help(int argc,char** argv)
 int main(int argc,char** argv)
 {
     //parse command line arguments
-    if(argc < 2){cout << usage << endl; return 0;}
     if(parse_help(argc,argv)){cout << usage << endl; return 0;}
+    if(argc < 2){cout << usage << endl; return 0;}
     
     if (argc<1) {
         return 0;
@@ -40,8 +51,17 @@ int main(int argc,char** argv)
     ft_data  ftdata = load_ft_jzp(fname);
     
     //load detector model
-    face_detector detector = load_ft<face_detector>(string(ftdata.baseDir+"detectormodel.yaml").c_str());
-    detector.baseDir =ftdata.baseDir;
+    face_tracker tracker = load_ft<face_tracker>(string(ftdata.baseDir+"trackermodel.yaml").c_str());
+    tracker.detector.baseDir = ftdata.baseDir;
+    
+    
+    //create tracker parameters
+    face_tracker_params p; p.robust = false;
+    p.ssize.resize(3);
+    p.ssize[0] = Size(21,21);
+    p.ssize[1] = Size(11,11);
+    p.ssize[2] = Size(5,5);
+    
     //open video stream
     VideoCapture cam;
     if(argc > 2)cam.open(argv[2]); else cam.open(0);
@@ -50,17 +70,18 @@ int main(int argc,char** argv)
         << usage << endl; return 0;
     }
     //detect until user quits
-    namedWindow("face detector");
+    namedWindow("face tracker");
     while(cam.get(CV_CAP_PROP_POS_AVI_RATIO) < 0.999999){
-        Mat im; cam >> im;    flip(im,im,1);
-        vector<Point2f> p = detector.detect(im);
-        if(p.size() > 0){
-            for(int i = 0; i < int(p.size()); i++)
-                circle(im,p[i],1,CV_RGB(0,255,0),2,CV_AA);
-        }
-        imshow("face detector",im);
-        if(waitKey(10) == 'q')break;
+        Mat im; cam >> im;  flip(im,im,1);
+        if(tracker.track(im,p))
+            tracker.draw(im);
+        draw_string(im,"d - redetection");
+        tracker.timer.display_fps(im,Point(1,im.rows-1));
+        imshow("face tracker",im);
+        int c = waitKey(10);
+        if(c == 'q')break;
+        else if(c == 'd')tracker.reset();
     }
-    destroyWindow("face detector"); cam.release(); return 0;
+    destroyWindow("face tracker"); cam.release(); return 0;
 }
 //==============================================================================

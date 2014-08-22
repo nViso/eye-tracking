@@ -29,7 +29,7 @@ Point findMassCenter_BinaryBiggestBlob(Mat bw_img);
 Point findEyeCenterByMassCenter(Mat image);
 Point findEyeCenterByMassCenter2(Mat image);
 Point findEyeCenterBySymmetryDetection(Mat image, float pupilRadius) ;
-Point findEyeCenterByColorSegmentation(Mat image, float coordinateWeight= 0.3, int kmeansIterations = 3, int kmeansRepeats= 3, int blurSize= 5);
+Point findEyeCenterByColorSegmentation(Mat image, float coordinateWeight= 0.4, int kmeansIterations = 3, int kmeansRepeats= 3, int blurSize= 5);
 
 Mat calculateImageSymmetryScore(Mat image);
 

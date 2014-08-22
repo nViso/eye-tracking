@@ -15,7 +15,6 @@ ${Boost_INCLUDE_DIR}
 ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../lib CACHE PATH
      "Output directory for the OpenCV_hotshots library" )
@@ -23,7 +22,7 @@ SET( EXECUTABLE_OUTPUT_PATH
      ${PROJECT_BINARY_DIR}/../bin CACHE PATH
      "Output directory for the OpenCV_hotshots executables" )
 
+
+SUBDIRS(asm_face)
 SUBDIRS(jzp_lib)
-SUBDIRS(opencv_hotshots/ft)
 SUBDIRS(pupil_tracker)
-SUBDIRS(playground)

@@ -1,3 +1,11 @@
+//
+//  HeadPoseEstimation.cpp
+//  JZP_EYE_TRACKING
+//
+//  Created by Zhiping Jiang on 14-8-22.
+//
+//
+
 
 #include <cmath>
 #include "asm_face/ft.hpp"
@@ -24,7 +32,7 @@ int main(int argc, const char * argv[])
     fileLoader["cameraMatrix"]>>cameraMatrix;
     fileLoader["distCoeffs"] >> distCoeffs;
     fileLoader.release();
-
+    
     shape_model smodel = load_ft<shape_model>(string(ftdata.baseDir+"shapemodel.yaml").c_str());
     vector<Point3f> faceFeatures = findBestFrontalFaceShape(smodel);
     vector<Point3f> faceCrdRefVecs;
@@ -42,7 +50,7 @@ int main(int argc, const char * argv[])
     while(cam.get(CV_CAP_PROP_POS_AVI_RATIO) < 0.999999){
         Mat im = captureImage(cam);
         tracker.track(im);
-
+        
         vector<Point2f> featuresTruPts = tracker.points;
         fliplr(featuresTruPts, im.size());
         
@@ -106,7 +114,7 @@ int main(int argc, const char * argv[])
         
         tracker.timer.display_fps(cropped,Point(1,cropped.rows-1));
         imshow("rotated",rotated_img);
-    
+        
         int c = waitKey(1);
         if(c == 'q')break;
         else if(c == 'd') tracker.reset();

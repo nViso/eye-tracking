@@ -10,7 +10,7 @@
 
 
 ASEF_Algorithm::ASEF_Algorithm() {
-    haar_cascade_path = "EyeLocatorASEF128x128.fel";
+    haar_cascade_path = "resources/EyeLocatorASEF128x128.fel";
     isInitialized = false;
 }
 

@@ -12,7 +12,7 @@
  shape_model: A combined local-global 2D point distribution model
  Jason Saragih (2012)
  */
-#include "opencv_hotshots/ft/ft.hpp"
+#include "asm_face/ft.hpp"
 #define fl at<float>
 //==============================================================================
 void

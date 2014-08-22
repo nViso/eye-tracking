@@ -15,7 +15,7 @@
 #ifndef _FT_FACE_DETECTOR_HPP_
 #define _FT_FACE_DETECTOR_HPP_
 #include <opencv2/objdetect/objdetect.hpp>
-#include "opencv_hotshots/ft/ft_data.hpp"
+#include "asm_face/ft_data.hpp"
 //==============================================================================
 class face_detector{                       //face detector for initialisation
 public:

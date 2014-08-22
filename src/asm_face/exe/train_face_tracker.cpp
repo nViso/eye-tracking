@@ -13,7 +13,7 @@
   Jason Saragih (2012)
 */
 
-#include "opencv_hotshots/ft/ft.hpp"
+#include "asm_face/ft.hpp"
 #define fl at<float>
 const char* usage = 
 "usage: ./train_face_tracker shape_model_file patch_models_file"

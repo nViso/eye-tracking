@@ -19,3 +19,7 @@ TARGET_LINK_LIBRARIES(train_face_detector ${OpenCV_LIBS} ft)
 TARGET_LINK_LIBRARIES(visualize_face_detector ${OpenCV_LIBS} ft) 
 TARGET_LINK_LIBRARIES(train_face_tracker ${OpenCV_LIBS} ft) 
 TARGET_LINK_LIBRARIES(visualize_face_tracker ${OpenCV_LIBS} ft)
+
+add_custom_command(TARGET train_face_detector POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../../resources ${EXECUTABLE_OUTPUT_PATH}
+)

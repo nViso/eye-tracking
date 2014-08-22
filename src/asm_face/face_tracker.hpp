@@ -14,9 +14,9 @@
 */
 #ifndef _FT_FACE_TRACKER_HPP_
 #define _FT_FACE_TRACKER_HPP_
-#include "opencv_hotshots/ft/shape_model.hpp"
-#include "opencv_hotshots/ft/patch_model.hpp"
-#include "opencv_hotshots/ft/face_detector.hpp"
+#include "asm_face/shape_model.hpp"
+#include "asm_face/patch_model.hpp"
+#include "asm_face/face_detector.hpp"
 //==============================================================================
 class fps_timer{                           //frames/second timer for tracking
 public:

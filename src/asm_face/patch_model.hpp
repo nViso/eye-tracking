@@ -14,7 +14,7 @@
 */
 #ifndef _FT_PATCH_MODEL_HPP_
 #define _FT_PATCH_MODEL_HPP_
-#include "opencv_hotshots/ft/ft_data.hpp"
+#include "asm_face/ft_data.hpp"
 #include <vector>
 using namespace cv;
 using namespace std;

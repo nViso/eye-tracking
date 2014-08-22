@@ -17,11 +17,11 @@
 #include <fstream>
 #include <unistd.h>
 #include <opencv2/opencv.hpp>
-#include "opencv_hotshots/ft/ft_data.hpp"
-#include "opencv_hotshots/ft/patch_model.hpp"
-#include "opencv_hotshots/ft/shape_model.hpp"
-#include "opencv_hotshots/ft/face_detector.hpp"
-#include "opencv_hotshots/ft/face_tracker.hpp"
+#include "asm_face/ft_data.hpp"
+#include "asm_face/patch_model.hpp"
+#include "asm_face/shape_model.hpp"
+#include "asm_face/face_detector.hpp"
+#include "asm_face/face_tracker.hpp"
 
 
 

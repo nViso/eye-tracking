@@ -12,7 +12,7 @@
  ft_data: face tracker data
  Jason Saragih (2012)
  */
-#include "opencv_hotshots/ft/ft_data.hpp"
+#include "asm_face/ft_data.hpp"
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include "stdio.h"	// For 'sprintf()'

@@ -377,7 +377,7 @@ Point findEyeCenterByColorSegmentation(Mat image, float coordinateWeight, int km
     layerweighted_img = mat2gray(layerweighted_img);
     gray_img.convertTo(gray_img, CV_32FC1,1/255.0);
     Mat composed  = gray_img.mul(layerweighted_img);
-    
+    imagesc("composed", composed);
     Mat score = calculateImageSymmetryScore(composed);
     Mat scoresum;
     reduce(score.rowRange(0, composed.cols/6), scoresum, 0, CV_REDUCE_SUM,CV_32FC1);
@@ -393,7 +393,10 @@ Point findEyeCenterByColorSegmentation(Mat image, float coordinateWeight, int km
     for (int i = 1 ; i<=maxVal; i++) {
         Mat indexlayer_img = index_img >=i;
         medianBlur(indexlayer_img, indexlayer_img, 5);
+        erode(indexlayer_img, indexlayer_img, blurSize);
+        erode(indexlayer_img, indexlayer_img, blurSize);
         indexlayer_img = removeSmallBlobs(indexlayer_img);
+        
         indexlayer_img = fillHoleInBinary(indexlayer_img);
         indexlayer_img = fillConvexHulls(indexlayer_img);
         Mat score = calculateImageSymmetryScore(indexlayer_img);
@@ -412,6 +415,7 @@ Point findEyeCenterByColorSegmentation(Mat image, float coordinateWeight, int km
             
         }
     }
+    imagesc("bestindexlayer",bestIndex_img);
     
     Point massCenter = findMassCenter_BinaryBiggestBlob(bestIndex_img);
     

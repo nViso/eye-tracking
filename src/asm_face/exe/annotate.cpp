@@ -12,7 +12,7 @@
  annotate: annotation tool
  Jason Saragih (2012)
  */
-#include "opencv_hotshots/ft/ft.hpp"
+#include "asm_face/ft.hpp"
 
 //==============================================================================
 class annotate{

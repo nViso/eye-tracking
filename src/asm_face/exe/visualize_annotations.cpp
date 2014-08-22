@@ -12,7 +12,7 @@
   visualize_annotations: Display annotated data to screen
   Jason Saragih (2012)
 */
-#include "opencv_hotshots/ft/ft.hpp"
+#include "asm_face/ft.hpp"
 //==============================================================================
 int main(int argc,char** argv)
 {
