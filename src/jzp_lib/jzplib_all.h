@@ -18,6 +18,7 @@
 #include "jzplib_math.h"
 #include "jzplib_detections.h"
 #include "skinColorDetection.h"
+#include "jzplib_camera.h"
 #include "ASEF.h"
 
 

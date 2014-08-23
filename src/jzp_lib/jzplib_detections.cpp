@@ -101,7 +101,7 @@ Point findEyeCenterByMassCenter(Mat image) {
 
 //    if (image.cols* image.rows >0) {
 //        bilateralFilter(image, bila_img, kernel_length, sigmaColor, sigmaSpace);
-//        bilateralFilter(bila_img, image, kernel_length, sigmaColor, sigmaSpace);
+    //        bilateralFilter(bila_img, image, kernel_length, sigmaColor, sigmaSpace);
 //        imshow("bila",image);
 //    }
     

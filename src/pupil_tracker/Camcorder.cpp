@@ -48,7 +48,7 @@ int main (int argc, char *argv[])
 	VideoCapture capture(0);
     
 	// set framerate to record and capture at
-	int framerate = 25;
+	int framerate = 10;
     
 	// Get the properties from the camera
 	double width = capture.get(CV_CAP_PROP_FRAME_WIDTH);

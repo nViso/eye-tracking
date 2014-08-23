@@ -46,9 +46,16 @@ int main(int argc, const char * argv[])
     if(!cam.isOpened()){
         return 0;
     }
-    Mat rvec, tvec, rmatrix;
+    Mat rvec, tvec;
+    Mat im;
+    im = captureImage(cam);
+    cout<<"original cm:"<<endl<<cameraMatrix<<endl;
+    
+    Mat cameraMatrix2 = cameraMatrixByCropNResize(cameraMatrix,im.size(),findBiggestSquare(im),0.4f);
+    cout<<"now cm: "<<endl<<cameraMatrix2<<endl;
     while(cam.get(CV_CAP_PROP_POS_AVI_RATIO) < 0.999999){
-        Mat im = captureImage(cam);
+        im = captureImage(cam);
+        im = imresize(im, 0.4f);
         tracker.track(im);
         
         vector<Point2f> featuresTruPts = tracker.points;
@@ -56,7 +63,7 @@ int main(int argc, const char * argv[])
         
         
         solvePnP(faceFeatures, featuresTruPts, cameraMatrix, distCoeffs, rvec, tvec);
-        cout<<"distance:"<<norm(tvec)<<endl;
+//        cout<<"distance:"<<norm(tvec)<<endl;
         Mat reprjPtsMat, reprjCrdRefMat;
         projectPoints(faceFeatures, rvec, tvec, cameraMatrix, distCoeffs, reprjPtsMat);
         projectPoints(faceCrdRefVecs, rvec, tvec, cameraMatrix, distCoeffs, reprjCrdRefMat);
@@ -64,56 +71,17 @@ int main(int argc, const char * argv[])
         vector<Point2f> reprjCrdRefPts = Mat2PointsVector(reprjCrdRefMat);
         fliplr(reprjPts, im.size());
         fliplr(reprjCrdRefPts, im.size());
-        Rodrigues(rvec, rmatrix);
         
         vector<Point2f> canthusPts(tracker.points.begin(),tracker.points.begin()+4);
         vector<Point2f> nosePts(tracker.points.begin()+4,tracker.points.begin()+6);
         
-        float eyePairTileAngle = calculateEyePairTileAngle(canthusPts);
-        Point2f eyePairCenter = caculateEyePairCenter(canthusPts);
+        drawPoints(im, reprjPts);
+        line(im, reprjCrdRefPts[0], reprjCrdRefPts[1], Scalar(255,0,0),2);
+        line(im, reprjCrdRefPts[0], reprjCrdRefPts[2], Scalar(0,255,0),2);
+        line(im, reprjCrdRefPts[0], reprjCrdRefPts[3], Scalar(0,0,255),2);
         
-        Mat M = getRotationMatrix2D(eyePairCenter, eyePairTileAngle, 1.0);
-        Mat Mback = getRotationMatrix2D(eyePairCenter, -eyePairTileAngle, 1.0);
-        
-        vector<Point2f> rotatedCanthusPts = rotatePointsByRotationMatrix(canthusPts, M);
-        vector<Point2f> rotatedNosePts = rotatePointsByRotationMatrix(nosePts, M);
-        vector<Point2f> rotatedReprjPts = rotatePointsByRotationMatrix(reprjPts, M);
-        vector<Point2f> rotatedReprjCrdRefPts = rotatePointsByRotationMatrix(reprjCrdRefPts, M);
-        float eyePairRectWidth =abs(rotatedCanthusPts[2].x - rotatedCanthusPts[3].x)+1;
-        Size2f eyePairRectSize(eyePairRectWidth,eyePairRectWidth/7);
-        Rect cropRect(Point2f(eyePairCenter.x-eyePairRectWidth/2,eyePairCenter.y -eyePairRectWidth/14.0f),eyePairRectSize);
-        Mat rotated_img, cropped;
-        warpAffine(im, rotated_img, M, im.size(),INTER_CUBIC);
-        getRectSubPix(rotated_img, eyePairRectSize, eyePairCenter, cropped);
-        
-        Rect leftEyeRect = Rect(0,0,rotatedCanthusPts[0].x-rotatedCanthusPts[2].x,eyePairRectSize.height);
-        Rect rightEyeRect = Rect(rotatedCanthusPts[1].x-rotatedCanthusPts[2].x,0,rotatedCanthusPts[3].x-rotatedCanthusPts[1].x,eyePairRectSize.height);
-        
-        Mat leftEyeImg , rightEyeImg;
-        leftEyeImg = cropped(leftEyeRect);
-        rightEyeImg = cropped(rightEyeRect);
-        Point leftEyeCenter =   findEyeCenterByColorSegmentation(leftEyeImg);
-        Point rightEyeCenter ; //=  findEyeCenterByColorSegmentation(rightEyeImg);
-        leftEyeCenter += leftEyeRect.tl();
-        leftEyeCenter += cropRect.tl();
-        rightEyeCenter += rightEyeRect.tl();
-        rightEyeCenter += cropRect.tl();
-        
-        Point leftEC_unrotated = rotatePointByRotationMatrix(leftEyeCenter, Mback);
-        Point rightEC_unroated = rotatePointByRotationMatrix(rightEyeCenter, Mback);
-        
-        circle(rotated_img, leftEyeCenter, 3, Scalar(0,255,0));
-        circle(rotated_img, rightEyeCenter, 3, Scalar(0,255,0));
-        
-        circle(im, leftEC_unrotated, 3, Scalar(0,255,0));
-        circle(im, rightEC_unroated, 3, Scalar(0,255,0));
-        drawPoints(rotated_img, rotatedReprjPts);
-        line(rotated_img, rotatedReprjCrdRefPts[0], rotatedReprjCrdRefPts[1], Scalar(255,0,0),2,CV_AA);
-        line(rotated_img, rotatedReprjCrdRefPts[0], rotatedReprjCrdRefPts[2], Scalar(0,255,0),2,CV_AA);
-        line(rotated_img, rotatedReprjCrdRefPts[0], rotatedReprjCrdRefPts[3], Scalar(0,0,255),2,CV_AA);
-        
-        tracker.timer.display_fps(cropped,Point(1,cropped.rows-1));
-        imshow("rotated",rotated_img);
+        tracker.timer.display_fps(im,Point(1,im.rows-1));
+        imshow("head pose",im);
         
         int c = waitKey(1);
         if(c == 'q')break;
