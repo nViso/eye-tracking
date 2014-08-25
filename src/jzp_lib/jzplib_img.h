@@ -21,15 +21,16 @@ Mat sobelEdgeDerivatives(Mat src);
 Mat magicEqualHist(Mat faceimg);
 Mat equalizeImage(const Mat& inputImage);
 
-Mat imresize(Mat image, float scale);
-Mat imresize(Mat image, int imageWidthforDetection);
+Mat imresize(const Mat& image, float scale);
+void imresize(const Mat& image, float scale, Mat& dst);
+void imresize(const Mat& image, int imageWidthforDetection, Mat& dst);
 
 Mat calculateColorHistogram(Mat image,Mat mask, int dims , int colorSpace );
 Mat calculateColorBackProjection(Mat image, Mat hist,int colorSpace ) ;
 
 Mat rgbScaleColorSpace(Mat rgb);
 
-Mat captureImage(VideoCapture capture);
+void captureImage(VideoCapture& capture, Mat& color_img);
 
 Mat imcomplement(Mat gray);
 

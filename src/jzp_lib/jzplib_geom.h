@@ -18,20 +18,19 @@ using namespace cv;
 
 float rad2deg(float radian);
 float deg2rad(float degree);
-vector<Point2f> Mat2PointsVector(Mat mat);
+vector<Point2f> Mat2PointsVector(const Mat& mat);
 float tileRadianBtwn2Pts(Point2f left, Point2f right);
-float calculateEyePairTileAngle(vector<Point2f> canthusPts) ;
-Point2f caculateEyePairCenter(vector<Point2f> canthusPts);
+float calculateEyePairTileAngle(const vector<Point2f>& canthusPts) ;
+Point2f caculateEyePairCenter(const vector<Point2f>& canthusPts);
 Point2f rotatePointByRotationMatrix(Point2f src,Mat M);
-vector<Point2f> rotatePointsByRotationMatrix(vector<Point2f> original, Mat RM);
-Mat rotatePointsByRotationMatrix_C2(Mat pointPerRow, Mat RM) ;
+vector<Point2f> rotatePointsByRotationMatrix(const vector<Point2f>& original,const Mat& RM);
 void fliplr(vector<Point2f>& points,Size imageSize);
 
 Point rectBL(Rect rect);
 Point rectTR(Rect rect);
 Point rectBR(Rect rect);
 
-Rect findBiggestSquare(Mat original_img);
+Rect findBiggestSquare(const Mat& original_img);
 
 #endif /* defined(__OPENCV_HOTSHOTS__jzplib_geom__) */
 

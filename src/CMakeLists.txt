@@ -4,10 +4,12 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
 
-
 cmake_minimum_required(VERSION 2.8)
 find_package(OpenCV REQUIRED)
-find_package(Boost COMPONENTS system filesystem date_time thread REQUIRED)
+find_package(Boost COMPONENTS system filesystem chrono date_time timer thread REQUIRED)
+
+# this line is for the tbb library not found by FINDOPENCV.CMAKE
+link_directories(/usr/local/lib/)
 
 INCLUDE_DIRECTORIES(
 ${OPENCV_INCLUDE_DIR}
@@ -21,6 +23,7 @@ SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../lib CACHE PATH
 SET( EXECUTABLE_OUTPUT_PATH 
      ${PROJECT_BINARY_DIR}/../bin CACHE PATH
      "Output directory for the OpenCV_hotshots executables" )
+
 
 
 SUBDIRS(asm_face)

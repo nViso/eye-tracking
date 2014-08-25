@@ -17,7 +17,7 @@ float deg2rad(float degree) {
     return degree/180*M_PI;
 }
 
-vector<Point2f> Mat2PointsVector(Mat mat) {
+vector<Point2f> Mat2PointsVector(const Mat& mat) {
     vector<Point2f> pts;
     mat.copyTo(pts);
     return pts;
@@ -29,7 +29,7 @@ float tileRadianBtwn2Pts(Point2f left, Point2f right) {
     return atan((right.y - left.y)/abs(right.x-left.x));
 }
 
-float calculateEyePairTileAngle(vector<Point2f> canthusPts) {
+float calculateEyePairTileAngle(const vector<Point2f>& canthusPts) {
     
     float tile1 = rad2deg(tileRadianBtwn2Pts(canthusPts[0], canthusPts[1]));
     float tile2 = rad2deg(tileRadianBtwn2Pts(canthusPts[2], canthusPts[3]));
@@ -42,7 +42,7 @@ float calculateEyePairTileAngle(vector<Point2f> canthusPts) {
 }
 
 
-Point2f caculateEyePairCenter(vector<Point2f> canthusPts) {
+Point2f caculateEyePairCenter(const vector<Point2f>& canthusPts) {
     return Point ((canthusPts[2].x+canthusPts[3].x)/2,(canthusPts[2].y+canthusPts[3].y)/2);
 }
 
@@ -54,7 +54,7 @@ Point2f rotatePointByRotationMatrix(Point2f src,Mat M) {
     return result;
 }
 
-vector<Point2f> rotatePointsByRotationMatrix(vector<Point2f> original, Mat RM) {
+vector<Point2f> rotatePointsByRotationMatrix(const vector<Point2f>& original,const Mat& RM) {
     vector<Point2f> pts(original);
     for (int i = 0 ; i < pts.size() ; i ++) {
         pts[i] = rotatePointByRotationMatrix(pts[i], RM);
@@ -63,12 +63,6 @@ vector<Point2f> rotatePointsByRotationMatrix(vector<Point2f> original, Mat RM) {
     return pts;
 }
 
-Mat rotatePointsByRotationMatrix_C2(Mat pointPerRow, Mat RM) {
-    vector<Point2f> pts = Mat2PointsVector(pointPerRow);
-    rotatePointsByRotationMatrix(pts,RM);
-    return Mat(pts);
-    
-}
 
 
 
@@ -85,12 +79,13 @@ Point rectBR(Rect rect) {
 }
 
 
-Rect findBiggestSquare(Mat original_img) {
-    int length = original_img.size().width > original_img.size().height ? original_img.size().height : original_img.size().width;
-    int x = original_img.size().width > original_img.size().height ? (original_img.size().width - length)/2 : 0;
-    int y = original_img.size().width > original_img.size().height ? 0 :(original_img.size().height - length)/2 ;
+Rect findBiggestSquare(const Mat& original_img) {
+    int width = original_img.size().width;
+    int height =original_img.size().height;
+    int length = width > height ? height : width;
+    int x = width > height ? (width - length)/2 : 0;
+    int y = width > height ? 0 :(height - length)/2 ;
     Rect squareRect(x,y,length,length);
-    cv::Size squareSize(length,length);
     
     return squareRect;
 }

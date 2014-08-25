@@ -2,8 +2,8 @@
 #include <cmath>
 #include "asm_face/ft.hpp"
 #include "jzp_lib/jzplib_all.h"
+#include <boost/lexical_cast.hpp>
 
-// test pushing to github by xcode
 int main(int argc, const char * argv[])
 {
     
@@ -23,43 +23,50 @@ int main(int argc, const char * argv[])
     if(!cam.isOpened()){
         return 0;
     }
-    while(cam.get(CV_CAP_PROP_POS_AVI_RATIO) < 0.999999){
-        Mat im = captureImage(cam);
-        imresize(im, 0.7f);
+    Mat origin, im ;
+    Mat rotated_img, cropped;
+    Mat leftEyeImg , rightEyeImg;
+    LowpassFPSTimer timer;
+    float zoomRatio = 1.0f;
+    while(true){
+        timer.tick();
+        captureImage(cam, origin);
+        imresize(origin,zoomRatio,im);
+        
         tracker.track(im);
 
         vector<Point2f> canthusPts(tracker.points.begin(),tracker.points.begin()+4);
         vector<Point2f> nosePts(tracker.points.begin()+4,tracker.points.begin()+6);
-        
+
         float eyePairTileAngle = calculateEyePairTileAngle(canthusPts);
         Point2f eyePairCenter = caculateEyePairCenter(canthusPts);
-        
+
         Mat M = getRotationMatrix2D(eyePairCenter, eyePairTileAngle, 1.0);
         Mat Mback = getRotationMatrix2D(eyePairCenter, -eyePairTileAngle, 1.0);
-        
+
         vector<Point2f> rotatedCanthusPts = rotatePointsByRotationMatrix(canthusPts, M);
         vector<Point2f> rotatedNosePts = rotatePointsByRotationMatrix(nosePts, M);
 
         float eyePairRectWidth =abs(rotatedCanthusPts[2].x - rotatedCanthusPts[3].x)+1;
         Size2f eyePairRectSize(eyePairRectWidth,eyePairRectWidth/7);
         Rect cropRect(Point2f(eyePairCenter.x-eyePairRectWidth/2,eyePairCenter.y -eyePairRectWidth/14.0f),eyePairRectSize);
-        Mat rotated_img, cropped;
-        warpAffine(im, rotated_img, M, im.size(),INTER_CUBIC);
+////
+        warpAffine(im, rotated_img, M, im.size(),CV_INTER_LINEAR);
         getRectSubPix(rotated_img, eyePairRectSize, eyePairCenter, cropped);
-        
+//
         Rect leftEyeRect = Rect(0,0,rotatedCanthusPts[0].x-rotatedCanthusPts[2].x,eyePairRectSize.height);
         Rect rightEyeRect = Rect(rotatedCanthusPts[1].x-rotatedCanthusPts[2].x,0,rotatedCanthusPts[3].x-rotatedCanthusPts[1].x,eyePairRectSize.height);
-        
-        Mat leftEyeImg , rightEyeImg;
+//
+//
         leftEyeImg = cropped(leftEyeRect);
         rightEyeImg = cropped(rightEyeRect);
-        Point leftEyeCenter =   findEyeCenterByColorSegmentation(leftEyeImg);
-        Point rightEyeCenter ; //=  findEyeCenterByColorSegmentation(rightEyeImg);
+        Point leftEyeCenter = findEyeCenterByColorSegmentation(leftEyeImg);
+        Point rightEyeCenter = findEyeCenterByColorSegmentation(rightEyeImg);
         leftEyeCenter += leftEyeRect.tl();
         leftEyeCenter += cropRect.tl();
         rightEyeCenter += rightEyeRect.tl();
         rightEyeCenter += cropRect.tl();
-        
+//
         Point leftEC_unrotated = rotatePointByRotationMatrix(leftEyeCenter, Mback);
         Point rightEC_unroated = rotatePointByRotationMatrix(rightEyeCenter, Mback);
         
@@ -70,13 +77,14 @@ int main(int argc, const char * argv[])
         circle(im, rightEC_unroated, 3, Scalar(0,255,0));
 
         
-        tracker.timer.display_fps(cropped,Point(1,cropped.rows-1));
-        imshow("rotated",rotated_img);
+        drawPoints(im, tracker.points);
+        drawStringAtTopLeftCorner(im, boost::lexical_cast<string>(1.0/timer.tock()));
+        imshow("im",im);
     
         int c = waitKey(1);
         if(c == 'q')break;
         else if(c == 'd') tracker.reset();
         
     }
-    
+    return 0;
 }

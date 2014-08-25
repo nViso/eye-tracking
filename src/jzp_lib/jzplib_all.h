@@ -19,6 +19,7 @@
 #include "jzplib_detections.h"
 #include "skinColorDetection.h"
 #include "jzplib_camera.h"
+#include "jzplib_utils.h"
 #include "ASEF.h"
 
 

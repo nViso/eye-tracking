@@ -8,6 +8,7 @@
 
 #include "jzplib_img.h"
 #include "jzplib_geom.h"
+#include "jzplib_utils.h"
 
 
 
@@ -92,22 +93,27 @@ Mat magicEqualHist(Mat faceimg) {
     return gray_img;
 }
 
-
-Mat imresize(Mat image, float scale) {
-    int imageWidthforDetection =image.size().width*scale;
-    double imageSizeScale = 1.0*image.size().width*1.0/image.size().height;
-    Mat resized;
-    resize(image, resized, Size(imageWidthforDetection, cvRound(imageWidthforDetection/imageSizeScale)));
-    
-    return resized;
+Mat imresize(const Mat& image, float scale) {
+    Mat dst;
+    imresize(image, scale, dst);
+    return dst;
 }
 
-Mat imresize(Mat image, int imageWidthforDetection) {
+void imresize(const Mat& image, float scale, Mat& dst) {
+    int imageWidthforDetection =image.size().width*scale;
     double imageSizeScale = 1.0*image.size().width*1.0/image.size().height;
-    Mat resized;
-    resize(image, resized, Size(imageWidthforDetection, cvRound(imageWidthforDetection/imageSizeScale)));
-    
-    return resized;
+    if (scale != 1.0f) {
+        resize(image, dst, Size(imageWidthforDetection, cvRound(imageWidthforDetection/imageSizeScale)),0.0,0.0);
+    } else if (scale == 1.0f)
+        image.copyTo(dst);
+}
+
+void imresize(const Mat& image, int imageWidthforDetection, Mat& dst) {
+    double imageSizeScale = 1.0*image.size().width*1.0/image.size().height;
+    if (imageSizeScale != 1.0f) {
+        resize(image, dst, Size(imageWidthforDetection, cvRound(imageWidthforDetection/imageSizeScale)),0.0,0.0);
+    } else if (imageSizeScale == 1.0f)
+        image.copyTo(dst);
 }
 
 
@@ -197,14 +203,13 @@ Mat rgbScaleColorSpace(Mat rgb) {
 
 
 
-Mat captureImage(VideoCapture capture) {
-    Mat original_img, color_img;
-    
-    capture >> original_img;
-    flip(original_img, original_img, 1);
-    color_img = original_img(findBiggestSquare(original_img)).clone();
-//    original_img.release();
-    return color_img;
+void captureImage(VideoCapture& capture, Mat& color_img) {
+    Rect squareRect;
+    LowpassFPSTimer timer(1);
+    capture >> color_img;
+//    squareRect =findBiggestSquare(color_img);
+//    color_img(squareRect).copyTo(color_img);
+    flip(color_img, color_img, 1);
 }
 
 Mat imcomplement(Mat gray) {
