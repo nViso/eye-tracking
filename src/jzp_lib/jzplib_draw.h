@@ -19,7 +19,8 @@ using namespace cv;
 
 void drawBox(cv::Mat& image, CvRect box, cv::Scalar color = cvScalarAll(255), int thick=1);
 
-void drawPoints(cv::Mat& image, std::vector<cv::Point2f> points,cv::Scalar color=cv::Scalar::all(255));
+void drawPoints(cv::Mat& image, vector<cv::Point2f> points, Scalar color=cv::Scalar::all(255));
+void drawConnectedPoints(Mat& image, vector<Point2f> points, Scalar color=cv::Scalar::all(255), int thick=1);
 
 void drawRotatedRect(Mat image, RotatedRect eyeRRect);
 void drawStringAtPoint(Mat img, const string text, Point position);

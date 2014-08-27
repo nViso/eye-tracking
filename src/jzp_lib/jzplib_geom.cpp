@@ -96,3 +96,63 @@ void fliplr(vector<Point2f>& points,Size imageSize) {
         points[i].x = imageSize.width - points[i].x;
     }
 }
+
+vector<Point2f> generalizedBezierCurve(vector<Point2f>& controlPoints, vector<int>& pointsBezierOrders, double resolution ) {
+    double progress;
+    vector<Point2f> curvePoints;
+    int ptIndex = 0;
+    if (controlPoints.size() ==0) {
+        return curvePoints;
+    }
+    while (ptIndex+pointsBezierOrders[ptIndex] < controlPoints.size()) {
+        vector<Point2f> currentSegment(controlPoints.begin()+ptIndex,controlPoints.begin()+ptIndex+pointsBezierOrders[ptIndex]+1);
+        for (progress = 0.0; progress <=1.0; progress+=resolution) {
+            Point2f nextpt(0,0);
+            int zorder = currentSegment.size()-1;
+            for (int i = 0; i <=zorder; i++) {
+                double coef = 1.0;
+                coef *=boost::math::binomial_coefficient<double>(zorder, i);
+                coef *=pow(1.0-progress, zorder-i);
+                coef *=pow(progress, i);
+                nextpt += (coef * currentSegment[i]);
+            }
+            curvePoints.push_back(nextpt);
+        }
+        curvePoints.push_back(currentSegment[currentSegment.size()-1]);
+        ptIndex += pointsBezierOrders[ptIndex];
+    }
+    
+    return curvePoints;
+}
+
+vector<Point2f> curveAnimateSequence(vector<Point2f>& curvePoints, float distancePerFrame) {
+    vector<Point2f> animatePoints;
+    double progress = 0.0;
+    double distance = 0.0;
+    if (curvePoints.size() <= 0) {
+        return animatePoints;
+    }
+    animatePoints.push_back(curvePoints[0]);
+    while(progress<(double)curvePoints.size()-1.0) {
+        int intPart;
+        double fractional = boost::math::modf(progress, &intPart);
+        double residuals = 1.0f - fractional;
+        double segLength = norm(Mat(curvePoints[intPart]),Mat(curvePoints[intPart+1]));
+        double residualLength =segLength*residuals;
+        if (distance + residualLength <=distancePerFrame) {
+            distance += residualLength;
+            progress = ceil(progress+0.0000000001);
+        } else {
+            // need to recalculate distance
+            
+            double requiredStep = (distancePerFrame-distance)/segLength;
+            progress += requiredStep;
+            requiredStep+=fractional;
+            Point2f  animatePoint = (1.0-requiredStep)*curvePoints[intPart] + requiredStep*curvePoints[intPart+1];
+            //            cout<<progress<<" "<<animatePoint<<endl;
+            animatePoints.push_back(animatePoint);
+            distance = 0;
+        }
+    }
+    return animatePoints;
+}

@@ -12,9 +12,11 @@
 #include <iostream>
 #include <cmath>
 #include <opencv2/opencv.hpp>
+#include <boost/math/special_functions.hpp>
 
 using namespace std;
 using namespace cv;
+
 
 float rad2deg(float radian);
 float deg2rad(float degree);
@@ -31,6 +33,10 @@ Point rectTR(Rect rect);
 Point rectBR(Rect rect);
 
 Rect findBiggestSquare(const Mat& original_img);
+
+vector<Point2f> generalizedBezierCurve(vector<Point2f>& controlPoints, vector<int>& pointsBezierOrders, double resolution );
+
+vector<Point2f> curveAnimateSequence(vector<Point2f>& curvePoints, float distancePerFrame);
 
 #endif /* defined(__OPENCV_HOTSHOTS__jzplib_geom__) */
 

@@ -16,6 +16,12 @@ void drawBox(Mat& image, CvRect box, Scalar color, int thick){
     rectangle( image, cvPoint(box.x, box.y), cvPoint(box.x+box.width,box.y+box.height),color, thick);
 }
 
+void drawConnectedPoints(Mat& image, vector<Point2f> points, Scalar color, int thick){
+    for (int i = 0; i<points.size()-1 && points.size()>0; i++) {
+        line(image, points[i], points[i+1], color,thick,CV_AA);
+    }
+}
+
 void drawPoints(Mat& image, vector<Point2f> points,Scalar color){
     for( vector<Point2f>::const_iterator i = points.begin(), ie = points.end(); i != ie; ++i )
     {
