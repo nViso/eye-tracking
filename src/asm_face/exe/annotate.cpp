@@ -13,7 +13,10 @@
  Jason Saragih (2012)
  */
 #include "asm_face/ft.hpp"
+#include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 
+namespace fs = boost::filesystem;
 //==============================================================================
 class annotate{
 public:
@@ -308,70 +311,49 @@ public:
         }
     }
 };
-//==============================================================================
-bool
-parse_help(int argc,char** argv)
-{
-    for(int i = 1; i < argc; i++){
-        string str = argv[i];
-        if(str.length() == 2){if(strcmp(str.c_str(),"-h") == 0)return true;}
-        if(str.length() == 6){if(strcmp(str.c_str(),"--help") == 0)return true;}
-    }return false;
-}
-//==============================================================================
-string
-parse_odir(int argc,char** argv)
-{
-    string odir = "data/";
-    for(int i = 1; i < argc; i++){
-        string str = argv[i];
-        if(str.length() != 2)continue;
-        if(strcmp(str.c_str(),"-d") == 0){
-            if(argc > i+1){odir = argv[i+1]; break;}
-        }
-    }//
-    if(odir[odir.length()-1] != '/')odir += "/";
-    return odir;
-}
-//==============================================================================
-int
-parse_ifile(int argc,
-            char** argv,
-            string& ifile)
-{
-    for(int i = 1; i < argc; i++){
-        string str = argv[i];
-        if(str.length() != 2)continue;
-        if(strcmp(str.c_str(),"-m") == 0){ //MUCT data
-            if(argc > i+1){ifile = argv[i+1]; return 2;}
-        }
-        if(strcmp(str.c_str(),"-v") == 0){ //video file
-            if(argc > i+1){ifile = argv[i+1]; return 1;}
-        }
-        if(strcmp(str.c_str(),"-a")==0) { // load existing annotation folder
-            if(argc > i+1){ifile = argv[i+1]; return 3;}
-        }
-    }
-    ifile = ""; return 0;
-}
+
+
 //==============================================================================
 int main(int argc,char** argv)
 {
     //parse cmd line options
-    if(parse_help(argc,argv)){
-        cout << "usage: ./annotate [-v video] [-m muct_dir] [-a annotations.yaml] [-d output_dir]"
+    if(argc <= 1){
+        cout << "usage: ./annotate [host_dir] or [-m muct_dir]. \n \
+        The first choose will check if an annotations.yaml exists. \
+        If it exists, the executables will read this yaml, and you may editor this yaml. \
+        If not existent, the camera will open and initialize a whole new annotation process. \n \
+        For the second choose, it will load the MUCT face data."
         << endl; return 0;
     }
-    string odir = parse_odir(argc,argv);
-    annotation.data.baseDir = odir;
     string ifile;
-    int type = parse_ifile(argc,argv,ifile);
-    string fname = odir + "annotations.yaml"; //file to save annotation data to
-    cout<<fname<<endl;
+    string fname;
+    
+    int type = -1;
+    for (int i = 0 ; i <argc ; i ++) {
+        string str = argv[i];
+        if (boost::equal(str,"-m")) {
+            type = 2;
+            ifile = argv[i+1];
+        }
+    }
+    if (type == -1) {
+        fs::path filePath(argv[1]);
+        cout<<"filepath"<<filePath<<endl;
+        if (fs::exists(filePath / "annotations.yaml")) {
+            type = 3;
+            cout<<"exist"<<endl;
+        } else {
+            type = 0;
+            fs::create_directories(filePath);
+            annotation.data.baseDir = filePath.string()+fs::path("/").make_preferred().native();
+            
+        }
+    }
+
     //get data
     namedWindow(annotation.wname);
     if (type==3) {
-        fname =string(argv[2]);
+        fname =string(argv[1]);
         annotation.data = load_ft_jzp(fname);
     }
     else if(type == 2){ //MUCT data
@@ -392,11 +374,10 @@ int main(int argc,char** argv)
     }else{
         //open video stream
         VideoCapture cam;
-        if(type == 1)cam.open(ifile); else cam.open(0);
+        cam.open(0);
         if(!cam.isOpened()){
-            cout << "Failed opening video file." << endl
-            << "usage: ./annotate [-v video] [-m muct_dir] [-d output_dir]"
-            << endl; return 0;
+            cout << "Error opening camera" << endl;
+            return 0;
         }
         //get images to annotate
         annotation.set_capture_instructions();
@@ -413,7 +394,7 @@ int main(int argc,char** argv)
                 if     (idx < 10)  sprintf(str,"00%d.png",idx);
                 else if(idx < 100) sprintf(str,"0%d.png",idx);
                 else               sprintf(str,"%d.png",idx);
-                fileName =odir+string(str);
+                fileName =annotation.data.baseDir+string(str);
                 //                cout<<fileName<<endl;
                 imwrite(fileName,im);
                 annotation.data.imnames.push_back(str);

@@ -12,6 +12,7 @@
 #include "jzp_lib/jzplib_all.h"
 
 vector<Point3f> findBestFrontalFaceShape(shape_model smodel) ;
+vector<Point2f> findBestFrontalFaceShape2D(ft_data smodel);
 
 // test pushing to github by xcode
 int main(int argc, const char * argv[])
@@ -41,6 +42,8 @@ int main(int argc, const char * argv[])
     faceCrdRefVecs.push_back(Point3f(0,50,0));
     faceCrdRefVecs.push_back(Point3f(0,0,50));
     
+    vector<Point2f> frontPerspective2D = findBestFrontalFaceShape2D(ftdata);
+    
     VideoCapture cam;
     if(argc > 2)cam.open(argv[2]); else cam.open(0);
     if(!cam.isOpened()){
@@ -48,18 +51,26 @@ int main(int argc, const char * argv[])
     }
     Mat rvec, tvec;
     Mat im;
-    im = captureImage(cam);
+    captureImage(cam,im);
     cout<<"original cm:"<<endl<<cameraMatrix<<endl;
     
-    Mat cameraMatrix2 = cameraMatrixByCropNResize(cameraMatrix,im.size(),findBiggestSquare(im),0.4f);
-    cout<<"now cm: "<<endl<<cameraMatrix2<<endl;
+//    Mat cameraMatrix2 = cameraMatrixByCropNResize(cameraMatrix,im.size(),findBiggestSquare(im),0.4f);
+//    cout<<"now cm: "<<endl<<cameraMatrix2<<endl;
     while(cam.get(CV_CAP_PROP_POS_AVI_RATIO) < 0.999999){
-        im = captureImage(cam);
-        im = imresize(im, 0.4f);
+        captureImage(cam,im);
+//        im = imresize(im, 0.4f);
         tracker.track(im);
         
         vector<Point2f> featuresTruPts = tracker.points;
         fliplr(featuresTruPts, im.size());
+        Mat hM = findHomography(featuresTruPts, frontPerspective2D, CV_RANSAC);
+        
+        Mat frontim;
+        Mat gray;
+        warpPerspective(im.clone(), frontim, hM, im.size());
+        imshow("front", frontim);
+        
+        
         
         
         solvePnP(faceFeatures, featuresTruPts, cameraMatrix, distCoeffs, rvec, tvec);
@@ -111,5 +122,10 @@ vector<Point3f> findBestFrontalFaceShape(shape_model smodel)  {
     faceFeatures[5].z = 8;
     
     return faceFeatures;
+}
+
+vector<Point2f> findBestFrontalFaceShape2D(ft_data ft)  {
+    return ft.points[0];
+    
 }
 

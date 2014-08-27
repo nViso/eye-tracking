@@ -66,7 +66,7 @@ int main(int argc,char** argv)
 {
     //load data
     if(argc < 2){
-        cout << "usage: ./visualise_patch_model patch_model [-w face_width]"
+        cout << "usage: ./visualise_patch_model host_dir (which contains the annotations.yaml)"
         << endl;
         return 0;
     }

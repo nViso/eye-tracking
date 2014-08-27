@@ -54,7 +54,7 @@ int main(int argc,char** argv)
 {
     //load data
     if(argc < 2){
-        cout << "usage: ./visualise_shape_model folder" << endl;
+        cout << "usage: ./visualise_shape_model host_dir (which contains the annotations.yaml)" << endl;
         return 0;
     }
     

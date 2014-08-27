@@ -18,7 +18,7 @@ int main(int argc,char** argv)
 {
   //load data
   if(argc < 2){
-    cout << "usage: ./visualise_annotation annotation_file" << endl; 
+    cout << "usage: ./visualise_annotation host_dir (which contains the annotations.yaml)" << endl; 
     return 0;
   }
     if (argc<1) {

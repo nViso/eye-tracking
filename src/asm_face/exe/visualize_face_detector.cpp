@@ -15,7 +15,7 @@
 
 #include "asm_face/ft.hpp"
 #define fl at<float>
-const char* usage = "usage: ./visualise_face detector [video_file]";
+const char* usage = "usage: ./visualise_face detector host_dir (which contains the annotations.yaml)";
 //==============================================================================
 bool
 parse_help(int argc,char** argv)

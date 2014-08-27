@@ -15,7 +15,7 @@
 #include "asm_face/ft.hpp"
 
 #define fl at<float>
-const char* usage = "usage: ./visualise_face_tracker tracker [video_file]";
+const char* usage = "usage: ./visualise_face_tracker host_dir (which contains the annotations.yaml)";
 //==============================================================================
 void
 draw_string(Mat img,                       //image to draw on

@@ -16,19 +16,8 @@
 #include "asm_face/ft.hpp"
 
 const char* usage =
-"usage: ./train_shape_model annotation_file shape_model_file "
-"[-f fraction_of_variation] [-k maximum_modes] [--mirror]";
-//==============================================================================
-bool
-parse_help(int argc,char** argv)
-{
-    for(int i = 1; i < argc; i++){
-        string str = argv[i];
-        if(str.length() == 2){if(strcmp(str.c_str(),"-h") == 0)return true;}
-        if(str.length() == 6){if(strcmp(str.c_str(),"--help") == 0)return true;}
-    }return false;
-}
-//==============================================================================
+"usage: ./train_shape_model host_dir (which contains the annotations.yaml)";
+
 float
 parse_frac(int argc,char** argv)
 {

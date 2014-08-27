@@ -16,8 +16,7 @@
 #include "asm_face/ft.hpp"
 #define fl at<float>
 const char* usage = 
-"usage: ./train_face_tracker shape_model_file patch_models_file"
-" face_detector_file face_tracker_file";
+"usage: ./train_face_tracker host_dir (which contains the annotations.yaml)";
 //==============================================================================
 bool
 parse_help(int argc,char** argv)
@@ -35,10 +34,10 @@ int main(int argc,char** argv)
   if(parse_help(argc,argv)){ cout << usage << endl; return 0;}
   if(argc < 2){ cout << usage << endl; return 0;}
 
-    if (argc<1) {
+    if (argc<=1) {
         return 0;
     }
-    string fname =string(argv[2]);
+    string fname =string(argv[1]);
     ft_data ftdata = load_ft_jzp(fname);
     
     

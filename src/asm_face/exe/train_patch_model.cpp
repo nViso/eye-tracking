@@ -17,8 +17,7 @@
 
 #define fl at<float>
 const char* usage =
-"usage: ./train_patch_model annotation_file "
-"[-w face_width] [-p patch_size] [-s search_window_size] [--mirror]";
+"usage: ./train_patch_model host_dir (which contains the annotations.yaml)";
 //==============================================================================
 bool
 parse_help(int argc,char** argv)
@@ -94,7 +93,7 @@ calc_scale(const Mat &X,                   //scaling basis vector
 int main(int argc,char** argv)
 {
     //parse cmdline input
-    if(argc < 1){ cout << usage << endl; return 0;}
+    if(argc <= 1){ cout << usage << endl; return 0;}
     int width  = parse_face_width(argc,argv);
     int psize  = parse_patch_size(argc,argv);
     int ssize  = parse_search_window_size(argc,argv);

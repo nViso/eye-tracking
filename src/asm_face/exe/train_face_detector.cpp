@@ -17,8 +17,7 @@
 
 #define fl at<float>
 const char* usage =
-"usage: ./train_face_detector detector_file annotation_file shape_model_file"
-" detector_model_file [-f min_frac_of_pts_in_det_rect] [--mirror]";
+"usage: ./train_face_detector haarcascadefile host_dir (which contains the annotations.yaml)";
 //==============================================================================
 bool
 parse_help(int argc,char** argv)
