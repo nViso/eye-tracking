@@ -129,7 +129,7 @@ Mat calculateColorHistogram(Mat image,Mat mask, int dims = 2, int colorSpace = C
     const int hist1Size[] = { hbins , sbins};
     const int hist2Size[] = { hbins , sbins};
     const int hist3Size[] = { hbins , sbins, vbins};
-    const float hranges[] = {0,180};   //hue值取值范围是【0,179】
+    const float hranges[] = {0,180}; 
     const float sranges[] = {0,256};
     const float vranges[] = {0,100};
     const float* hist1Ranges[] = {hranges};
@@ -200,17 +200,6 @@ Mat rgbScaleColorSpace(Mat rgb) {
     return scaled;
 }
 
-
-
-
-void captureImage(VideoCapture& capture, Mat& color_img) {
-    Rect squareRect;
-    LowpassFPSTimer timer(1);
-    capture >> color_img;
-//    squareRect =findBiggestSquare(color_img);
-//    color_img(squareRect).copyTo(color_img);
-    flip(color_img, color_img, 1);
-}
 
 Mat imcomplement(Mat gray) {
     return Scalar::all(255) - gray;

@@ -30,8 +30,6 @@ Mat calculateColorBackProjection(Mat image, Mat hist,int colorSpace ) ;
 
 Mat rgbScaleColorSpace(Mat rgb);
 
-void captureImage(VideoCapture& capture, Mat& color_img);
-
 Mat imcomplement(Mat gray);
 
 int sub2ind(const int row,const int col,const int cols,const int rows);
