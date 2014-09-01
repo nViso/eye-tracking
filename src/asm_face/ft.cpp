@@ -1,38 +1,37 @@
 //
-//  ft.cpp
-//  OPENCV_HOTSHOTS
+//  ft_io.cpp
+//  JZP_EYE_TRACKING
 //
-//  Created by Zhiping Jiang on 14-7-16.
+//  Created by Zhiping Jiang on 14-8-31.
 //
 //
-
-#include "asm_face/ft.hpp"
-
-
-
+#include "ft.hpp"
+#include <boost/algorithm/string.hpp>
 
 ft_data load_ft_jzp(string fname) {
-    bool withFileName = fname.find("annotations.yaml") != string::npos ;
-    if (withFileName) {
-        if (access(fname.c_str(),F_OK) == -1) {
-            cout<<"Cannot find the file annotations.yaml in "<<fname<<endl;
+    fs::path filepath(fname);
+    if (fs::exists(filepath)) {
+        if (fs::is_directory(filepath)) {
+            fs::path annotationfilePath(filepath / "annotations.yaml");
+            if (fs::exists(annotationfilePath)) {
+                ft_data data = load_ft<ft_data>(annotationfilePath.string().c_str());
+                data.baseDir = filepath.string()+fs::path("/").make_preferred().native();
+                return data;
+            } else {
+                cout<<annotationfilePath<<" does NOT exists. Return default one."<<endl;
+                return ft_data();
+            }
+        }
+        if (fs::is_regular_file(filepath) && boost::iequals(filepath.filename().string(), "annotations.yaml")) {
+            ft_data data = load_ft<ft_data>(filepath.string().c_str());
+            data.baseDir = filepath.parent_path().string()+fs::path("/").make_preferred().native();
+            return data;
+            
+        } else {
+            cout<<filepath<<" is not annotations.yaml. Return default one."<<endl;
             return ft_data();
         }
-        ft_data data = load_ft<ft_data>(fname.c_str());
-        data.baseDir = fname.substr(0, fname.find_last_of("/\\")+1);
-        return data;
-    } else {
-        string::size_type sepExist = fname.find_last_of("/\\");
-        if (sepExist == string::npos || sepExist <fname.length()-1) {
-            fname +="/";
-        }
-        const char* fileName = string(fname+"annotations.yaml").c_str();
-        if (access(fileName,F_OK) == -1) {
-            cout<<"Cannot find the file annotations.yaml in "<<fname<<endl;
-            return ft_data();
-        }
-        ft_data data = load_ft<ft_data>(fileName);
-        data.baseDir = fname;
-        return data;
     }
+    return ft_data();
+    
 }

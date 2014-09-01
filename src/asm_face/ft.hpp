@@ -13,7 +13,6 @@
  Jason Saragih (2012)
  */
 
-#include <unistd.h>
 #include <iostream>
 #include <fstream>
 #include <opencv2/opencv.hpp>
@@ -22,6 +21,8 @@
 #include "asm_face/shape_model.hpp"
 #include "asm_face/face_detector.hpp"
 #include "asm_face/face_tracker.hpp"
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
 
 
 //==============================================================================

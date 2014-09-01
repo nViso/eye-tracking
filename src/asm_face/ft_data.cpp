@@ -15,8 +15,7 @@
 #include "asm_face/ft_data.hpp"
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
-#include "stdio.h"	// For 'sprintf()'
-#include <unistd.h>
+#include "stdio.h"	
 
 
 //==============================================================================
