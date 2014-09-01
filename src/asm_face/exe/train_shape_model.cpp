@@ -14,6 +14,7 @@
  */
 
 #include "asm_face/ft.hpp"
+#include <boost/filesystem.hpp>
 
 const char* usage =
 "usage: ./train_shape_model host_dir (which contains the annotations.yaml)";
@@ -54,6 +55,7 @@ parse_mirror(int argc,char** argv)
 //==============================================================================
 int main(int argc,char** argv)
 {
+    
     //load data
     if(argc < 2){ cout << usage << endl; return 0;}
     float frac = parse_frac(argc,argv);

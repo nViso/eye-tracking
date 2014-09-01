@@ -12,17 +12,16 @@
  ft: header file for ft module
  Jason Saragih (2012)
  */
-#include "stdio.h"
+
+#include <unistd.h>
 #include <iostream>
 #include <fstream>
-#include <unistd.h>
 #include <opencv2/opencv.hpp>
 #include "asm_face/ft_data.hpp"
 #include "asm_face/patch_model.hpp"
 #include "asm_face/shape_model.hpp"
 #include "asm_face/face_detector.hpp"
 #include "asm_face/face_tracker.hpp"
-
 
 
 //==============================================================================
@@ -39,7 +38,7 @@ void save_ft(const string fname,const T& x){
     FileStorage f(fname,FileStorage::WRITE);
     f << "ft object" << x; f.release();
 }
-//==============================================================================
+
 template<class T>
 void
 write(FileStorage& fs,
@@ -48,7 +47,7 @@ write(FileStorage& fs,
 {
     x.write(fs);
 }
-//==============================================================================
+
 template<class T>
 void
 read(const FileNode& node,
@@ -57,8 +56,6 @@ read(const FileNode& node,
 {
     if(node.empty())x = d; else x.read(node);
 }
-//==============================================================================
-
 
 
 ft_data load_ft_jzp(string fname);

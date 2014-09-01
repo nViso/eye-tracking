@@ -63,7 +63,7 @@ int main(int argc, const char * argv[])
         
         vector<Point2f> featuresTruPts = tracker.points;
         fliplr(featuresTruPts, im.size());
-        Mat hM = findHomography(featuresTruPts, frontPerspective2D, CV_RANSAC);
+        Mat hM = findHomography(featuresTruPts ,frontPerspective2D, 0);
         
         Mat frontim;
         Mat gray;

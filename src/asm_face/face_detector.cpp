@@ -14,6 +14,7 @@
  */
 
 #include "asm_face/ft.hpp"
+#include <boost/filesystem.hpp>
 
 #define fl at<float>
 //==============================================================================
@@ -66,11 +67,7 @@ train(ft_data &data,
 {
     
     detector.load(fname.c_str());
-    if (fname.find_last_of("/\\") ==string::npos)
-        detector_fname = fname;
-    else
-        detector_fname= fname.substr(fname.find_last_of("/\\")+1,fname.length());
-//    cout<<detector_fname<<endl;
+    detector_fname = boost::filesystem::path(fname).filename().string();
     reference = ref.clone();
     vector<float> xoffset(0),yoffset(0),zoffset(0);
     for(int i = 0; i < data.n_images(); i++){
@@ -192,7 +189,6 @@ read(const FileNode& node)
     node["y offset"]  >> detector_offset[1];
     node["z offset"]  >> detector_offset[2];
     node["reference"] >> reference;
-    cout<<detector_fname<<endl;
     
 }
 //==============================================================================

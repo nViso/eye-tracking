@@ -1,7 +1,7 @@
 
-#include <cmath>
-#include "asm_face/ft.hpp"
-#include "jzp_lib/jzplib_all.h"
+//#include "asm_face/ft.hpp"
+//#include "jzp_lib/jzplib_all.h"
+#include "ASMPupilTracker.h"
 #include <boost/lexical_cast.hpp>
 
 int main(int argc, const char * argv[])
@@ -11,12 +11,8 @@ int main(int argc, const char * argv[])
     if (argc<2) {
         return 0;
     }
-    string fname =string(argv[1]);
-    ftdata = load_ft_jzp(fname);
-    
-    face_tracker tracker = load_ft<face_tracker>(string(ftdata.baseDir+"trackermodel.yaml").c_str());
-    tracker.detector.baseDir = ftdata.baseDir;
-
+    fs::path baseDirPath(argv[1]);
+    ASM_Pupil_Tracker pupilTracker(baseDirPath / "trackermodel.yaml");
     
     VideoCapture cam;
     if(argc > 2)cam.open(argv[2]); else cam.open(0);
@@ -26,65 +22,25 @@ int main(int argc, const char * argv[])
     Mat origin, im ;
     Mat rotated_img, cropped;
     Mat leftEyeImg , rightEyeImg;
-    LowpassFPSTimer timer;
+    LowpassFPSTimer timer(20);
     float zoomRatio = 1.0f;
     while(true){
         timer.tick();
         captureImage(cam, origin);
         imresize(origin,zoomRatio,im);
+        pupilTracker.processFrame(im);
         
-        tracker.track(im);
-
-        vector<Point2f> canthusPts(tracker.points.begin(),tracker.points.begin()+4);
-        vector<Point2f> nosePts(tracker.points.begin()+4,tracker.points.begin()+6);
-
-        float eyePairTileAngle = calculateEyePairTileAngle(canthusPts);
-        Point2f eyePairCenter = caculateEyePairCenter(canthusPts);
-
-        Mat M = getRotationMatrix2D(eyePairCenter, eyePairTileAngle, 1.0);
-        Mat Mback = getRotationMatrix2D(eyePairCenter, -eyePairTileAngle, 1.0);
-
-        vector<Point2f> rotatedCanthusPts = rotatePointsByRotationMatrix(canthusPts, M);
-        vector<Point2f> rotatedNosePts = rotatePointsByRotationMatrix(nosePts, M);
-
-        float eyePairRectWidth =abs(rotatedCanthusPts[2].x - rotatedCanthusPts[3].x)+1;
-        Size2f eyePairRectSize(eyePairRectWidth,eyePairRectWidth/7);
-        Rect cropRect(Point2f(eyePairCenter.x-eyePairRectWidth/2,eyePairCenter.y -eyePairRectWidth/14.0f),eyePairRectSize);
-////
-        warpAffine(im, rotated_img, M, im.size(),CV_INTER_LINEAR);
-        getRectSubPix(rotated_img, eyePairRectSize, eyePairCenter, cropped);
-//
-        Rect leftEyeRect = Rect(0,0,rotatedCanthusPts[0].x-rotatedCanthusPts[2].x,eyePairRectSize.height);
-        Rect rightEyeRect = Rect(rotatedCanthusPts[1].x-rotatedCanthusPts[2].x,0,rotatedCanthusPts[3].x-rotatedCanthusPts[1].x,eyePairRectSize.height);
-//
-//
-        leftEyeImg = cropped(leftEyeRect);
-        rightEyeImg = cropped(rightEyeRect);
-        Point leftEyeCenter = findEyeCenterByColorSegmentation(leftEyeImg);
-        Point rightEyeCenter = findEyeCenterByColorSegmentation(rightEyeImg);
-        leftEyeCenter += leftEyeRect.tl();
-        leftEyeCenter += cropRect.tl();
-        rightEyeCenter += rightEyeRect.tl();
-        rightEyeCenter += cropRect.tl();
-//
-        Point leftEC_unrotated = rotatePointByRotationMatrix(leftEyeCenter, Mback);
-        Point rightEC_unroated = rotatePointByRotationMatrix(rightEyeCenter, Mback);
+        drawPoints(im, pupilTracker.canthusPts);
+        drawPoints(im, pupilTracker.nosePts);
+        circle(im, pupilTracker.leftEyePoint, 3, Scalar(0,255,0));
+        circle(im, pupilTracker.rightEyePoint, 3, Scalar(0,255,0));
         
-        circle(rotated_img, leftEyeCenter, 3, Scalar(0,255,0));
-        circle(rotated_img, rightEyeCenter, 3, Scalar(0,255,0));
-        
-        circle(im, leftEC_unrotated, 3, Scalar(0,255,0));
-        circle(im, rightEC_unroated, 3, Scalar(0,255,0));
-
-        
-        drawPoints(im, tracker.points);
-        drawStringAtTopLeftCorner(im, boost::lexical_cast<string>(1.0/timer.tock()));
         imshow("im",im);
-    
+        
         int c = waitKey(1);
         if(c == 'q')break;
-        else if(c == 'd') tracker.reset();
-        
+        else if(c == 'd') pupilTracker.reDetectFace();
+        cout<<timer.tock()<<endl;
     }
     return 0;
 }

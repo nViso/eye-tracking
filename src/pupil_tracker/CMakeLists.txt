@@ -1,8 +1,13 @@
-ADD_EXECUTABLE(pupil_tracker pupil_tracker.cpp)
-ADD_EXECUTABLE(headpose_tracking HeadPoseEstimation.cpp)
-ADD_EXECUTABLE(camcorder Camcorder.cpp)
-ADD_EXECUTABLE(curvedrawer PolyFitCurveDrawer.cpp)
-ADD_EXECUTABLE(CurveGazingRecorder CurveGazingRecorder.cpp)
+SET(asmptsource
+ASMPupilTracker.h ASMPupilTracker.cpp
+)
+
+ADD_EXECUTABLE(pupil_tracker pupil_tracker.cpp ${asmptsource})
+ADD_EXECUTABLE(headpose_tracking HeadPoseEstimation.cpp ${asmptsource})
+ADD_EXECUTABLE(camcorder Camcorder.cpp ${asmptsource})
+ADD_EXECUTABLE(curvedrawer PolyFitCurveDrawer.cpp ${asmptsource})
+ADD_EXECUTABLE(CurveGazingRecorder CurveGazingRecorder.cpp ${asmptsource})
+
 
 
 TARGET_LINK_LIBRARIES(pupil_tracker ${OpenCV_LIBS} ft jzplib) 

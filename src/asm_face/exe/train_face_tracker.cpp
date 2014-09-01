@@ -34,9 +34,6 @@ int main(int argc,char** argv)
   if(parse_help(argc,argv)){ cout << usage << endl; return 0;}
   if(argc < 2){ cout << usage << endl; return 0;}
 
-    if (argc<=1) {
-        return 0;
-    }
     string fname =string(argv[1]);
     ft_data ftdata = load_ft_jzp(fname);
     

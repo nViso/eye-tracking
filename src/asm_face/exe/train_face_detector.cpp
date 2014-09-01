@@ -14,6 +14,10 @@
  */
 
 #include "asm_face/ft.hpp"
+#include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+namespace fs = boost::filesystem;
 
 #define fl at<float>
 const char* usage =
@@ -54,40 +58,52 @@ parse_mirror(int argc,char** argv)
 int main(int argc,char** argv)
 {
     //parse cmdline input
-    if(argc < 3){ cout << usage << endl; return 0;}
+    if(argc <=1){ cout << usage << endl; return 0;}
     float frac = parse_frac(argc,argv);
     bool mirror = parse_mirror(argc,argv);
     
-    //load data
-    if (argc<2) {
-        return 0;
-    }
-    string fname =string(argv[2]);
-    ft_data  ftdata = load_ft_jzp(fname);
-    
-    shape_model smodel = load_ft<shape_model>(string(ftdata.baseDir+"shapemodel.yaml").c_str());
+    fs::path workingDirPath(argv[1]);
+    ft_data  ftdata = load_ft_jzp(workingDirPath.string());
+    shape_model smodel = load_ft<shape_model>(fs::path(workingDirPath / "shapemodel.yaml").string().c_str());
     smodel.set_identity_params();
     vector<Point2f> r = smodel.calc_shape();
     Mat ref = Mat(r).reshape(1,2*r.size());
     
+    fs::path detectorFilePath;
+    if (argc==2) {
+        
+        fs::directory_iterator iterator(fs::current_path());
+        vector<fs::path> detectorFiles;
+        for (; iterator != fs::directory_iterator(); iterator++) {
+            if (boost::starts_with(iterator->path().filename().string(),"haar")) {
+                detectorFiles.push_back(iterator->path());
+            }
+        }
+        cout<<"There are "<<detectorFiles.size()<<" haar detector files in your CWD. Which one do you choose ?"<<endl;
+        for (int i = 0; i < detectorFiles.size(); i++) {
+            cout<<"("<<i+1<<") "<<detectorFiles[i].string()<<endl;
+        }
+        cout<<"your choice:";
+        string input;
+        cin >> input;
+        int index = boost::lexical_cast<int>(input)-1;
+        detectorFilePath =workingDirPath / detectorFiles[index].filename();
+        if (index >=0 && index < detectorFiles.size()) {
+            fs::copy_file(detectorFiles[index], detectorFilePath,  boost::filesystem::copy_option::overwrite_if_exists);
+        }
+    }
+    
+    if (argc==3) {
+        fs::path srcDetectorFilePath(argv[2]);
+        detectorFilePath =workingDirPath / srcDetectorFilePath.filename();
+        fs::copy_file(srcDetectorFilePath, detectorFilePath,  boost::filesystem::copy_option::overwrite_if_exists);
+    }
+
+    cout<<"Your current detector file is :"<<detectorFilePath<<endl;
+    
     //train face detector
     face_detector detector;
-    
-    //copy the haar detector file to the workspace.
-    string haardetector = argv[1];
-    string detectorName;
-    if (haardetector.find_last_of("/\\") ==string::npos)
-        detectorName = haardetector;
-    else
-        detectorName= haardetector.substr(haardetector.find_last_of("/\\"),haardetector.length());
-//    cout<<detectorName<<endl;
-    std::ifstream  src(haardetector, std::ios::binary);
-    std::ofstream  dst(ftdata.baseDir+detectorName,   std::ios::binary);
-    dst << src.rdbuf();
-    src.close();
-    dst.close();
-    
-    detector.train(ftdata,argv[1],ref,mirror,true,frac);
+    detector.train(ftdata,detectorFilePath.string(),ref,mirror,true,frac);
     //save detector
     save_ft<face_detector>(string(ftdata.baseDir+"detectormodel.yaml").c_str(),detector);
     return 0;

@@ -15,6 +15,9 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/time_traits.hpp>
+#include <deque>
+#include <numeric> 
+
 using namespace std;
 using namespace boost::timer;
 using namespace boost::posix_time;
@@ -22,8 +25,8 @@ using namespace boost::asio;
 
 class LowpassFPSTimer {
 private:
-    cpu_timer timer;
-    vector<double> durationValues;
+    ptime tickTime, tockTime;
+    deque<double> durationValues;
     int lowpassLength;
 public:
     LowpassFPSTimer(int lowpassLength = 50);

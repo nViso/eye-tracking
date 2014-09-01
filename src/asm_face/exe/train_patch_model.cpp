@@ -100,9 +100,6 @@ int main(int argc,char** argv)
     bool mirror = parse_mirror(argc,argv);
     Size wsize(psize+ssize,psize+ssize);
     
-    if (argc<1) {
-        return 0;
-    }
     string fname =string(argv[1]);
     ft_data  ftdata = load_ft_jzp(fname);
     

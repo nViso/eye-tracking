@@ -21,6 +21,9 @@
 #include "jzplib_camera.h"
 #include "jzplib_utils.h"
 #include "ASEF.h"
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 
 #endif

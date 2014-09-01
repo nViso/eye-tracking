@@ -10,33 +10,26 @@
 
 LowpassFPSTimer::LowpassFPSTimer(int lowpassLength) {
     this->lowpassLength = lowpassLength;
-    durationValues = vector<double>(lowpassLength);
+    durationValues = deque<double>();
     for (int i = 0 ; i < lowpassLength; i++) {
-        durationValues.push_back(999);
+        durationValues.push_back(999.0);
     }
 }
 
 void LowpassFPSTimer::tick() {
-    if (timer.is_stopped()) {
-        timer.start();
-    } else {
-        timer.resume();
-    }
+    tickTime = microsec_clock::local_time();
 }
 
 double LowpassFPSTimer::tock() {
-    cpu_times t = timer.elapsed();
-    
-    durationValues.erase(durationValues.begin());
-    durationValues.push_back((double)t.wall/1000000000.0L);
+    tockTime = microsec_clock::local_time();
+    durationValues.pop_front();
+    durationValues.push_back((double)time_duration(tockTime-tickTime).total_milliseconds()/1000.0);
     
     double sum = 0.0;
-    for (int i = 0 ; i < durationValues.size(); i ++) {
+    for (int i = 0; i < durationValues.size(); i++) {
         sum += durationValues[i];
     }
     sum /= durationValues.size();
-    timer.stop();
-//    timer.start();
     return sum;
 }
 
@@ -55,11 +48,6 @@ void FPScontroller::controlledDelay() {
     nextFrameTimestamp = nextFrameTimestamp + microsec(1000000/fps);
     blockTimer->expires_at(nextFrameTimestamp);
     blockTimer->wait();
-//    cout<<" pass blocking "<<endl;
-//    do {
-//        currentFrameTimestamp = microsec_clock::local_time();
-//        td = (currentFrameTimestamp - nextFrameTimestamp);
-//    } while(td.total_microseconds() < 1000000/fps);
     
 }
 

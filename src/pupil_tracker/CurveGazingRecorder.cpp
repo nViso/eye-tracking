@@ -5,6 +5,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/lockfree/spsc_queue.hpp>
+#include "ASMPupilTracker.h"
 #include <deque>
 namespace fs = boost::filesystem;
 using namespace boost::posix_time;
@@ -122,6 +123,36 @@ void showPrelude() {
     
 }
 
+void showResultPreview(fs::path videoFilePath, fs::path trackermodelpath) {
+    ASM_Pupil_Tracker pupilTracker(trackermodelpath);
+    string previewWindowName = "preview";
+    namedWindow(previewWindowName);
+    moveWindow(previewWindowName, 0, 0);
+    VideoCapture video(videoFilePath.string());
+    double fps = video.get(CV_CAP_PROP_FPS);
+    Mat frame ;
+    FPScontroller delayer(fps);
+    int frameCount = 0;
+    while (true) {
+        if(!video.read(frame))
+            break;
+        delayer.controlledDelay();
+        pupilTracker.processFrame(frame);
+        
+        drawPoints(frame, pupilTracker.canthusPts);
+        drawPoints(frame, pupilTracker.nosePts);
+        circle(frame, pupilTracker.leftEyePoint, 3, Scalar(0,255,0));
+        circle(frame, pupilTracker.rightEyePoint, 3, Scalar(0,255,0));
+        imshow(previewWindowName,frame);
+        
+        int k = waitKey(1);
+        
+        if (k == 'q') {
+            break;
+        }
+    }
+    destroyWindow(previewWindowName);
+}
 bool showResult() {
     Mat current;
     whitebg.copyTo(current);
@@ -186,6 +217,8 @@ void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path outputfilePre
     waitKey(50);
     captureFinishSign = true;
     waitKey(300);
+    
+    showResultPreview(fs::path(videoOutputFileName),fs::path("/Users/ZhipingJiang/ImageWorkLoad/jzp-715/trackermodel.yaml"));
 }
 
 int main (int argc, char *argv[])

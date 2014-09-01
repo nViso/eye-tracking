@@ -211,7 +211,7 @@ IplImage* drawIntGraph(const int *arraySrc, int nArrayLength, IplImage *imageDst
 		//cvInitFont(&font,CV_FONT_HERSHEY_PLAIN,0.5,0.6, 0,1, CV_AA);	// For OpenCV 2.0
 		CvScalar clr = GREY;
 		char text[16];
-		snprintf(text, sizeof(text)-1, "%.1f", maxV);
+		snprintf(text, sizeof(text)-1, "%.1d", maxV);
 		cvPutText(imageGraph, text, cvPoint(1, b+4), &font, clr);
 		// Write the scale of the x axis
 		snprintf(text, sizeof(text)-1, "%d", (nArrayLength-1) );
@@ -300,7 +300,7 @@ IplImage* drawUCharGraph(const uchar *arraySrc, int nArrayLength, IplImage *imag
 		//cvInitFont(&font,CV_FONT_HERSHEY_PLAIN,0.5,0.6, 0,1, CV_AA);	// For OpenCV 2.0
 		CvScalar clr = GREY;
 		char text[16];
-		snprintf(text, sizeof(text)-1, "%.1f", maxV);
+		snprintf(text, sizeof(text)-1, "%.1d", maxV);
 		cvPutText(imageGraph, text, cvPoint(1, b+4), &font, clr);
 		// Write the scale of the x axis
 		snprintf(text, sizeof(text)-1, "%d", (nArrayLength-1) );
