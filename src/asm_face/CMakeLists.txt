@@ -7,8 +7,8 @@ SET(ft_sources
     face_tracker.hpp    face_tracker.cpp
     
 )
-ADD_LIBRARY(ft ${ft_sources})
+ADD_LIBRARY(asmlib ${ft_sources})
 
-TARGET_LINK_LIBRARIES(ft ${OpenCV_LIBS} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(asmlib ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
 SUBDIRS(exe)
