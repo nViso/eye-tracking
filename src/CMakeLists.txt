@@ -29,3 +29,4 @@ SET( EXECUTABLE_OUTPUT_PATH
 SUBDIRS(asm_face)
 SUBDIRS(jzp_lib)
 SUBDIRS(pupil_tracker)
+SUBDIRS(portal)

@@ -143,6 +143,11 @@ void readPathData(fs::path filePath) {
         storage["pointsOrders"] >> pointsBezierOrders;
         storage["distancePerFrame"] >> distancePerFrame;
         storage["frameRate"] >> frameRate;
+    } else {
+        controlPoints = vector<Point2f>();
+        pointsBezierOrders = vector<int>();
+        distancePerFrame = 10;
+        frameRate = 50;
     }
 }
 
@@ -221,12 +226,7 @@ void showCurveCanvas() {
     
 }
 
-bool is_number(const std::string& s)
-{
-    std::string::const_iterator it = s.begin();
-    while (it != s.end() && std::isdigit(*it)) ++it;
-    return !s.empty() && it == s.end();
-}
+
 
 void showSelection(int & currentIndex, vector<fs::path> & trajectoryFiles) {
     Mat bg = whitebg.clone();
@@ -234,10 +234,7 @@ void showSelection(int & currentIndex, vector<fs::path> & trajectoryFiles) {
         cout<<"\n------------\nThere are " + boost::lexical_cast<string>(trajectoryFiles.size())+" trajectory file(s)"<<endl;
         for (int i = 0 ; i < trajectoryFiles.size(); i++) {
             cout<<"("+boost::lexical_cast<string>(i)+") "+ trajectoryFiles[i].string();
-            if (currentIndex == i) {
-                cout<<" (current selection)"<<endl;
-            } else
-                cout<<endl;
+            cout<<endl;
         }
         cout<<"([n]ew) Add new trajectory"<<endl;
         cout<<"([q]uit) quit."<<endl;

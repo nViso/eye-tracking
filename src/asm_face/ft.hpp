@@ -35,7 +35,6 @@ T load_ft(const string fname){
 //==============================================================================
 template<class T>
 void save_ft(const string fname,const T& x){
-    cout<<fname<<endl;
     FileStorage f(fname,FileStorage::WRITE);
     f << "ft object" << x; f.release();
 }

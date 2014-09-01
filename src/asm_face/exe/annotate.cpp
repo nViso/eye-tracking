@@ -341,7 +341,6 @@ int main(int argc,char** argv)
         cout<<"filepath"<<filePath<<endl;
         if (fs::exists(filePath / "annotations.yaml")) {
             type = 3;
-            cout<<"exist"<<endl;
         } else {
             type = 0;
             fs::create_directories(filePath);

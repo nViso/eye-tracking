@@ -8,6 +8,19 @@
 
 #include "jzplib_utils.h"
 
+bool is_number(const std::string& s)
+{
+    try
+    {
+        boost::lexical_cast<double>(s);
+        return true;
+    }
+    catch(boost::bad_lexical_cast &)
+    {
+        return false;
+    }
+}
+
 LowpassFPSTimer::LowpassFPSTimer(int lowpassLength) {
     this->lowpassLength = lowpassLength;
     durationValues = deque<double>();

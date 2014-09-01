@@ -56,7 +56,6 @@ get_image(const int idx,
     if((idx < 0) || (idx >= (int)imnames.size()))return Mat();
     Mat img,im;
     string fileName = baseDir+ imnames[idx];
-    cout<<fileName<<endl;
     if(flag < 2)
         img = imread(fileName,0);
     else

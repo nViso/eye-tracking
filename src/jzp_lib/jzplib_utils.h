@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <vector>
+#include <boost/lexical_cast.hpp>
 #include <boost/timer/timer.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/asio.hpp>
@@ -22,6 +23,8 @@ using namespace std;
 using namespace boost::timer;
 using namespace boost::posix_time;
 using namespace boost::asio;
+
+bool is_number(const std::string& s);
 
 class LowpassFPSTimer {
 private:
