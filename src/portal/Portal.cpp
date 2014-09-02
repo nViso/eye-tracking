@@ -167,6 +167,7 @@ int main(int argc, const char * argv[])
     fs::path  basePath, userBasePath, curvesPath, resultsPath;
     if (argc >=2) {
         basePath = fs::path(argv[1]);
+        fs::create_directories(basePath);
     } else {
         cout<<"enter the base dir path:";
         string path;
@@ -189,6 +190,8 @@ int main(int argc, const char * argv[])
         cout<<"2. visualize existing ASM face models"<<endl;
         cout<<"3. create, modify, visualize curves."<<endl;
         cout<<"4. run gazing curve recorder"<<endl;
+        cout<<"5. run pupil tracker."<<endl;
+        cout<<"6. run head pose estimation."<<endl;
         cout<<"q. quit"<<endl;
         cout<<"------ Your choice : ";
         string input;
@@ -196,7 +199,7 @@ int main(int argc, const char * argv[])
         
         if (is_number(input)) {
             int c = boost::lexical_cast<int>(input);
-            if (c<1 || c>4) {
+            if (c<1 || c>6) {
                 cout<<"error number"<<endl;
                 continue;
             }
@@ -221,6 +224,17 @@ int main(int argc, const char * argv[])
                 invoke_CurveGazingRecorder(curvesPath,targetProfilePath,resultsPath);
             }
             
+            if (c == 5) {
+                cout<<"Choose user profile:"<<endl;
+                fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
+                invoke_PupilTracker(targetProfilePath);
+            }
+            
+            if (c == 6) {
+                cout<<"Choose user profile:"<<endl;
+                fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
+                invoke_HeadPoseEstimation(targetProfilePath);
+            }
             
             
         } else if (boost::iequals(input, "q")) {
