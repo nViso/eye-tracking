@@ -92,6 +92,13 @@ void invoke_CurveDrawer(fs::path curvesDir) {
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
+void invoke_CurveGazingRecorder(fs::path curvesDir, fs::path userProfileDir, fs::path outputDir) {
+    cout<<"------- Invoking ./CurveGazingRecorder ---------"<<endl;
+    string cmd("./CurveGazingRecorder "+curvesDir.string()+" "+userProfileDir.string()+" "+outputDir.string());
+    system(cmd.c_str());
+    cout<<"------- Invocation Done ------------------------"<<endl;
+}
+
 
 void trainASMModel(fs::path userProfilePath) {
     invoke_annotate(userProfilePath);
@@ -138,7 +145,7 @@ fs::path chooseUserProfile(fs::path userBasePath, bool withNew) {
         
         if (is_number(input) && boost::lexical_cast<int>(input) >=0 && boost::lexical_cast<int>(input) < existingProfiles.size()) {
             return existingProfiles[boost::lexical_cast<int>(input)];
-        } else if (boost::starts_with(input, "n")){
+        } else if (boost::starts_with(input, "n") && withNew ){
             cout<<"input new user profile name: ";
             string newname;
             cin >> newname;
@@ -181,7 +188,7 @@ int main(int argc, const char * argv[])
         cout<<"1. train or modify ASM face models."<<endl;
         cout<<"2. visualize existing ASM face models"<<endl;
         cout<<"3. create, modify, visualize curves."<<endl;
-        cout<<"4. run training"<<endl;
+        cout<<"4. run gazing curve recorder"<<endl;
         cout<<"q. quit"<<endl;
         cout<<"------ Your choice : ";
         string input;
@@ -206,6 +213,12 @@ int main(int argc, const char * argv[])
             
             if (c ==3) {
                 invoke_CurveDrawer(curvesPath);
+            }
+            
+            if (c == 4) {
+                cout<<"Choose user profile:"<<endl;
+                fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
+                invoke_CurveGazingRecorder(curvesPath,targetProfilePath,resultsPath);
             }
             
             

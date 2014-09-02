@@ -123,7 +123,7 @@ void showPrelude() {
     
 }
 
-void showResultPreview(fs::path videoFilePath, fs::path trackermodelpath) {
+void showResultPreviewAndSave(fs::path videoFilePath, fs::path trackermodelpath) {
     ASM_Pupil_Tracker pupilTracker(trackermodelpath);
     string previewWindowName = "preview";
     namedWindow(previewWindowName);
@@ -178,7 +178,7 @@ void writeAnimationTraceFile(string path) {
     storage.release();
 }
 
-void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path outputfilePrefix) {
+void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path trackerModelfile, fs::path outputfilePrefix) {
     readPathData(trajectoryfile);
     showPrelude();
     // start up camera
@@ -218,19 +218,19 @@ void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path outputfilePre
     captureFinishSign = true;
     waitKey(300);
     
-    showResultPreview(fs::path(videoOutputFileName),fs::path("/Users/ZhipingJiang/ImageWorkLoad/jzp-715/trackermodel.yaml"));
+    showResultPreviewAndSave(fs::path(videoOutputFileName),trackerModelfile);
 }
 
 int main (int argc, char *argv[])
 {
-    if (argc < 3) {
-        cout<<argv[0]<<" "<<"trajectoies_set_dir user_name"<<endl;
+    if (argc < 4) {
+        cout<<argv[0]<<" "<<"trajectoies_set_dir user_profile_dir output_dir"<<endl;
         return 0;
     }
     
     fs::path pathDirPath(argv[1]);
-    string username = argv[2];
-    fs::path outputDirPath = pathDirPath / username;
+    fs::path userProfilePath(argv[2]);
+    fs::path outputDirPath(argv[3]);
     vector<fs::path> trajectoryFiles;
     if (setupTrajectories(pathDirPath,trajectoryFiles) == 0) {
         return 0;
@@ -254,8 +254,10 @@ int main (int argc, char *argv[])
     while (trainQueue.empty() == false) {
         fs::path currentPath =trainQueue.front();
         trainQueue.pop_front();
-        fs::path outputfilepath = outputDirPath / currentPath.stem().string();
-        showAnimationAndRecordVideo(currentPath,outputfilepath);
+        fs::path outputfilepath = outputDirPath / userProfilePath.filename() / currentPath.stem().string();
+        fs::create_directories(outputfilepath.parent_path());
+        cout<<outputfilepath<<endl;
+        showAnimationAndRecordVideo(currentPath, userProfilePath/ "trackermodel.yaml", outputfilepath);
         if (showResult() == false) {
             trainQueue.push_front(currentPath);
         }
