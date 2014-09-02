@@ -54,6 +54,19 @@ parse_mirror(int argc,char** argv)
         if(strcmp(str.c_str(),"--mirror") == 0)return true;
     }return false;
 }
+
+bool is_number(const std::string& s)
+{
+    try
+    {
+        boost::lexical_cast<double>(s);
+        return true;
+    }
+    catch(boost::bad_lexical_cast &)
+    {
+        return false;
+    }
+}
 //==============================================================================
 int main(int argc,char** argv)
 {
@@ -79,18 +92,28 @@ int main(int argc,char** argv)
                 detectorFiles.push_back(iterator->path());
             }
         }
-        cout<<"There are "<<detectorFiles.size()<<" haar detector files in your CWD. Which one do you choose ?"<<endl;
-        for (int i = 0; i < detectorFiles.size(); i++) {
-            cout<<"("<<i+1<<") "<<detectorFiles[i].string()<<endl;
+        while(true) {
+            cout<<"There are "<<detectorFiles.size()<<" haar detector files in your CWD. Which one do you choose ?"<<endl;
+            for (int i = 0; i < detectorFiles.size(); i++) {
+                cout<<"("<<i+1<<") "<<detectorFiles[i].string()<<endl;
+            }
+            cout<<"your choice:";
+            string input;
+            cin >> input;
+            if (is_number(input) && boost::lexical_cast<int>(input)>0 && boost::lexical_cast<int>(input) < detectorFiles.size()) {
+                
+                int index = boost::lexical_cast<int>(input)-1;
+                detectorFilePath =workingDirPath / detectorFiles[index].filename();
+                if (index >=0 && index < detectorFiles.size()) {
+                    fs::copy_file(detectorFiles[index], detectorFilePath,  boost::filesystem::copy_option::overwrite_if_exists);
+                    
+                }
+                break;
+            } else {
+                cout<<" error input."<<endl;
+            }
         }
-        cout<<"your choice:";
-        string input;
-        cin >> input;
-        int index = boost::lexical_cast<int>(input)-1;
-        detectorFilePath =workingDirPath / detectorFiles[index].filename();
-        if (index >=0 && index < detectorFiles.size()) {
-            fs::copy_file(detectorFiles[index], detectorFilePath,  boost::filesystem::copy_option::overwrite_if_exists);
-        }
+        
     }
     
     if (argc==3) {
@@ -98,7 +121,7 @@ int main(int argc,char** argv)
         detectorFilePath =workingDirPath / srcDetectorFilePath.filename();
         fs::copy_file(srcDetectorFilePath, detectorFilePath,  boost::filesystem::copy_option::overwrite_if_exists);
     }
-
+    
     cout<<"Your current detector file is :"<<detectorFilePath<<endl;
     
     //train face detector

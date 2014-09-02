@@ -11,6 +11,9 @@
 
 
 #include <opencv2/opencv.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 #include "jzplib_img.h"
 #include "jzplib_draw.h"
 #include "jzplib_bwOps.h"
@@ -21,9 +24,7 @@
 #include "jzplib_camera.h"
 #include "jzplib_utils.h"
 #include "ASEF.h"
-#include <boost/filesystem.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
+
 
 namespace fs = boost::filesystem;
 

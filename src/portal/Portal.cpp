@@ -72,7 +72,7 @@ void invoke_visualize_face_tracker(fs::path userProfileDir) {
 }
 
 void invoke_PupilTracker(fs::path userProfileDir) {
-    cout<<"------- Invoking ./CurveDrawer -----------------"<<endl;
+    cout<<"------- Invoking ./PupilTracker ----------------"<<endl;
     string cmd("./PupilTracker "+userProfileDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
@@ -139,8 +139,8 @@ fs::path chooseUserProfile(fs::path userBasePath, bool withNew) {
         if (withNew) {
             cout<<"([n]ew) to create new profile"<<endl;
         }
-        cout<<"which one do you choose ? ";
         string input;
+        cout<<"which one do you choose ? ";
         cin >> input;
         
         if (is_number(input) && boost::lexical_cast<int>(input) >=0 && boost::lexical_cast<int>(input) < existingProfiles.size()) {
