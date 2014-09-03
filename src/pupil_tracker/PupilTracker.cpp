@@ -40,7 +40,6 @@ int main(int argc, const char * argv[])
         int c = waitKey(1);
         if(c == 'q')break;
         else if(c == 'd') pupilTracker.reDetectFace();
-        cout<<1.0/timer.tock()<<endl;
     }
     return 0;
 }
