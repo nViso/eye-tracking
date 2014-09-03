@@ -86,3 +86,26 @@ void BlockDelayer::delay_milisec(double milisec) {
 void BlockDelayer::delay_sec(double sec) {
     BlockDelayer::delay_microsec_private(sec*1e6);
 }
+
+void CSVFileWriter::addSlot(vector<float> slot) {
+    slots.push_back(slot);
+}
+
+void CSVFileWriter::setDelimeter(const string delimeter) {
+    this->delimeter = delimeter;
+}
+
+void CSVFileWriter::writeToFile(boost::filesystem::path filePath) {
+    namespace fs = boost::filesystem;
+    io::stream_buffer<io::file_sink> outbuf(filePath.string());
+    std::ostream out(&outbuf);
+    int i = 0, j =0 ;
+    for (i= 0; i< slots.size(); i++) {
+        for (j = 0; j < slots[i].size()-1; j++) {
+            out<<setprecision(10) <<slots[i][j]<<delimeter;
+        }
+        out<<setprecision(10) <<slots[i][j]<<endl;
+    }
+    out.flush();
+    outbuf.close();
+}

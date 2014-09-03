@@ -24,12 +24,13 @@ int main(int argc, const char * argv[])
     Mat leftEyeImg , rightEyeImg;
     LowpassFPSTimer timer(20);
     float zoomRatio = 1.0f;
+    CSVFileWriter csvlogger;
     while(true){
         timer.tick();
         captureImage(cam, origin);
         imresize(origin,zoomRatio,im);
         pupilTracker.processFrame(im);
-        
+        csvlogger.addSlot(pupilTracker.toDataSlot());
         drawPoints(im, pupilTracker.canthusPts);
         drawPoints(im, pupilTracker.nosePts);
         circle(im, pupilTracker.leftEyePoint, 3, Scalar(0,255,0));
@@ -41,5 +42,6 @@ int main(int argc, const char * argv[])
         if(c == 'q')break;
         else if(c == 'd') pupilTracker.reDetectFace();
     }
+    csvlogger.writeToFile(fs::path("/Users/ZhipingJiang/test.txt"));
     return 0;
 }
