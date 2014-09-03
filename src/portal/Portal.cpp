@@ -8,93 +8,111 @@
 #include "stdlib.h"
 #include <jzp_lib/jzplib_all.h>
 
+
+
+
 void invoke_annotate(fs::path userProfileDir) {
     cout<<"------- Invoking ./annotate --------------------"<<endl;
-    string cmd("./annotate "+userProfileDir.string());
+    string cmdpath = (fs::current_path()/"annotate").string();
+    string cmd(cmdpath+" "+userProfileDir.string());
+    cout<<userProfileDir<<endl;
+    cout<<cmd<<endl;
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
 void invoke_train_shape_model(fs::path userProfileDir) {
     cout<<"------- Invoking ./train_shape_model -----------"<<endl;
-    string cmd("./train_shape_model "+userProfileDir.string());
+    string cmdpath = (fs::current_path()/"train_shape_model").string();
+    string cmd(cmdpath+" "+userProfileDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
 void invoke_train_patch_model(fs::path userProfileDir) {
     cout<<"------- Invoking ./train_patch_model -----------"<<endl;
-    string cmd("./train_patch_model "+userProfileDir.string());
+    string cmdpath = (fs::current_path()/"train_shape_model").string();
+    string cmd(cmdpath+" "+userProfileDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
 void invoke_train_face_detector(fs::path userProfileDir) {
     cout<<"------- Invoking ./train_face_detector ---------"<<endl;
-    string cmd("./train_face_detector "+userProfileDir.string());
+    string cmdpath = (fs::current_path()/"train_shape_model").string();
+    string cmd(cmdpath+" "+userProfileDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
 void invoke_train_face_tracker(fs::path userProfileDir) {
     cout<<"------- Invoking ./train_face_tracker ----------"<<endl;
-    string cmd("./train_face_tracker "+userProfileDir.string());
+    string cmdpath = (fs::current_path()/"train_shape_model").string();
+    string cmd(cmdpath+" "+userProfileDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
 void invoke_visualize_shape_model(fs::path userProfileDir) {
     cout<<"------- Invoking ./visualize_shape_model -------"<<endl;
-    string cmd("./visualize_shape_model "+userProfileDir.string());
+    string cmdpath = (fs::current_path()/"train_shape_model").string();
+    string cmd(cmdpath+" "+userProfileDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
 void invoke_visualize_patch_model(fs::path userProfileDir) {
     cout<<"------- Invoking ./visualize_patch_model -------"<<endl;
-    string cmd("./visualize_patch_model "+userProfileDir.string());
+    string cmdpath = (fs::current_path()/"visualize_patch_model").string();
+    string cmd(cmdpath+" "+userProfileDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
 void invoke_visualize_face_detector(fs::path userProfileDir) {
     cout<<"------- Invoking ./visualize_face_detector -----"<<endl;
-    string cmd("./visualize_face_detector "+userProfileDir.string());
+    string cmdpath = (fs::current_path()/"visualize_face_detector").string();
+    string cmd(cmdpath+" "+userProfileDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
 void invoke_visualize_face_tracker(fs::path userProfileDir) {
     cout<<"------- Invoking ./visualize_face_tracker ------"<<endl;
-    string cmd("./visualize_face_tracker "+userProfileDir.string());
+    string cmdpath = (fs::current_path()/"visualize_face_tracker").string();
+    string cmd(cmdpath+" "+userProfileDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
 void invoke_PupilTracker(fs::path userProfileDir) {
     cout<<"------- Invoking ./PupilTracker ----------------"<<endl;
-    string cmd("./PupilTracker "+userProfileDir.string());
+    string cmdpath = (fs::current_path()/"PupilTracker").string();
+    string cmd(cmdpath+" "+userProfileDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
 void invoke_HeadPoseEstimation(fs::path userProfileDir) {
     cout<<"------- Invoking ./HeadPoseEstimation ----------"<<endl;
-    string cmd("./HeadPoseEstimation "+userProfileDir.string());
+    string cmdpath = (fs::current_path()/"HeadPoseEstimation").string();
+    string cmd(cmdpath+" "+userProfileDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
 void invoke_CurveDrawer(fs::path curvesDir) {
     cout<<"------- Invoking ./CurveDrawer -----------------"<<endl;
-    string cmd("./CurveDrawer "+curvesDir.string());
+    string cmdpath = (fs::current_path()/"CurveDrawer").string();
+    string cmd(cmdpath+" "+curvesDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
 void invoke_CurveGazingRecorder(fs::path curvesDir, fs::path userProfileDir, fs::path outputDir) {
     cout<<"------- Invoking ./CurveGazingRecorder ---------"<<endl;
-    string cmd("./CurveGazingRecorder "+curvesDir.string()+" "+userProfileDir.string()+" "+outputDir.string());
+    string cmdpath = (fs::current_path()/"train_shape_model").string();
+    string cmd(cmdpath+" "+curvesDir.string()+" "+userProfileDir.string()+" "+outputDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
@@ -130,7 +148,7 @@ vector<fs::path> listExistingUserProfiles(fs::path userBasePath) {
 fs::path chooseUserProfile(fs::path userBasePath, bool withNew) {
     vector<fs::path> existingProfiles = listExistingUserProfiles(userBasePath);
     int index = 0;
-    while (true) {
+    while (existingProfiles.size()>0 || withNew) {
         
         cout<<"There are "<<existingProfiles.size()<<" user profiles:"<<endl;
         for (index = 0; index < existingProfiles.size(); index++) {
@@ -156,6 +174,8 @@ fs::path chooseUserProfile(fs::path userBasePath, bool withNew) {
             cout<<"error input"<<endl;
         }
     }
+    cout<<"There is no user profile. You should create an new one."<<endl;
+    return fs::path();
 }
 
 
@@ -164,9 +184,11 @@ fs::path chooseUserProfile(fs::path userBasePath, bool withNew) {
 
 int main(int argc, const char * argv[])
 {
+    
     fs::path  basePath, userBasePath, curvesPath, resultsPath;
     if (argc >=2) {
         basePath = fs::path(argv[1]);
+        cout<<"base path: "<<basePath<<endl;
         fs::create_directories(basePath);
     } else {
         cout<<"enter the base dir path:";
@@ -211,7 +233,10 @@ int main(int argc, const char * argv[])
             
             if (c == 2) {
                 fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
-                visualizeASMModel(targetProfilePath);
+                if (targetProfilePath.empty() == false) {
+                    visualizeASMModel(targetProfilePath);
+                }
+                
             }
             
             if (c ==3) {
@@ -221,19 +246,26 @@ int main(int argc, const char * argv[])
             if (c == 4) {
                 cout<<"Choose user profile:"<<endl;
                 fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
-                invoke_CurveGazingRecorder(curvesPath,targetProfilePath,resultsPath);
+                if (targetProfilePath.empty() == false) {
+                    invoke_CurveGazingRecorder(curvesPath,targetProfilePath,resultsPath);
+                }
+                
             }
             
             if (c == 5) {
                 cout<<"Choose user profile:"<<endl;
                 fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
-                invoke_PupilTracker(targetProfilePath);
+                if (targetProfilePath.empty() == false) {
+                    invoke_PupilTracker(targetProfilePath);
+                }
             }
             
             if (c == 6) {
                 cout<<"Choose user profile:"<<endl;
                 fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
-                invoke_HeadPoseEstimation(targetProfilePath);
+                if (targetProfilePath.empty() == false) {
+                    invoke_HeadPoseEstimation(targetProfilePath);
+                }
             }
             
             
