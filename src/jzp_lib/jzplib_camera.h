@@ -21,7 +21,7 @@ using namespace std;
 
 Mat cameraMatrixByCropNResize(Mat originalCameraMatrix, Size originalSize, Rect currentRect, float resizeFactor);
 
-void captureImage(VideoCapture& capture, Mat& color_img);
+bool captureImage(VideoCapture& capture, Mat& color_img, bool flip = true);
 
 void videoCaptureThreadFun(VideoCapture *capture, Mat *frame, int framerate, bool * finishSign);
 

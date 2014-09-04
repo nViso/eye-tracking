@@ -100,7 +100,7 @@ int main(int argc,char** argv)
             cout<<"your choice:";
             string input;
             cin >> input;
-            if (is_number(input) && boost::lexical_cast<int>(input)>0 && boost::lexical_cast<int>(input) < detectorFiles.size()) {
+            if (is_number(input) && boost::lexical_cast<int>(input)>0 && boost::lexical_cast<int>(input) <= detectorFiles.size()) {
                 
                 int index = boost::lexical_cast<int>(input)-1;
                 detectorFilePath =workingDirPath / detectorFiles[index].filename();
