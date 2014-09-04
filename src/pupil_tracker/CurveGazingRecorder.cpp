@@ -240,7 +240,8 @@ int main (int argc, char *argv[])
         fs::create_directories(outputDirPath);
     }
     
-    
+    ptime presentPtime = second_clock::local_time();
+    string dateString = simpleDataFormat(presentPtime, "%Y_%m_%d");
     
     //setup
     namedWindow(windowName);
@@ -254,7 +255,7 @@ int main (int argc, char *argv[])
     while (trainQueue.empty() == false) {
         fs::path currentPath =trainQueue.front();
         trainQueue.pop_front();
-        fs::path outputfilepath = outputDirPath / userProfilePath.filename() / currentPath.stem().string();
+        fs::path outputfilepath = (outputDirPath / (dateString+"_"+ userProfilePath.filename().string())) / currentPath.stem().string();
         fs::create_directories(outputfilepath.parent_path());
         cout<<outputfilepath<<endl;
         showAnimationAndRecordVideo(currentPath, userProfilePath/ "trackermodel.yaml", outputfilepath);

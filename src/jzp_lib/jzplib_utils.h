@@ -14,6 +14,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/timer/timer.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/posix_time/posix_time_io.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/time_traits.hpp>
 #include <boost/filesystem.hpp>
@@ -30,6 +31,7 @@ namespace io = boost::iostreams;
 
 bool is_number(const std::string& s);
 
+std::string simpleDataFormat(boost::posix_time::ptime now, std::string format);
 class LowpassFPSTimer {
 private:
     ptime tickTime, tockTime;
