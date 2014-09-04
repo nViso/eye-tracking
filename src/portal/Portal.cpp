@@ -15,8 +15,6 @@ void invoke_annotate(fs::path userProfileDir) {
     cout<<"------- Invoking ./annotate --------------------"<<endl;
     string cmdpath = (fs::current_path()/"annotate").string();
     string cmd(cmdpath+" "+userProfileDir.string());
-    cout<<userProfileDir<<endl;
-    cout<<cmd<<endl;
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
@@ -31,7 +29,7 @@ void invoke_train_shape_model(fs::path userProfileDir) {
 
 void invoke_train_patch_model(fs::path userProfileDir) {
     cout<<"------- Invoking ./train_patch_model -----------"<<endl;
-    string cmdpath = (fs::current_path()/"train_shape_model").string();
+    string cmdpath = (fs::current_path()/"train_patch_model").string();
     string cmd(cmdpath+" "+userProfileDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
@@ -39,7 +37,7 @@ void invoke_train_patch_model(fs::path userProfileDir) {
 
 void invoke_train_face_detector(fs::path userProfileDir) {
     cout<<"------- Invoking ./train_face_detector ---------"<<endl;
-    string cmdpath = (fs::current_path()/"train_shape_model").string();
+    string cmdpath = (fs::current_path()/"train_face_detector").string();
     string cmd(cmdpath+" "+userProfileDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
@@ -47,7 +45,7 @@ void invoke_train_face_detector(fs::path userProfileDir) {
 
 void invoke_train_face_tracker(fs::path userProfileDir) {
     cout<<"------- Invoking ./train_face_tracker ----------"<<endl;
-    string cmdpath = (fs::current_path()/"train_shape_model").string();
+    string cmdpath = (fs::current_path()/"train_face_tracker").string();
     string cmd(cmdpath+" "+userProfileDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
@@ -111,7 +109,7 @@ void invoke_CurveDrawer(fs::path curvesDir) {
 
 void invoke_CurveGazingRecorder(fs::path curvesDir, fs::path userProfileDir, fs::path outputDir) {
     cout<<"------- Invoking ./CurveGazingRecorder ---------"<<endl;
-    string cmdpath = (fs::current_path()/"train_shape_model").string();
+    string cmdpath = (fs::current_path()/"CurveGazingRecorder").string();
     string cmd(cmdpath+" "+curvesDir.string()+" "+userProfileDir.string()+" "+outputDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;

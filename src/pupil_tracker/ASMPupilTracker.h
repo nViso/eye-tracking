@@ -14,6 +14,7 @@ class ASM_Pupil_Tracker {
 public:
     ASM_Pupil_Tracker(fs::path trackermodel);
     void processFrame(const cv::Mat & im);
+    vector<float> toDataSlot();
     void reDetectFace();
     Point2f glabellaPoint;
     float eyePairTileAngle;

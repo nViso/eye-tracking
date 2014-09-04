@@ -36,7 +36,7 @@ void drawInstructions() {
     drawStringAtPoint(bg, "[, ] for distance/frame : "+ boost::lexical_cast<string>(distancePerFrame), Point(0,40));
     drawStringAtPoint(bg, ";, ' for frame rate : "+ boost::lexical_cast<string>(frameRate), Point(0,60));
     drawStringAtPoint(bg, "., / for curve resolution : "+ boost::lexical_cast<string>(divs), Point(0,80));
-    cout<<controlPoints.size()<<" points,"<<"resolution:"<<divs<<", distance/frame:"<<distancePerFrame<<",frame rate:"<<frameRate<<",bezier order:"<<currentBezierOrder<<endl;
+    
 }
 
 void setupTrajectories(fs::path pathDirPath, vector<fs::path>& trajectoryFiles) {

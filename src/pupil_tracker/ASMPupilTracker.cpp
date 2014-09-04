@@ -14,6 +14,21 @@ ASM_Pupil_Tracker::ASM_Pupil_Tracker(fs::path path) {
     tracker.detector.baseDir = path.parent_path().string() + fs::path("/").make_preferred().native();
 }
 
+vector<float> ASM_Pupil_Tracker::toDataSlot() {
+    vector<float> slot;
+    
+    slot.push_back(leftEyePoint.x);
+    slot.push_back(leftEyePoint.y);
+    slot.push_back(rightEyePoint.x);
+    slot.push_back(rightEyePoint.y);
+    for (int i = 0; i < tracker.points.size(); i++) {
+        slot.push_back(tracker.points[i].x);
+        slot.push_back(tracker.points[i].y);
+    }
+    
+    return slot;
+}
+
 void ASM_Pupil_Tracker::reDetectFace() {
     tracker.reset();
 }
