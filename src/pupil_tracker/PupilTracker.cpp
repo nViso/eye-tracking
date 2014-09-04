@@ -6,28 +6,40 @@
 
 int main(int argc, const char * argv[])
 {
-    
-    ft_data ftdata;
+    string windowName;
+    VideoCapture cam;
+    bool dumpFile = false;
+    fs::path inputFilePath;
     if (argc<2) {
+        cout<<argv[0]<<" userProfileDir"<<" [dumping Video file]"<<endl;
+        return 0;
+    } else if (argc == 2) {
+        windowName = "Pupil tracking from camera";
+        cam.open(0);
+    } else if(argc > 2) {
+        dumpFile = true;
+        cam.open(argv[2]);
+        inputFilePath = fs::path(argv[2]);
+        windowName = "Pupil tracking from video [" + string(argv[2]) +"]";
+    }
+    
+    if(!cam.isOpened()){
+        cout<<"cannot open camera or video file."<<endl;
         return 0;
     }
+    
     fs::path baseDirPath(argv[1]);
     ASM_Pupil_Tracker pupilTracker(baseDirPath / "trackermodel.yaml");
+    windowName += ( " by profile ["+baseDirPath.string()+"]");
     
-    VideoCapture cam;
-    if(argc > 2)cam.open(argv[2]); else cam.open(0);
-    if(!cam.isOpened()){
-        return 0;
-    }
     Mat origin, im ;
-    Mat rotated_img, cropped;
-    Mat leftEyeImg , rightEyeImg;
-    LowpassFPSTimer timer(20);
     float zoomRatio = 1.0f;
     CSVFileWriter csvlogger;
     while(true){
-        timer.tick();
-        captureImage(cam, origin);
+        bool success = captureImage(cam, origin, !dumpFile);
+        if (success == false) {
+            break;
+        }
         imresize(origin,zoomRatio,im);
         pupilTracker.processFrame(im);
         csvlogger.addSlot(pupilTracker.toDataSlot());
@@ -35,13 +47,17 @@ int main(int argc, const char * argv[])
         drawPoints(im, pupilTracker.nosePts);
         circle(im, pupilTracker.leftEyePoint, 3, Scalar(0,255,0));
         circle(im, pupilTracker.rightEyePoint, 3, Scalar(0,255,0));
-        
-        imshow("im",im);
-        
+        imshow(windowName,im);
         int c = waitKey(1);
-        if(c == 'q')break;
-        else if(c == 'd') pupilTracker.reDetectFace();
+        if(c == 'q' && ! dumpFile)
+            break;
+        if(c == 'd')
+            pupilTracker.reDetectFace();
     }
-    csvlogger.writeToFile(fs::path("/Users/ZhipingJiang/test.txt"));
+    
+    if (dumpFile) {
+        csvlogger.writeToFile(inputFilePath.parent_path() / (inputFilePath.stem().string() + ".txt"));
+    }
+    
     return 0;
 }

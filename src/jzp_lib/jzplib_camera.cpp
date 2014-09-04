@@ -25,14 +25,18 @@ Mat cameraMatrixByCropNResize(const Mat originalCameraMatrix, Size originalSize,
     return nowcm;
 }
 
-void captureImage(VideoCapture& capture, Mat& color_img) {
+bool captureImage(VideoCapture& capture, Mat& color_img, bool flipImage) {
     Rect squareRect;
     Mat origin;
-    if (&capture && capture.isOpened()) {
-        capture >> origin;
-        //    squareRect =findBiggestSquare(color_img);
-        //    color_img(squareRect).copyTo(color_img);
-        flip(origin, color_img, 1);
+    if (&capture && capture.isOpened() && capture.read(origin)) {
+        if (flipImage)
+            flip(origin, color_img, 1);
+        else {
+            origin.copyTo(color_img);
+        }
+        return true;
+    } else {
+        return false;
     }
     
 }

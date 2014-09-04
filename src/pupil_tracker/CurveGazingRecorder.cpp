@@ -123,35 +123,12 @@ void showPrelude() {
     
 }
 
-void showResultPreviewAndSave(fs::path videoFilePath, fs::path trackermodelpath) {
-    ASM_Pupil_Tracker pupilTracker(trackermodelpath);
-    string previewWindowName = "preview";
-    namedWindow(previewWindowName);
-    moveWindow(previewWindowName, 0, 0);
-    VideoCapture video(videoFilePath.string());
-    double fps = video.get(CV_CAP_PROP_FPS);
-    Mat frame ;
-    FPScontroller delayer(fps);
-    int frameCount = 0;
-    while (true) {
-        if(!video.read(frame))
-            break;
-        delayer.controlledDelay();
-        pupilTracker.processFrame(frame);
-        
-        drawPoints(frame, pupilTracker.canthusPts);
-        drawPoints(frame, pupilTracker.nosePts);
-        circle(frame, pupilTracker.leftEyePoint, 3, Scalar(0,255,0));
-        circle(frame, pupilTracker.rightEyePoint, 3, Scalar(0,255,0));
-        imshow(previewWindowName,frame);
-        
-        int k = waitKey(1);
-        
-        if (k == 'q') {
-            break;
-        }
-    }
-    destroyWindow(previewWindowName);
+void showResultPreviewAndSave(fs::path videoFilePath, fs::path userProfilePath) {
+    cout<<"------- Invoking ./PupilTracker ----------------"<<endl;
+    string cmdpath = (fs::current_path()/"PupilTracker").string();
+    string cmd = cmdpath+" "+userProfilePath.string()+" "+videoFilePath.string();
+    system(cmd.c_str());
+    cout<<"------- Invocation Done ------------------------"<<endl;
 }
 bool showResult() {
     Mat current;
@@ -178,7 +155,7 @@ void writeAnimationTraceFile(string path) {
     storage.release();
 }
 
-void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path trackerModelfile, fs::path outputfilePrefix) {
+void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path userProfilePath, fs::path outputfilePrefix) {
     readPathData(trajectoryfile);
     showPrelude();
     // start up camera
@@ -218,7 +195,7 @@ void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path trackerModelf
     captureFinishSign = true;
     waitKey(300);
     
-    showResultPreviewAndSave(fs::path(videoOutputFileName),trackerModelfile);
+    showResultPreviewAndSave(fs::path(videoOutputFileName),userProfilePath);
 }
 
 int main (int argc, char *argv[])
@@ -258,7 +235,7 @@ int main (int argc, char *argv[])
         fs::path outputfilepath = (outputDirPath / (dateString+"_"+ userProfilePath.filename().string())) / currentPath.stem().string();
         fs::create_directories(outputfilepath.parent_path());
         cout<<outputfilepath<<endl;
-        showAnimationAndRecordVideo(currentPath, userProfilePath/ "trackermodel.yaml", outputfilepath);
+        showAnimationAndRecordVideo(currentPath, userProfilePath, outputfilepath);
         if (showResult() == false) {
             trainQueue.push_front(currentPath);
         }
