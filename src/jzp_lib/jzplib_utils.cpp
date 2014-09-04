@@ -21,6 +21,17 @@ bool is_number(const std::string& s)
     }
 }
 
+std::string simpleDataFormat(boost::posix_time::ptime date_time, std::string format)
+{
+    static boost::posix_time::time_facet * facet =
+    new boost::posix_time::time_facet(format.c_str());
+    std::ostringstream stream;
+    stream.imbue(std::locale(stream.getloc(), facet));
+    stream << date_time;
+//    free(facet);
+    return stream.str();
+}
+
 LowpassFPSTimer::LowpassFPSTimer(int lowpassLength) {
     this->lowpassLength = lowpassLength;
     durationValues = deque<double>();
