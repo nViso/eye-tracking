@@ -41,7 +41,7 @@ int main(int argc, const char * argv[])
             break;
         }
         imresize(origin,zoomRatio,im);
-        pupilTracker.processFrame(im);
+        bool processSuccess = pupilTracker.processFrame(im);
         csvlogger.addSlot(pupilTracker.toDataSlot());
         drawPoints(im, pupilTracker.canthusPts);
         drawPoints(im, pupilTracker.nosePts);

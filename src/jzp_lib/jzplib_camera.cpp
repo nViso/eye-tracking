@@ -96,3 +96,60 @@ void videoWriterThreadFun(VideoWriter * writer, spsc_queue<Mat,boost::lockfree::
 	}
     cout<<"writer finished, totally "<<frameCount<<" frames."<<endl;
 }
+
+
+vector<vector<Point3f> > calcBoardCornerPositions(int gridW, int gridH, float squareSize, int imagesCount)
+{
+    vector<vector<Point3f> > objectPoints(imagesCount);
+    for (int k = 0 ; k <imagesCount; k++) {
+        objectPoints[k] = vector<Point3f>(0);
+        for( int i = 0; i < gridH; i++ )
+            for( int j = 0; j < gridW; j++ )
+                objectPoints[k].push_back(Point3f(float( j*squareSize ), float( i*squareSize ), 0));
+    }
+    //    objectPoints.resize(imagesCount,objectPoints[0]);
+//    cout<<objectPoints.size()<<" "<<objectPoints[0].size()<<endl;
+    return objectPoints;
+}
+
+bool chessboardCameraCalibration(int gridW, int gridH, float gridSize, vector<fs::path> imagePaths, Mat & cameraMatrix, Mat & distCoeffs, bool drawCorners) {
+    vector<Mat> images;
+    for (int i = 0; i <imagePaths.size(); i++) {
+        //        cout<<files[i].string()<<endl;
+        images.push_back(imread(imagePaths[i].string()));
+        //        imshow("chessboard"+boost::lexical_cast<std::string>(i),images[i]);
+    }
+    
+    Size grids(gridW,gridH);
+    vector<vector<Point2f> > imagePoints;
+    vector<int> usefulImgIndeces;
+    for (int i = 0 ; i <images.size() ; i ++) {
+        vector<Point2f> corners;
+        bool found = findChessboardCorners(images[i], grids, corners,CALIB_CB_ADAPTIVE_THRESH + CALIB_CB_NORMALIZE_IMAGE+CALIB_CB_FAST_CHECK);
+        
+        if (found) {
+            usefulImgIndeces.push_back(i);
+            Mat gray;
+            cvtColor(images[i], gray, CV_BGR2GRAY);
+            cornerSubPix(gray, corners, Size(11, 11), Size(-1, -1),
+                         TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
+            imagePoints.push_back(corners);
+            if (drawCorners) {
+                drawChessboardCorners(images[i], grids, Mat(corners), found);
+                imshow("chessboard"+boost::lexical_cast<std::string>(i),images[i]);
+            }
+        }
+    }
+    
+    if (usefulImgIndeces.empty()) {
+        cout<<"no chessboard found."<<endl;
+        return false;
+    }
+    
+    vector<vector<Point3f> > objectPoints = calcBoardCornerPositions(gridW,gridH, gridSize, imagePoints.size());
+    Size imageSize = images[0].size();
+    vector<Mat> rvecs, tvecs;
+    double rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distCoeffs, rvecs, tvecs);
+    
+    return true;
+}

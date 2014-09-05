@@ -380,8 +380,8 @@ int main(int argc,char** argv)
         }
         //get images to annotate
         annotation.set_capture_instructions();
-        while(cam.get(CV_CAP_PROP_POS_AVI_RATIO) < 0.999999){
-            Mat im,img; cam >> im;
+        Mat im;
+        while(cam.read(im)){
             flip(im,im,1);
             annotation.image = im.clone();
             annotation.draw_instructions();
