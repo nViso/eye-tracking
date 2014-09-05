@@ -18,6 +18,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/time_traits.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/file.hpp>
 #include <deque>
@@ -28,10 +29,13 @@ using namespace boost::timer;
 using namespace boost::posix_time;
 using namespace boost::asio;
 namespace io = boost::iostreams;
+namespace fs = boost::filesystem;
 
 bool is_number(const std::string& s);
 
+vector<fs::path> listFilesWithExtension(fs::path folderPath, string prefix, string surfix);
 std::string simpleDataFormat(boost::posix_time::ptime now, std::string format);
+
 class LowpassFPSTimer {
 private:
     ptime tickTime, tockTime;

@@ -43,14 +43,7 @@ void setupTrajectories(fs::path pathDirPath, vector<fs::path>& trajectoryFiles) 
     if (!fs::exists(pathDirPath)) {
         fs::create_directories(pathDirPath);
     }
-    
-    fs::directory_iterator iterator(pathDirPath);
-    
-    for (; iterator != fs::directory_iterator(); iterator++) {
-        if (boost::iequals(".yaml", iterator->path().extension().string())) {
-            trajectoryFiles.push_back(iterator->path());
-        }
-    }
+    trajectoryFiles = listFilesWithExtension(pathDirPath, "", "yaml");
 }
 
 
