@@ -25,8 +25,8 @@ vector<fs::path> listFilesWithExtension(fs::path folderPath, string prefix, stri
     vector<fs::path> files;
     fs::directory_iterator iterend;
     for (fs::directory_iterator it(folderPath); it != iterend; it++) {
-        if (boost::ends_with(it->path().extension().string(), surfix)
-            && boost::starts_with(it->path().stem().string(), prefix) ) {
+        if (boost::ends_with(it->path().filename().string(), surfix)
+            && boost::starts_with(it->path().filename().string(), prefix) ) {
             files.push_back(it->path());
         }
     }

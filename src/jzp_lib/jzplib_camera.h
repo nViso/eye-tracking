@@ -6,9 +6,6 @@
 //
 //
 
-#ifndef __JZP_EYE_TRACKING__jzplib_camera__
-#define __JZP_EYE_TRACKING__jzplib_camera__
-
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <boost/thread.hpp>
@@ -32,5 +29,3 @@ void videoWriterThreadFun(VideoWriter * writer, spsc_queue<Mat,boost::lockfree::
 vector<vector<Point3f> > calcBoardCornerPositions(int gridW, int gridH, float squareSize, int imagesCount);
 
 void chessboardCameraCalibration(int gridW, int gridH, float gridSize, vector<fs::path> imagePaths, Mat & cameraMatrix, Mat & distCoeffs, bool drawCorners);
-
-#endif /* defined(__JZP_EYE_TRACKING__jzplib_camera__) */
