@@ -34,6 +34,8 @@ namespace fs = boost::filesystem;
 bool is_number(const std::string& s);
 
 vector<fs::path> listFilesWithExtension(fs::path folderPath, string prefix, string surfix);
+vector<fs::path> listFilesRecursivelyWithExtension(fs::path folderPath, string prefix, string surfix)
+;
 std::string simpleDataFormat(boost::posix_time::ptime now, std::string format);
 
 class LowpassFPSTimer {
