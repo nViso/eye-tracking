@@ -21,6 +21,18 @@ bool is_number(const std::string& s)
     }
 }
 
+vector<fs::path> listFilesWithExtension(fs::path folderPath, string prefix, string surfix) {
+    vector<fs::path> files;
+    fs::directory_iterator iterend;
+    for (fs::directory_iterator it(folderPath); it != iterend; it++) {
+        if (boost::ends_with(it->path().filename().string(), surfix)
+            && boost::starts_with(it->path().filename().string(), prefix) ) {
+            files.push_back(it->path());
+        }
+    }
+    return files;
+}
+
 std::string simpleDataFormat(boost::posix_time::ptime date_time, std::string format)
 {
     static boost::posix_time::time_facet * facet =

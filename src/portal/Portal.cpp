@@ -115,6 +115,14 @@ void invoke_CurveGazingRecorder(fs::path curvesDir, fs::path userProfileDir, fs:
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
+void invoke_CameraCalibrator(fs::path cameraBaseDir) {
+    cout<<"------- Invoking ./CameraCalibrator -----------------"<<endl;
+    string cmdpath = (fs::current_path()/"CameraCalibrator").string();
+    string cmd(cmdpath+" "+cameraBaseDir.string());
+    system(cmd.c_str());
+    cout<<"------- Invocation Done ------------------------"<<endl;
+}
+
 
 void trainASMModel(fs::path userProfilePath) {
     invoke_annotate(userProfilePath);
@@ -183,7 +191,7 @@ fs::path chooseUserProfile(fs::path userBasePath, bool withNew) {
 int main(int argc, const char * argv[])
 {
     
-    fs::path  basePath, userBasePath, curvesPath, resultsPath;
+    fs::path  basePath, userBasePath, curvesPath, resultsPath, cameraCalibPath;
     if (argc >=2) {
         basePath = fs::path(argv[1]);
         cout<<"base path: "<<basePath<<endl;
@@ -200,9 +208,11 @@ int main(int argc, const char * argv[])
     userBasePath = basePath/"user_profile";
     curvesPath = basePath/"curves";
     resultsPath = basePath/"results";
+    cameraCalibPath = basePath /"camera_calibration";
     fs::create_directories(userBasePath);
     fs::create_directories(curvesPath);
     fs::create_directories(resultsPath);
+    fs::create_directories(cameraCalibPath);
     
     while (true) {
         cout<<"\nAvaliable Choices:"<<endl;
@@ -212,6 +222,7 @@ int main(int argc, const char * argv[])
         cout<<"4. run gazing curve recorder"<<endl;
         cout<<"5. run pupil tracker."<<endl;
         cout<<"6. run head pose estimation."<<endl;
+        cout<<"7. run chessboard camera calibration."<<endl;
         cout<<"q. quit"<<endl;
         cout<<"------ Your choice : ";
         string input;
@@ -219,7 +230,7 @@ int main(int argc, const char * argv[])
         
         if (is_number(input)) {
             int c = boost::lexical_cast<int>(input);
-            if (c<1 || c>6) {
+            if (c<1 || c>7) {
                 cout<<"error number"<<endl;
                 continue;
             }
@@ -264,6 +275,10 @@ int main(int argc, const char * argv[])
                 if (targetProfilePath.empty() == false) {
                     invoke_HeadPoseEstimation(targetProfilePath);
                 }
+            }
+            
+            if (c == 7) {
+                invoke_CameraCalibrator(cameraCalibPath);
             }
             
             
