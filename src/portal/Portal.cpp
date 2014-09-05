@@ -183,7 +183,7 @@ fs::path chooseUserProfile(fs::path userBasePath, bool withNew) {
 int main(int argc, const char * argv[])
 {
     
-    fs::path  basePath, userBasePath, curvesPath, resultsPath;
+    fs::path  basePath, userBasePath, curvesPath, resultsPath, cameraCalibPath;
     if (argc >=2) {
         basePath = fs::path(argv[1]);
         cout<<"base path: "<<basePath<<endl;
@@ -200,9 +200,11 @@ int main(int argc, const char * argv[])
     userBasePath = basePath/"user_profile";
     curvesPath = basePath/"curves";
     resultsPath = basePath/"results";
+    cameraCalibPath = basePath /"camera_calibration";
     fs::create_directories(userBasePath);
     fs::create_directories(curvesPath);
     fs::create_directories(resultsPath);
+    fs::create_directories(cameraCalibPath);
     
     while (true) {
         cout<<"\nAvaliable Choices:"<<endl;

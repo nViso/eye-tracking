@@ -29,4 +29,8 @@ void videoBufferThreadFun(spsc_queue<Mat,boost::lockfree::capacity<512> > * buff
 
 void videoWriterThreadFun(VideoWriter * writer, spsc_queue<Mat,boost::lockfree::capacity<512> > * buffer, int framerate, bool * writeEnabled, bool * finishSign);
 
+vector<vector<Point3f> > calcBoardCornerPositions(int gridW, int gridH, float squareSize, int imagesCount);
+
+void chessboardCameraCalibration(int gridW, int gridH, float gridSize, vector<fs::path> imagePaths, Mat & cameraMatrix, Mat & distCoeffs, bool drawCorners);
+
 #endif /* defined(__JZP_EYE_TRACKING__jzplib_camera__) */
