@@ -33,13 +33,18 @@ void ASM_Pupil_Tracker::reDetectFace() {
     tracker.reset();
 }
 
-void ASM_Pupil_Tracker::processFrame(const cv::Mat & im) {
+bool ASM_Pupil_Tracker::processFrame(const cv::Mat & im) {
 //    LowpassFPSTimer timer(1);
 //    timer.tick();
     Mat  leftEyeImg,rightEyeImg,cropped;
     tracker.track(im);
     canthusPts = vector<Point2f>(tracker.points.begin(),tracker.points.begin()+4);
     nosePts = vector<Point2f>(tracker.points.begin()+4,tracker.points.begin()+6);
+    
+    if (canthusPts[2].x < canthusPts[0].x && canthusPts[0].x < canthusPts[1].x && canthusPts[1].x < canthusPts[3].x) {
+    } else {
+        return false;
+    }
     
     eyePairTileAngle = calculateEyePairTileAngle(canthusPts);
     glabellaPoint= caculateEyePairCenter(canthusPts);
@@ -60,6 +65,10 @@ void ASM_Pupil_Tracker::processFrame(const cv::Mat & im) {
     Rect leftEyeRect = Rect(0,0,rotatedCanthusPts[0].x-rotatedCanthusPts[2].x,eyePairRectSize.height);
     Rect rightEyeRect = Rect(rotatedCanthusPts[1].x-rotatedCanthusPts[2].x,0,rotatedCanthusPts[3].x-rotatedCanthusPts[1].x,eyePairRectSize.height);
     
+    if (leftEyeRect.area() < 50 || rightEyeRect.area()< 50) {
+        return false;
+    }
+    
     leftEyeImg = cropped(leftEyeRect);
     rightEyeImg = cropped(rightEyeRect);
     Point leftEyeCenter = findEyeCenterByColorSegmentation(leftEyeImg);
@@ -71,5 +80,5 @@ void ASM_Pupil_Tracker::processFrame(const cv::Mat & im) {
     
     leftEyePoint= rotatePointByRotationMatrix(leftEyeCenter, Mback);
     rightEyePoint= rotatePointByRotationMatrix(rightEyeCenter, Mback);
-//    cout<<timer.tock()<<endl;
+    return true;
 }
