@@ -112,7 +112,7 @@ vector<vector<Point3f> > calcBoardCornerPositions(int gridW, int gridH, float sq
     return objectPoints;
 }
 
-void chessboardCameraCalibration(int gridW, int gridH, float gridSize, vector<fs::path> imagePaths, Mat & cameraMatrix, Mat & distCoeffs, bool drawCorners) {
+bool chessboardCameraCalibration(int gridW, int gridH, float gridSize, vector<fs::path> imagePaths, Mat & cameraMatrix, Mat & distCoeffs, bool drawCorners) {
     vector<Mat> images;
     for (int i = 0; i <imagePaths.size(); i++) {
         //        cout<<files[i].string()<<endl;
@@ -141,8 +141,15 @@ void chessboardCameraCalibration(int gridW, int gridH, float gridSize, vector<fs
         }
     }
     
+    if (usefulImgIndeces.empty()) {
+        cout<<"no chessboard found."<<endl;
+        return false;
+    }
+    
     vector<vector<Point3f> > objectPoints = calcBoardCornerPositions(gridW,gridH, gridSize, imagePoints.size());
     Size imageSize = images[0].size();
     vector<Mat> rvecs, tvecs;
     double rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distCoeffs, rvecs, tvecs);
+    
+    return true;
 }
