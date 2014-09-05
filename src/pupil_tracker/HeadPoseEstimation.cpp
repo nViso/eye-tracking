@@ -28,11 +28,19 @@ int main(int argc, const char * argv[])
     face_tracker tracker = load_ft<face_tracker>(string(ftdata.baseDir+"trackermodel.yaml").c_str());
     tracker.detector.baseDir = ftdata.baseDir;
     
-    FileStorage fileLoader(string(ftdata.baseDir+"cameraparams.yaml"),FileStorage::READ);
     Mat cameraMatrix, distCoeffs;
-    fileLoader["cameraMatrix"]>>cameraMatrix;
-    fileLoader["distCoeffs"] >> distCoeffs;
-    fileLoader.release();
+    if (argc == 2) { // without camera file.
+        FileStorage fileLoader(string(ftdata.baseDir+"cameraparams.yaml"),FileStorage::READ);
+        fileLoader["cameraMatrix"]>>cameraMatrix;
+        fileLoader["distCoeffs"] >> distCoeffs;
+        fileLoader.release();
+    }
+    if (argc == 3) { // with camera file
+        FileStorage fileLoader(string(argv[2]),FileStorage::READ);
+        fileLoader["cameraMatrix"]>>cameraMatrix;
+        fileLoader["distCoeffs"] >> distCoeffs;
+        fileLoader.release();
+    }
     
     shape_model smodel = load_ft<shape_model>(string(ftdata.baseDir+"shapemodel.yaml").c_str());
     vector<Point3f> faceFeatures = findBestFrontalFaceShape(smodel);
@@ -45,30 +53,30 @@ int main(int argc, const char * argv[])
     vector<Point2f> frontPerspective2D = findBestFrontalFaceShape2D(ftdata);
     
     VideoCapture cam;
-    if(argc > 2)cam.open(argv[2]); else cam.open(0);
+    cam.open(0);
     if(!cam.isOpened()){
         return 0;
     }
     Mat rvec, tvec;
     Mat im;
     captureImage(cam,im);
-    cout<<"original cm:"<<endl<<cameraMatrix<<endl;
     
-//    Mat cameraMatrix2 = cameraMatrixByCropNResize(cameraMatrix,im.size(),findBiggestSquare(im),0.4f);
-//    cout<<"now cm: "<<endl<<cameraMatrix2<<endl;
-    while(cam.get(CV_CAP_PROP_POS_AVI_RATIO) < 0.999999){
-        captureImage(cam,im);
-//        im = imresize(im, 0.4f);
+
+    while(true){
+        bool success = captureImage(cam, im, true);
+        if (success == false) {
+            break;
+        }
         tracker.track(im);
         
         vector<Point2f> featuresTruPts = tracker.points;
         fliplr(featuresTruPts, im.size());
-        Mat hM = findHomography(featuresTruPts ,frontPerspective2D, 0);
         
-        Mat frontim;
-        Mat gray;
-        warpPerspective(im.clone(), frontim, hM, im.size());
-        imshow("front", frontim);
+//        Mat hM = findHomography(featuresTruPts ,frontPerspective2D, 0);
+//        Mat frontim;
+//        Mat gray;
+//        warpPerspective(im.clone(), frontim, hM, im.size());
+//        imshow("front", frontim);
         
         
         
