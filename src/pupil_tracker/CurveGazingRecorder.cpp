@@ -160,7 +160,7 @@ void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path userProfilePa
     
     //setup video writer
     string videoOutputFileName = outputfilePrefix.string()+".avi";
-    string animationTraceOutputFileName =outputfilePrefix.string()+".yaml";
+    string animationTraceOutputFileName =outputfilePrefix.string()+".groundtruth";
     writeAnimationTraceFile(animationTraceOutputFileName);
     string ccstr = "MJPG";
 	VideoWriter videoWriter(videoOutputFileName,CV_FOURCC(ccstr[0],ccstr[1],ccstr[2],ccstr[3]), writeRate, cvSize((int)cameraWidth,(int)cameraHeight));

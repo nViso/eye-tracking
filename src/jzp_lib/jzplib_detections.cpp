@@ -48,7 +48,7 @@ Rect haarPatternDetection(CascadeClassifier classifier, Mat image, int imageWidt
     return biggerRect;
 }
 
-Point findMassCenter_BinaryBiggestBlob(const Mat& bw_img) {
+Point2f findMassCenter_BinaryBiggestBlob(const Mat& bw_img) {
     Mat full_bw_img = removeSmallBlobs(bw_img);
     threshold(bw_img, bw_img, 254, 255, CV_THRESH_BINARY);
     
@@ -137,7 +137,7 @@ Mat calculateImageSymmetryScore(const Mat& image) {
     return score;
 }
 
-Point findEyeCenterByColorSegmentation(const Mat& image, float coordinateWeight, int kmeansIterations, int kmeansRepeats, int blurSize)  {
+Point2f findEyeCenterByColorSegmentation(const Mat& image, float coordinateWeight, int kmeansIterations, int kmeansRepeats, int blurSize)  {
     
     Mat img, gray_img;
     Mat colorpoints, kmeansPoints;
@@ -200,14 +200,16 @@ Point findEyeCenterByColorSegmentation(const Mat& image, float coordinateWeight,
     layerweighted_img = mat2gray(layerweighted_img);
     gray_img.convertTo(gray_img, CV_32FC1,1/255.0);
     Mat composed  = gray_img.mul(layerweighted_img);
-    Mat score = calculateImageSymmetryScore(composed);
+    float zoomRatio = 5.0f;
+    Mat zoomed;
+    imresize(composed, zoomRatio, zoomed);
+    Mat score = calculateImageSymmetryScore(zoomed);
     Mat scoresum;
-    reduce(score.rowRange(0, composed.cols/6), scoresum, 0, CV_REDUCE_SUM,CV_32FC1);
-//    plotVectors("live", scoresum.t());
+    reduce(score.rowRange(0, zoomed.cols/6), scoresum, 0, CV_REDUCE_SUM,CV_32FC1);
     double minVal , maxVal;
     Point minLoc, maxLoc;
     minMaxLoc(scoresum,&minVal,&maxVal,&minLoc,&maxLoc);
-    int initialHC = maxLoc.x;
+    float initialHC = (float)maxLoc.x/zoomRatio;
 
     int bestx = 0,bestlayer = 0;
     Mat bestIndex_img = index_img >=1;
@@ -238,10 +240,10 @@ Point findEyeCenterByColorSegmentation(const Mat& image, float coordinateWeight,
         }
     }
     
-    Point massCenter = findMassCenter_BinaryBiggestBlob(bestIndex_img);
+    Point2f massCenter = findMassCenter_BinaryBiggestBlob(bestIndex_img);
     
     
-    return Point(initialHC,massCenter.y);
+    return Point2f(initialHC,massCenter.y);
 }
 
 

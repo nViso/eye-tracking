@@ -5,11 +5,35 @@
 //  Created by Zhiping Jiang on 14-9-1.
 //
 //
-#include "stdlib.h"
+
 #include <jzp_lib/jzplib_all.h>
 
-
-
+void transformLagecyAnimationPointsFile(fs::path resultsPath) {
+//    vector<fs::path> animatePointFiles = listFilesRecursivelyWithExtension(resultsPath, "", "yaml");
+////    boost::progress_display show_progress( animatePointFiles.size() );
+//    for (int i = 0 ; i < animatePointFiles.size(); i++) {
+//        fs::path cp = animatePointFiles[i];
+//        FileStorage reader(cp.string(),FileStorage::READ);
+//        Mat points;
+//        reader["AnimationPoints"] >> points;
+//        points = points.reshape(1);
+//        CSVFileWriter logger;
+//        for (int j = 0; j < points.rows; j++) {
+//            logger.addSlot(points.row(j));
+//        }
+//        
+//        logger.writeToFile(cp.parent_path() / string(cp.stem().string()+".groudtruth"));
+//        fs::remove(cp);
+////        ++show_progress;
+//    }
+    
+    vector<fs::path> animatePointFiles2 = listFilesRecursivelyWithExtension(resultsPath, "", "txt");
+    //    boost::progress_display show_progress( animatePointFiles.size() );
+    for (int i = 0 ; i < animatePointFiles2.size(); i++) {
+        fs::path cp = animatePointFiles2[i];
+        fs::rename(cp, cp.parent_path() / string(cp.stem().string()+".test"));
+    }
+}
 
 void invoke_annotate(fs::path userProfileDir) {
     cout<<"------- Invoking ./annotate --------------------"<<endl;
@@ -232,6 +256,8 @@ int main(int argc, const char * argv[])
     fs::create_directories(curvesPath);
     fs::create_directories(resultsPath);
     fs::create_directories(cameraCalibPath);
+    
+    transformLagecyAnimationPointsFile(resultsPath);
     
     while (true) {
         cout<<"\nAvaliable Choices:"<<endl;
