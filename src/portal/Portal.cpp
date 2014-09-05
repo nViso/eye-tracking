@@ -91,10 +91,10 @@ void invoke_PupilTracker(fs::path userProfileDir) {
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
-void invoke_HeadPoseEstimation(fs::path userProfileDir) {
+void invoke_HeadPoseEstimation(fs::path userProfileDir,fs::path cameraFile) {
     cout<<"------- Invoking ./HeadPoseEstimation ----------"<<endl;
     string cmdpath = (fs::current_path()/"HeadPoseEstimation").string();
-    string cmd(cmdpath+" "+userProfileDir.string());
+    string cmd = cmdpath+" "+userProfileDir.string()+" "+cameraFile.string();
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
@@ -141,14 +141,33 @@ void visualizeASMModel(fs::path userProfilePath) {
 
 vector<fs::path> listExistingUserProfiles(fs::path userBasePath) {
     vector<fs::path> userProfilePaths;
-    fs::directory_iterator iterator(userBasePath);
-    
-    for (; iterator != fs::directory_iterator(); iterator++) {
-        if (fs::exists(iterator->path()/ "annotations.yaml")) {
-            userProfilePaths.push_back(iterator->path());
-        }
+
+    userProfilePaths = listFilesRecursivelyWithExtension(userBasePath, "annotations.yaml", "");
+    for (int i = 0; i < userProfilePaths.size(); i++) {
+        userProfilePaths[i] = userProfilePaths[i].parent_path();
     }
     return userProfilePaths;
+}
+
+fs::path chooseCameraProfile(fs::path cameraBasePath) {
+    vector<fs::path> existingProfiles = listFilesRecursivelyWithExtension(cameraBasePath, "CM", "yaml");
+    int index = 0;
+    while (existingProfiles.size()>0) {
+        
+        cout<<"There are "<<existingProfiles.size()<<" camera profiles:"<<endl;
+        for (index = 0; index < existingProfiles.size(); index++) {
+            cout<<"("<<index<<") "<<existingProfiles[index].string()<<endl;
+        }
+        string input;
+        cout<<"which one do you choose ? ";
+        cin >> input;
+        
+        if (is_number(input) && boost::lexical_cast<int>(input) >=0 && boost::lexical_cast<int>(input) < existingProfiles.size()) {
+            return existingProfiles[boost::lexical_cast<int>(input)];
+        }
+    }
+    cout<<"There is no user profile. You should create an new one."<<endl;
+    return fs::path();
 }
 
 fs::path chooseUserProfile(fs::path userBasePath, bool withNew) {
@@ -272,8 +291,9 @@ int main(int argc, const char * argv[])
             if (c == 6) {
                 cout<<"Choose user profile:"<<endl;
                 fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
+                fs::path cameraProfilePath = chooseCameraProfile(cameraCalibPath);
                 if (targetProfilePath.empty() == false) {
-                    invoke_HeadPoseEstimation(targetProfilePath);
+                    invoke_HeadPoseEstimation(targetProfilePath,cameraProfilePath);
                 }
             }
             
