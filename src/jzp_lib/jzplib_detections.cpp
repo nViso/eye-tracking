@@ -137,7 +137,7 @@ Mat calculateImageSymmetryScore(const Mat& image) {
     return score;
 }
 
-Point2f findEyeCenterByColorSegmentation(const Mat& image, float coordinateWeight, int kmeansIterations, int kmeansRepeats, int blurSize)  {
+void findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCoord, float coordinateWeight, int kmeansIterations, int kmeansRepeats, int blurSize)  {
     
     Mat img, gray_img;
     Mat colorpoints, kmeansPoints;
@@ -200,7 +200,7 @@ Point2f findEyeCenterByColorSegmentation(const Mat& image, float coordinateWeigh
     layerweighted_img = mat2gray(layerweighted_img);
     gray_img.convertTo(gray_img, CV_32FC1,1/255.0);
     Mat composed  = gray_img.mul(layerweighted_img);
-    float zoomRatio = 5.0f;
+    float zoomRatio = 1.0f;
     Mat zoomed;
     imresize(composed, zoomRatio, zoomed);
     Mat score = calculateImageSymmetryScore(zoomed);
@@ -243,7 +243,7 @@ Point2f findEyeCenterByColorSegmentation(const Mat& image, float coordinateWeigh
     Point2f massCenter = findMassCenter_BinaryBiggestBlob(bestIndex_img);
     
     
-    return Point2f(initialHC,massCenter.y);
+    eyeCoord =  Point2f(initialHC,massCenter.y);
 }
 
 
