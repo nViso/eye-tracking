@@ -85,6 +85,28 @@ Point2f findMassCenter_BinaryBiggestBlob(const Mat& bw_img) {
         return Point(0,0);
 }
 
+SymmetryScore_tbb::SymmetryScore_tbb(Mat & gray, Mat & score) : score(score), gray_img(gray){
+    
+}
+
+void SymmetryScore_tbb::operator() (const cv::Range& range) const {
+    // each thread process in interleaved style.
+    for (int thdnumber = range.start; thdnumber< range.end; thdnumber++) {
+        Mat temp(1,1,CV_32FC1), base(1,1,CV_32FC1),colsum(1,1,CV_32FC1);
+        // initial with the thdnumber, grow by thdnumbers
+        for (int i = thdnumber ; i < gray_img.cols/2; i+=range.end) {
+            temp = gray_img.colRange(0, i+1).clone();
+            flip(temp, temp, 1);
+            base = gray_img.colRange(i+1, gray_img.cols).clone();
+            base.colRange(0, temp.cols) += temp;
+            reduce(base, colsum, 0, CV_REDUCE_SUM,CV_32FC1);
+            colsum =  colsum.t();
+            colsum.copyTo(score.colRange(i, i+1).rowRange(0, colsum.rows));
+        }
+    }
+    
+}
+
 
 Mat calculateImageSymmetryScore(const Mat& image) {
     Mat gray_img ;
@@ -104,36 +126,14 @@ Mat calculateImageSymmetryScore(const Mat& image) {
     gray_img.convertTo(gray_img, CV_32FC1);
 
     Mat score(gray_img.cols,gray_img.cols,CV_32FC1,Scalar::all(0));
-    Mat temp(1,1,CV_32FC1), base(1,1,CV_32FC1),colsum(1,1,CV_32FC1);
-    
-    
-    for (int i = 0 ; i < gray_img.cols/2; i++) {
-        temp = gray_img.colRange(0, i+1).clone();
-        flip(temp, temp, 1);
-        base = gray_img.colRange(i+1, gray_img.cols).clone();
-        base.colRange(0, temp.cols) += temp;
-        reduce(base, colsum, 0, CV_REDUCE_SUM,CV_32FC1);
-        colsum =  colsum.t();
-        colsum.copyTo(score.colRange(i, i+1).rowRange(0, colsum.rows));
-    }
+    parallel_for_(Range(0,2), SymmetryScore_tbb(gray_img, score));
     
     flip(score, score, 1);
     flip(gray_img, gray_img, 1);
-    
-    for (int i = 0 ; i < gray_img.cols/2; i++) {
-        temp = gray_img.colRange(0, i+1).clone();
-        flip(temp, temp, 1);
-        base = gray_img.colRange(i+1, gray_img.cols).clone();
-        base.colRange(0, temp.cols) += temp;
-        reduce(base, colsum, 0, CV_REDUCE_SUM,CV_32FC1);
-        colsum =  colsum.t();
-        colsum.copyTo(score.colRange(i, i+1).rowRange(0, colsum.rows));
-    }
+    parallel_for_(Range(0,2), SymmetryScore_tbb(gray_img, score));
     
     flip(score, score, 1);
     gray_img.release();
-    base.release();
-    temp.release();
     return score;
 }
 
@@ -169,7 +169,7 @@ void findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCoord, floa
         }
         kmeans(kmeansPoints,2,bestLabels,TermCriteria(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, kmeansRepeats, 0.001),kmeansRepeats,KMEANS_PP_CENTERS,centers);
         reduce(centers.colRange(0, 3), colorsum, 1, CV_REDUCE_SUM);
-
+        
         if (colorsum.at<float>(0) < colorsum.at<float>(1)) {
             
             findNonZero(bestLabels==0, minColorPtIndex);
@@ -195,12 +195,12 @@ void findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCoord, floa
             index_img.at<float>(r,c) +=1;
         }
     }
-//    imagesc("layered",mat2gray(index_img));
+    //    imagesc("layered",mat2gray(index_img));
     Mat layerweighted_img = index_img.mul(index_img);
     layerweighted_img = mat2gray(layerweighted_img);
     gray_img.convertTo(gray_img, CV_32FC1,1/255.0);
     Mat composed  = gray_img.mul(layerweighted_img);
-    float zoomRatio = 1.0f;
+    float zoomRatio = 5.0f;
     Mat zoomed;
     imresize(composed, zoomRatio, zoomed);
     Mat score = calculateImageSymmetryScore(zoomed);
@@ -210,7 +210,7 @@ void findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCoord, floa
     Point minLoc, maxLoc;
     minMaxLoc(scoresum,&minVal,&maxVal,&minLoc,&maxLoc);
     float initialHC = (float)maxLoc.x/zoomRatio;
-
+    
     int bestx = 0,bestlayer = 0;
     Mat bestIndex_img = index_img >=1;
     minMaxLoc(index_img,&minVal,&maxVal,&minLoc,&maxLoc);

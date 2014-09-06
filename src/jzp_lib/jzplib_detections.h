@@ -29,4 +29,14 @@ void  findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCord, floa
 
 Mat calculateImageSymmetryScore(const Mat& image );
 
+class SymmetryScore_tbb : public ParallelLoopBody {
+public:
+    SymmetryScore_tbb(Mat & gray, Mat & score);
+    virtual void operator() (const cv::Range& range) const;
+    
+private:
+    Mat & score;
+    Mat & gray_img;
+};
+
 #endif /* defined(__OPENCV_HOTSHOTS__jzplib_detections__) */

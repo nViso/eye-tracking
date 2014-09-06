@@ -237,6 +237,12 @@ fs::path chooseUserProfile(fs::path userBasePath, bool withNew) {
 
 void regeneratePupilCoordiantesFromExistingTests(fs::path resultsPath) {
     vector<fs::path> videoFiles = listFilesRecursivelyWithExtension(resultsPath, "", "avi");
+    
+    if (videoFiles.empty()) {
+        cout<<" No .avi file is found in the result path"<<endl;
+        return ;
+    }
+    
     cout<<endl;
     for (int i = 0; i < videoFiles.size(); i++) {
         fs::path cp = videoFiles[i];
