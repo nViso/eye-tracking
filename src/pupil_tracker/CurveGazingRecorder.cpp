@@ -201,18 +201,18 @@ int main (int argc, char *argv[])
     
     fs::path pathDirPath(argv[1]);
     fs::path userProfilePath(argv[2]);
-    fs::path outputDirPath(argv[3]);
+    fs::path resultsBasePath(argv[3]);
     vector<fs::path> trajectoryFiles;
     if (setupTrajectories(pathDirPath,trajectoryFiles) == 0) {
         return 0;
     }
     
-    if (fs::exists(outputDirPath) == false) {
-        fs::create_directories(outputDirPath);
-    }
-    
     ptime presentPtime = second_clock::local_time();
     string dateString = simpleDataFormat(presentPtime, "%Y_%m_%d");
+    
+    fs::path resultDirPath = resultsBasePath / string(dateString+"_"+ userProfilePath.filename().string());
+    fs::create_directories(resultDirPath);
+    copyDirRecursively(userProfilePath, resultDirPath/"user_profile");
     
     //setup
     namedWindow(windowName);
@@ -226,8 +226,7 @@ int main (int argc, char *argv[])
     while (trainQueue.empty() == false) {
         fs::path currentPath =trainQueue.front();
         trainQueue.pop_front();
-        fs::path outputfilepath = (outputDirPath / (dateString+"_"+ userProfilePath.filename().string())) / currentPath.stem().string();
-        fs::create_directories(outputfilepath.parent_path());
+        fs::path outputfilepath = resultDirPath / currentPath.stem().string();
         cout<<outputfilepath<<endl;
         showAnimationAndRecordVideo(currentPath, userProfilePath, outputfilepath);
         if (showResult() == false) {
