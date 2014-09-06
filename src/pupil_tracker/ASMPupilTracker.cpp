@@ -69,14 +69,16 @@ bool ASM_Pupil_Tracker::processFrame(const cv::Mat & im) {
         return false;
     }
     
-    leftEyeImg = cropped(leftEyeRect);
-    rightEyeImg = cropped(rightEyeRect);
-    Point leftEyeCenter = findEyeCenterByColorSegmentation(leftEyeImg);
-    Point rightEyeCenter = findEyeCenterByColorSegmentation(rightEyeImg);
-    leftEyeCenter += leftEyeRect.tl();
-    leftEyeCenter += cropRect.tl();
-    rightEyeCenter += rightEyeRect.tl();
-    rightEyeCenter += cropRect.tl();
+    Point2f leftEyeCenter, rightEyeCenter;
+    boost::thread leftEyeThread(findEyeCenterByColorSegmentation, cropped(leftEyeRect), boost::ref(leftEyeCenter), 0.4,3,3,5);
+    boost::thread  rightEyeThread(findEyeCenterByColorSegmentation, cropped(rightEyeRect), boost::ref(rightEyeCenter), 0.4,3,3,5);
+    leftEyeThread.join();
+    rightEyeThread.join();
+    
+    leftEyeCenter += Point2f(leftEyeRect.tl().x,leftEyeRect.tl().y);
+    leftEyeCenter += Point2f(cropRect.tl().x, cropRect.tl().y);
+    rightEyeCenter += Point2f(rightEyeRect.tl().x,rightEyeRect.tl().y);
+    rightEyeCenter += Point2f(cropRect.tl().x,cropRect.tl().y);
     
     leftEyePoint= rotatePointByRotationMatrix(leftEyeCenter, Mback);
     rightEyePoint= rotatePointByRotationMatrix(rightEyeCenter, Mback);

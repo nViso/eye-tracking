@@ -3,21 +3,29 @@
 //#include "jzp_lib/jzplib_all.h"
 #include "ASMPupilTracker.h"
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 int main(int argc, const char * argv[])
 {
     string windowName;
     VideoCapture cam;
     bool dumpFile = false;
+    bool noShow = false;
     fs::path inputFilePath;
     if (argc<2) {
-        cout<<argv[0]<<" userProfileDir"<<" [dumping Video file]"<<endl;
+        cout<<argv[0]<<" userProfileDir"<<" [dumping Video file]"<<" [noshow]"<<endl;
         return 0;
     } else if (argc == 2) {
         windowName = "Pupil tracking from camera";
         cam.open(0);
-    } else if(argc > 2) {
+    } else if(argc == 3) {
         dumpFile = true;
+        cam.open(argv[2]);
+        inputFilePath = fs::path(argv[2]);
+        windowName = "Pupil tracking from video [" + string(argv[2]) +"]";
+    } else if(argc == 4 && boost::iequals(string(argv[3]), "noshow")) {
+        dumpFile = true;
+        noShow = true;
         cam.open(argv[2]);
         inputFilePath = fs::path(argv[2]);
         windowName = "Pupil tracking from video [" + string(argv[2]) +"]";
@@ -43,6 +51,10 @@ int main(int argc, const char * argv[])
         imresize(origin,zoomRatio,im);
         bool processSuccess = pupilTracker.processFrame(im);
         csvlogger.addSlot(pupilTracker.toDataSlot());
+        
+        if (noShow) {
+            continue;
+        }
         drawPoints(im, pupilTracker.canthusPts);
         drawPoints(im, pupilTracker.nosePts);
         circle(im, pupilTracker.leftEyePoint, 3, Scalar(0,255,0));
@@ -56,7 +68,7 @@ int main(int argc, const char * argv[])
     }
     
     if (dumpFile) {
-        csvlogger.writeToFile(inputFilePath.parent_path() / (inputFilePath.stem().string() + ".txt"));
+        csvlogger.writeToFile(inputFilePath.parent_path() / (inputFilePath.stem().string() + ".test"));
     }
     
     return 0;

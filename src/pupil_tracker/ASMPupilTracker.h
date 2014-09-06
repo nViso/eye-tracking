@@ -9,6 +9,7 @@
 #include <iostream>
 #include "asm_face/ft.hpp"
 #include "jzp_lib/jzplib_all.h"
+#include <boost/thread.hpp>
 
 class ASM_Pupil_Tracker {
 public:
