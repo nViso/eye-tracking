@@ -90,11 +90,8 @@ SymmetryScore_tbb::SymmetryScore_tbb(Mat & gray, Mat & score) : score(score), gr
 }
 
 void SymmetryScore_tbb::operator() (const cv::Range& range) const {
-    // each thread process in interleaved style.
-    for (int thdnumber = range.start; thdnumber< range.end; thdnumber++) {
-        Mat temp(1,1,CV_32FC1), base(1,1,CV_32FC1),colsum(1,1,CV_32FC1);
-        // initial with the thdnumber, grow by thdnumbers
-        for (int i = thdnumber ; i < gray_img.cols/2; i+=range.end) {
+    Mat temp(1,1,CV_32FC1), base(1,1,CV_32FC1),colsum(1,1,CV_32FC1);
+    for (int i = range.start ; i < range.end; i++) {
             temp = gray_img.colRange(0, i+1).clone();
             flip(temp, temp, 1);
             base = gray_img.colRange(i+1, gray_img.cols).clone();
@@ -103,8 +100,6 @@ void SymmetryScore_tbb::operator() (const cv::Range& range) const {
             colsum =  colsum.t();
             colsum.copyTo(score.colRange(i, i+1).rowRange(0, colsum.rows));
         }
-    }
-    
 }
 
 
@@ -126,11 +121,11 @@ Mat calculateImageSymmetryScore(const Mat& image) {
     gray_img.convertTo(gray_img, CV_32FC1);
 
     Mat score(gray_img.cols,gray_img.cols,CV_32FC1,Scalar::all(0));
-    parallel_for_(Range(0,2), SymmetryScore_tbb(gray_img, score));
+    parallel_for_(Range(0,gray_img.cols/2), SymmetryScore_tbb(gray_img, score));
     
     flip(score, score, 1);
     flip(gray_img, gray_img, 1);
-    parallel_for_(Range(0,2), SymmetryScore_tbb(gray_img, score));
+    parallel_for_(Range(0,gray_img.cols/2), SymmetryScore_tbb(gray_img, score));
     
     flip(score, score, 1);
     gray_img.release();
