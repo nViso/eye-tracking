@@ -43,13 +43,22 @@ int main(int argc, const char * argv[])
     Mat origin, im ;
     float zoomRatio = 1.0f;
     CSVFileWriter csvlogger;
+    LowpassFPSTimer timer(20);
+    int frameCount = 0;
     while(true){
+        timer.tick();
         bool success = captureImage(cam, origin, !dumpFile);
         if (success == false) {
             break;
         }
+        
         imresize(origin,zoomRatio,im);
-        bool processSuccess = pupilTracker.processFrame(im);
+        pupilTracker.processFrame(im);
+
+        printf("\b\rprocessing fps: %f, frameCount : %d",1.0/timer.tock(), ++frameCount);
+        fflush(stdout);
+        
+        if (dumpFile)
         csvlogger.addSlot(pupilTracker.toDataSlot());
         
         if (noShow) {

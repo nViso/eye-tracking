@@ -35,6 +35,7 @@ public:
     virtual void operator() (const cv::Range& range) const;
     
 private:
+    Mat flipped;
     Mat & score;
     Mat & gray_img;
 };
