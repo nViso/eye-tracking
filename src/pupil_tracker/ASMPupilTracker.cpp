@@ -34,8 +34,6 @@ void ASM_Pupil_Tracker::reDetectFace() {
 }
 
 bool ASM_Pupil_Tracker::processFrame(const cv::Mat & im) {
-//    LowpassFPSTimer timer(1);
-//    timer.tick();
     Mat  leftEyeImg,rightEyeImg,cropped;
     tracker.track(im);
     canthusPts = vector<Point2f>(tracker.points.begin(),tracker.points.begin()+4);

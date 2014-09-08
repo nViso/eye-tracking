@@ -46,17 +46,19 @@ int main(int argc, const char * argv[])
     LowpassFPSTimer timer(20);
     int frameCount = 0;
     while(true){
+        timer.tick();
         bool success = captureImage(cam, origin, !dumpFile);
         if (success == false) {
             break;
         }
         
-        timer.tick();
         imresize(origin,zoomRatio,im);
         pupilTracker.processFrame(im);
 
-        printf("\b\rprocessing time: %f second",timer.tock());
+        printf("\b\rprocessing fps: %f, frameCount : %d",1.0/timer.tock(), ++frameCount);
         fflush(stdout);
+        
+        if (dumpFile)
         csvlogger.addSlot(pupilTracker.toDataSlot());
         
         if (noShow) {
