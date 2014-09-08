@@ -97,8 +97,8 @@ void SymmetryScore_tbb::operator() (const cv::Range& range) const {
             flipped.colRange(flipped.cols-i-1, flipped.cols).copyTo(temp);
             gray_img.colRange(i+1, gray_img.cols).copyTo(base);
         } else {
-            flipped.colRange(i, gray_img.cols).copyTo(temp);
-            gray_img.colRange(flipped.cols-i-1, flipped.cols).copyTo(base);
+            gray_img.colRange(i, gray_img.cols).copyTo(temp);
+            flipped.colRange(flipped.cols-i, flipped.cols).copyTo(base);
         }
         base.colRange(0, temp.cols) += temp;
         reduce(base, colsum, 0, CV_REDUCE_SUM,CV_32FC1);
@@ -195,15 +195,16 @@ void findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCoord, floa
     Mat zoomed;
     imresize(composed, zoomRatio, zoomed);
     Mat score = calculateImageSymmetryScore(zoomed);
+//    imagesc("score", score);
     Mat scoresum;
     reduce(score.rowRange(0, zoomed.cols/6), scoresum, 0, CV_REDUCE_SUM,CV_32FC1);
-    plotVectors("scoresum", scoresum.t());
+//    plotVectors("scoresum", scoresum.t());
     double minVal , maxVal;
     Point minLoc, maxLoc;
     minMaxLoc(scoresum,&minVal,&maxVal,&minLoc,&maxLoc);
     float initialHC = (float)maxLoc.x/zoomRatio;
     line(zoomed, Point(maxLoc.x,0), Point(maxLoc.x,zoomed.rows-1), Scalar::all(255));
-    imshow("zoomed", zoomed);
+//    imshow("zoomed", zoomed);
     int bestx = 0,bestlayer = 0;
     Mat bestIndex_img = index_img >=1;
     minMaxLoc(index_img,&minVal,&maxVal,&minLoc,&maxLoc);

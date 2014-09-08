@@ -25,7 +25,6 @@ void drawConnectedPoints(Mat& image, vector<Point2f> points, Scalar color=cv::Sc
 void drawRotatedRect(Mat image, RotatedRect eyeRRect);
 void drawStringAtPoint(Mat img, const string text, Point position);
 void drawStringAtTopLeftCorner(Mat img, const string text);
-Mat  plotColumnVector(Mat data);
 void drawColorHistGram(Mat hist);
 void imagesc(string windowName, Mat image, int colormap = COLORMAP_JET) ;
 
