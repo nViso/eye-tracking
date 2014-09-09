@@ -191,7 +191,7 @@ void findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCoord, floa
     layerweighted_img = mat2gray(layerweighted_img);
     gray_img.convertTo(gray_img, CV_32FC1,1/255.0);
     Mat composed  = gray_img.mul(layerweighted_img);
-    float zoomRatio = 3.0f;
+    float zoomRatio = 5.0f;
     Mat zoomed;
     imresize(composed, zoomRatio, zoomed);
     Mat score = calculateImageSymmetryScore(zoomed);
