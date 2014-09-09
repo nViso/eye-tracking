@@ -55,7 +55,7 @@ int main(int argc, const char * argv[])
         imresize(origin,zoomRatio,im);
         pupilTracker.processFrame(im);
 
-        printf("\b\rprocessing fps: %f, frameCount : %d",1.0/timer.tock(), ++frameCount);
+        printf("\b\rfps: %f, frame count: %d",1.0/timer.tock(), ++frameCount);
         fflush(stdout);
         
         if (dumpFile)
