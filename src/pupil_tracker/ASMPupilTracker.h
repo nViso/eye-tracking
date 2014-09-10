@@ -25,6 +25,7 @@ public:
     
     Mat rotated_img;
     Mat rotationMatrix;
+    bool isTrackingSuccess;
     
     fs::path trackerFilePath;
     face_tracker tracker;

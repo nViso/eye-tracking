@@ -6,9 +6,9 @@ clearvars -except resultsData ;
 
 
 selectedGraphs = 1: size(resultsData,2);
-selectedPeople = 1:4; %size(eyeTrackingData,1);
+selectedPeople = 1:4; % size(resultsData,1);
 featureBank = fieldnames(resultsData{1,1});
-selectedFeature = featureBank([1 2 3 4 ]);
+selectedFeature = featureBank([3 12 16 18]);
 
 
 %%
@@ -26,13 +26,19 @@ for i = selectedGraphs
             subplotAxis = optimalSubplot(gcf,cols,rows,col,row);
             data = eval(['resultsData{j,i}.' selectedFeature{k}]);
             
+            if size(data,2) >=20
+                imagesc(data);
+            end
+            
             if size(data,2) ==2
                 %plot(data(:,1),data(:,2),'.-');
                 plot(data(:,1),data(:,2),'-');
                 hold on;
                 scatter(data(:,1),data(:,2),20,1:size(data,1),'filled');
                 hold off;
-            else
+            end
+            
+            if size(data,2) == 1
                 plot(data,'.-');
             end
             

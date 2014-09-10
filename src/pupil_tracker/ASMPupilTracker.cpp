@@ -17,6 +17,13 @@ ASM_Pupil_Tracker::ASM_Pupil_Tracker(fs::path path) {
 vector<float> ASM_Pupil_Tracker::toDataSlot() {
     vector<float> slot;
     
+    if (isTrackingSuccess == false) {
+        for (int i = 0; i < 8; i++) {
+            slot.push_back(0.0f);
+            slot.push_back(0.0f);
+        }
+    }
+    
     slot.push_back(leftEyePoint.x);
     slot.push_back(leftEyePoint.y);
     slot.push_back(rightEyePoint.x);
@@ -35,7 +42,10 @@ void ASM_Pupil_Tracker::reDetectFace() {
 
 bool ASM_Pupil_Tracker::processFrame(const cv::Mat & im) {
     Mat  leftEyeImg,rightEyeImg,cropped;
-    tracker.track(im);
+    if(tracker.track(im) == 0) {// failed
+        isTrackingSuccess = false;
+        return false;
+    }
     canthusPts = vector<Point2f>(tracker.points.begin(),tracker.points.begin()+4);
     nosePts = vector<Point2f>(tracker.points.begin()+4,tracker.points.begin()+6);
     
@@ -85,5 +95,6 @@ bool ASM_Pupil_Tracker::processFrame(const cv::Mat & im) {
     
     leftEyePoint= rotatePointByRotationMatrix(leftEyeCenter, Mback);
     rightEyePoint= rotatePointByRotationMatrix(rightEyeCenter, Mback);
+    isTrackingSuccess = true;
     return true;
 }

@@ -5,7 +5,6 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/lockfree/spsc_queue.hpp>
-#include "ASMPupilTracker.h"
 #include <deque>
 namespace fs = boost::filesystem;
 using namespace boost::posix_time;
@@ -210,7 +209,7 @@ int main (int argc, char *argv[])
     ptime presentPtime = second_clock::local_time();
     string dateString = simpleDataFormat(presentPtime, "%Y_%m_%d");
     
-    fs::path resultDirPath = resultsBasePath / string(dateString+"_"+ userProfilePath.filename().string());
+    fs::path resultDirPath = resultsBasePath / string(userProfilePath.filename().string());
     fs::create_directories(resultDirPath);
     copyDirRecursively(userProfilePath, resultDirPath/"user_profile");
     
