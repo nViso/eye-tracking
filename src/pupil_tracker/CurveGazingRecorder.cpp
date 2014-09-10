@@ -5,7 +5,6 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/lockfree/spsc_queue.hpp>
-#include "ASMPupilTracker.h"
 #include <deque>
 namespace fs = boost::filesystem;
 using namespace boost::posix_time;
