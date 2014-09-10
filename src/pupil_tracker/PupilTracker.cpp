@@ -53,21 +53,23 @@ int main(int argc, const char * argv[])
         }
         
         imresize(origin,zoomRatio,im);
-        pupilTracker.processFrame(im);
-
+        bool succeeded = pupilTracker.processFrame(im);
+        
         printf("\b\rfps: %f, frame count: %d",1.0/timer.tock(), ++frameCount);
         fflush(stdout);
         
         if (dumpFile)
-        csvlogger.addSlot(pupilTracker.toDataSlot());
+            csvlogger.addSlot(pupilTracker.toDataSlot());
         
         if (noShow) {
             continue;
         }
-        drawPoints(im, pupilTracker.canthusPts);
-        drawPoints(im, pupilTracker.nosePts);
-        circle(im, pupilTracker.leftEyePoint, 3, Scalar(0,255,0));
-        circle(im, pupilTracker.rightEyePoint, 3, Scalar(0,255,0));
+        if (succeeded) {
+            drawPoints(im, pupilTracker.canthusPts);
+            drawPoints(im, pupilTracker.nosePts);
+            circle(im, pupilTracker.leftEyePoint, 3, Scalar(0,255,0));
+            circle(im, pupilTracker.rightEyePoint, 3, Scalar(0,255,0));
+        }
         imshow(windowName,im);
         int c = waitKey(1);
         if(c == 'q' && ! dumpFile)
