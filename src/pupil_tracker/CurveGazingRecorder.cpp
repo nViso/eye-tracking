@@ -210,7 +210,7 @@ int main (int argc, char *argv[])
     ptime presentPtime = second_clock::local_time();
     string dateString = simpleDataFormat(presentPtime, "%Y_%m_%d");
     
-    fs::path resultDirPath = resultsBasePath / string(dateString+"_"+ userProfilePath.filename().string());
+    fs::path resultDirPath = resultsBasePath / string(userProfilePath.filename().string());
     fs::create_directories(resultDirPath);
     copyDirRecursively(userProfilePath, resultDirPath/"user_profile");
     

@@ -232,18 +232,13 @@ int main(int argc, const char * argv[])
 {
     
     fs::path  basePath, userBasePath, curvesPath, resultsPath, cameraCalibPath;
+    if (argc <=1) {
+        cout<<"usage:"<<argv[0]<<" base_dir"<<" [result_sub_dir]"<<endl;
+    }
     if (argc >=2) {
         basePath = fs::path(argv[1]);
         cout<<"base path: "<<basePath<<endl;
         fs::create_directories(basePath);
-    } else {
-        cout<<"enter the base dir path:";
-        string path;
-        cin >> path;
-        if ( fs::is_directory(fs::path(path))) {
-            basePath = path;
-        }
-        cout<<"your base folder path is :"<<basePath.string()<<endl;
     }
     userBasePath = basePath/"user_profile";
     curvesPath = basePath/"curves";
@@ -253,6 +248,15 @@ int main(int argc, const char * argv[])
     fs::create_directories(curvesPath);
     fs::create_directories(resultsPath);
     fs::create_directories(cameraCalibPath);
+    
+    if (argc == 3) {
+        resultsPath /= string(argv[2]);
+        fs::create_directories(resultsPath);
+        if (fs::is_directory(resultsPath) == false) {
+            cout<<"illegal result_sub_dir name"<<endl;
+            return 0;
+        }
+    }
     
     while (true) {
         cout<<"\nAvaliable Choices:"<<endl;
