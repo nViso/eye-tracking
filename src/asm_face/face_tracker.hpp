@@ -14,6 +14,7 @@
 */
 #ifndef _FT_FACE_TRACKER_HPP_
 #define _FT_FACE_TRACKER_HPP_
+#include "asm_face/ft_data.hpp"
 #include "asm_face/shape_model.hpp"
 #include "asm_face/patch_model.hpp"
 #include "asm_face/face_detector.hpp"
@@ -63,6 +64,7 @@ public:
   face_detector detector;                  //detector for initialisation
   shape_model smodel;                      //shape model
   patch_models pmodel;                     //feature detectors
+  ft_data annotations;
   
   face_tracker(){tracking = false;}
 
