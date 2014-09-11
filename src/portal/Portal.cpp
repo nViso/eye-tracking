@@ -5,11 +5,8 @@
 //  Created by Zhiping Jiang on 14-9-1.
 //
 //
-#include "stdlib.h"
+
 #include <jzp_lib/jzplib_all.h>
-
-
-
 
 void invoke_annotate(fs::path userProfileDir) {
     cout<<"------- Invoking ./annotate --------------------"<<endl;
@@ -123,6 +120,14 @@ void invoke_CameraCalibrator(fs::path cameraBaseDir) {
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
+void invoke_RegeneratePupilData(fs::path userProfileDir, fs::path videoFilePath) {
+    cout<<"------- Invoking ./PupilTracker(noshow) ----------------"<<endl;
+    string cmdpath = (fs::current_path()/"PupilTracker").string();
+    string cmd = cmdpath+" "+userProfileDir.string()+" "+videoFilePath.string()+" noshow";
+    system(cmd.c_str());
+    cout<<"------- Invocation Done ------------------------"<<endl;
+}
+
 
 void trainASMModel(fs::path userProfilePath) {
     invoke_annotate(userProfilePath);
@@ -203,6 +208,22 @@ fs::path chooseUserProfile(fs::path userBasePath, bool withNew) {
     return fs::path();
 }
 
+void regeneratePupilCoordiantesFromExistingTests(fs::path resultsPath) {
+    vector<fs::path> videoFiles = listFilesRecursivelyWithExtension(resultsPath, "", "avi");
+    
+    if (videoFiles.empty()) {
+        cout<<" No .avi file is found in the result path"<<endl;
+        return ;
+    }
+    
+    cout<<endl;
+    for (int i = 0; i < videoFiles.size(); i++) {
+        fs::path cp = videoFiles[i];
+        cout<<" processing ("<<i+1<<"/"<<videoFiles.size()<<") "<<cp.string()<<" ..."<<endl;
+        invoke_RegeneratePupilData(cp.parent_path()/"user_profile", cp);
+    }
+}
+
 
 
 
@@ -211,18 +232,13 @@ int main(int argc, const char * argv[])
 {
     
     fs::path  basePath, userBasePath, curvesPath, resultsPath, cameraCalibPath;
+    if (argc <=1) {
+        cout<<"usage:"<<argv[0]<<" base_dir"<<" [result_sub_dir]"<<endl;
+    }
     if (argc >=2) {
         basePath = fs::path(argv[1]);
         cout<<"base path: "<<basePath<<endl;
         fs::create_directories(basePath);
-    } else {
-        cout<<"enter the base dir path:";
-        string path;
-        cin >> path;
-        if ( fs::is_directory(fs::path(path))) {
-            basePath = path;
-        }
-        cout<<"your base folder path is :"<<basePath.string()<<endl;
     }
     userBasePath = basePath/"user_profile";
     curvesPath = basePath/"curves";
@@ -233,6 +249,15 @@ int main(int argc, const char * argv[])
     fs::create_directories(resultsPath);
     fs::create_directories(cameraCalibPath);
     
+    if (argc == 3) {
+        resultsPath /= string(argv[2]);
+        fs::create_directories(resultsPath);
+        if (fs::is_directory(resultsPath) == false) {
+            cout<<"illegal result_sub_dir name"<<endl;
+            return 0;
+        }
+    }
+    
     while (true) {
         cout<<"\nAvaliable Choices:"<<endl;
         cout<<"1. train or modify ASM face models."<<endl;
@@ -242,6 +267,7 @@ int main(int argc, const char * argv[])
         cout<<"5. run pupil tracker."<<endl;
         cout<<"6. run head pose estimation."<<endl;
         cout<<"7. run chessboard camera calibration."<<endl;
+        cout<<"8. regenerate pupil tracking coordinates for existing tests."<<endl;
         cout<<"q. quit"<<endl;
         cout<<"------ Your choice : ";
         string input;
@@ -249,7 +275,7 @@ int main(int argc, const char * argv[])
         
         if (is_number(input)) {
             int c = boost::lexical_cast<int>(input);
-            if (c<1 || c>7) {
+            if (c<1 || c>8) {
                 cout<<"error number"<<endl;
                 continue;
             }
@@ -299,6 +325,10 @@ int main(int argc, const char * argv[])
             
             if (c == 7) {
                 invoke_CameraCalibrator(cameraCalibPath);
+            }
+            
+            if (c == 8) {
+                regeneratePupilCoordiantesFromExistingTests(resultsPath);
             }
             
             

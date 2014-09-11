@@ -5,7 +5,7 @@ ASMPupilTracker.h ASMPupilTracker.cpp
 ADD_EXECUTABLE(PupilTracker PupilTracker.cpp ${asmptsource})
 ADD_EXECUTABLE(HeadPoseEstimation HeadPoseEstimation.cpp )
 ADD_EXECUTABLE(CurveDrawer CurveDrawer.cpp )
-ADD_EXECUTABLE(CurveGazingRecorder CurveGazingRecorder.cpp ${asmptsource})
+ADD_EXECUTABLE(CurveGazingRecorder CurveGazingRecorder.cpp)
 ADD_EXECUTABLE(CameraCalibrator CameraCalibrator.cpp)
 
 TARGET_LINK_LIBRARIES(PupilTracker ${OpenCV_LIBS} asmlib jzplib)

@@ -58,28 +58,6 @@ drawStringAtTopLeftCorner(Mat img,                       //image to draw on
     drawStringAtPoint(img, text, Point(1,size.height+1));
 }
 
-
-Mat plotColumnVector(Mat data) {
-    int histSize = data.rows;
-    int hist_w = 1024; int hist_h = 400;
-    int bin_w = cvRound( (double) hist_w/histSize );
-    
-    Mat histImage( hist_h, hist_w, CV_8UC3, Scalar( 0,0,0) );
-    normalize(data, data, 0, histImage.rows, NORM_MINMAX, -1, Mat() );
-    cout<<data<<endl;
-    
-    for( int i = 1; i < histSize; i++ )
-    {
-        line( histImage, Point( bin_w*(i-1), hist_h - cvRound(data.at<float>(i-1)) ) ,
-             Point(bin_w*(i), hist_h - cvRound(data.at<float>(i))),
-             Scalar( 255, 0, 0), 2, 8, 0  );
-    }
-    imshow("plot",histImage);
-    return histImage;
-}
-
-
-
 void drawColorHistGram(Mat hist) {
     double maxVal=0;
     minMaxLoc(hist, 0, &maxVal, 0, 0);
@@ -105,9 +83,13 @@ void drawColorHistGram(Mat hist) {
 }
 
 void imagesc(string windowName, Mat image, int colormap) {
-    Mat colored;
-    applyColorMap(image, colored, colormap);
-    imshow(windowName, colored);
+    Mat display;
+    float Amin = *min_element(image.begin<float>(), image.end<float>());
+    float Amax = *max_element(image.begin<float>(), image.end<float>());
+    Mat A_scaled = (image - Amin)/(Amax - Amin);
+    A_scaled.convertTo(display, CV_8UC1, 255.0, 0);
+    applyColorMap(display, display, cv::COLORMAP_JET);
+    imshow(windowName, display);
 }
 
 void plotVectors(string windowName, Mat values) {

@@ -17,6 +17,13 @@ ASM_Pupil_Tracker::ASM_Pupil_Tracker(fs::path path) {
 vector<float> ASM_Pupil_Tracker::toDataSlot() {
     vector<float> slot;
     
+    if (isTrackingSuccess == false) {
+        for (int i = 0; i < 8; i++) {
+            slot.push_back(0.0f);
+            slot.push_back(0.0f);
+        }
+    }
+    
     slot.push_back(leftEyePoint.x);
     slot.push_back(leftEyePoint.y);
     slot.push_back(rightEyePoint.x);
@@ -34,10 +41,11 @@ void ASM_Pupil_Tracker::reDetectFace() {
 }
 
 bool ASM_Pupil_Tracker::processFrame(const cv::Mat & im) {
-//    LowpassFPSTimer timer(1);
-//    timer.tick();
     Mat  leftEyeImg,rightEyeImg,cropped;
-    tracker.track(im);
+    if(tracker.track(im) == 0) {// failed
+        isTrackingSuccess = false;
+        return false;
+    }
     canthusPts = vector<Point2f>(tracker.points.begin(),tracker.points.begin()+4);
     nosePts = vector<Point2f>(tracker.points.begin()+4,tracker.points.begin()+6);
     
@@ -69,16 +77,24 @@ bool ASM_Pupil_Tracker::processFrame(const cv::Mat & im) {
         return false;
     }
     
-    leftEyeImg = cropped(leftEyeRect);
-    rightEyeImg = cropped(rightEyeRect);
-    Point leftEyeCenter = findEyeCenterByColorSegmentation(leftEyeImg);
-    Point rightEyeCenter = findEyeCenterByColorSegmentation(rightEyeImg);
-    leftEyeCenter += leftEyeRect.tl();
-    leftEyeCenter += cropRect.tl();
-    rightEyeCenter += rightEyeRect.tl();
-    rightEyeCenter += cropRect.tl();
+    Point2f leftEyeCenter, rightEyeCenter;
+    
+//    findEyeCenterByColorSegmentation(cropped(leftEyeRect), leftEyeCenter);
+//    findEyeCenterByColorSegmentation(cropped(rightEyeRect), rightEyeCenter);
+//    cout<<"debug"<<endl;
+    
+    boost::thread leftEyeThread(findEyeCenterByColorSegmentation, cropped(leftEyeRect), boost::ref(leftEyeCenter), 0.4,3,3,5);
+    boost::thread  rightEyeThread(findEyeCenterByColorSegmentation, cropped(rightEyeRect), boost::ref(rightEyeCenter), 0.4,3,3,5);
+    leftEyeThread.join();
+    rightEyeThread.join();
+    
+    leftEyeCenter += Point2f(leftEyeRect.tl().x,leftEyeRect.tl().y);
+    leftEyeCenter += Point2f(cropRect.tl().x, cropRect.tl().y);
+    rightEyeCenter += Point2f(rightEyeRect.tl().x,rightEyeRect.tl().y);
+    rightEyeCenter += Point2f(cropRect.tl().x,cropRect.tl().y);
     
     leftEyePoint= rotatePointByRotationMatrix(leftEyeCenter, Mback);
     rightEyePoint= rotatePointByRotationMatrix(rightEyeCenter, Mback);
+    isTrackingSuccess = true;
     return true;
 }

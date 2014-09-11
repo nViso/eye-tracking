@@ -9,6 +9,7 @@
 #include <iostream>
 #include "asm_face/ft.hpp"
 #include "jzp_lib/jzplib_all.h"
+#include <boost/thread.hpp>
 
 class ASM_Pupil_Tracker {
 public:
@@ -24,6 +25,7 @@ public:
     
     Mat rotated_img;
     Mat rotationMatrix;
+    bool isTrackingSuccess;
     
     fs::path trackerFilePath;
     face_tracker tracker;
