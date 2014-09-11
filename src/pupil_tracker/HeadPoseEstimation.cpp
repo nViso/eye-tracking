@@ -19,7 +19,8 @@ int main(int argc, const char * argv[])
 {
     
     ft_data ftdata;
-    if (argc<2) {
+    if (argc<3) {
+        cout<<argv[0]<<" user_profile_dir camera_profile.yaml";
         return 0;
     }
     string fname =string(argv[1]);
@@ -27,22 +28,13 @@ int main(int argc, const char * argv[])
     
     face_tracker tracker = load_ft<face_tracker>(string(ftdata.baseDir+"trackermodel.yaml").c_str());
     tracker.detector.baseDir = ftdata.baseDir;
+    shape_model smodel = load_ft<shape_model>(string(ftdata.baseDir+"shapemodel.yaml").c_str());
     
     Mat cameraMatrix, distCoeffs;
-    if (argc == 2) { // without camera file.
-        FileStorage fileLoader(string(ftdata.baseDir+"cameraparams.yaml"),FileStorage::READ);
-        fileLoader["cameraMatrix"]>>cameraMatrix;
-        fileLoader["distCoeffs"] >> distCoeffs;
-        fileLoader.release();
-    }
-    if (argc == 3) { // with camera file
-        FileStorage fileLoader(string(argv[2]),FileStorage::READ);
-        fileLoader["cameraMatrix"]>>cameraMatrix;
-        fileLoader["distCoeffs"] >> distCoeffs;
-        fileLoader.release();
-    }
+    readCameraProfile(fs::path(argv[2]), cameraMatrix, distCoeffs);
     
-    shape_model smodel = load_ft<shape_model>(string(ftdata.baseDir+"shapemodel.yaml").c_str());
+    
+    
     vector<Point3f> faceFeatures = findBestFrontalFaceShape(smodel);
     vector<Point3f> faceCrdRefVecs;
     faceCrdRefVecs.push_back(Point3f(0,0,0));

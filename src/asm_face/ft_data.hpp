@@ -26,7 +26,11 @@ public:
     vector<Vec2i> connections;               //indices of connected points
     vector<string> imnames;                  //images
     vector<vector<Point2f> > points;         //points
+    float distanceBetweenOuterCanthuses = 0.0f;
     string baseDir;
+    
+    float getDistanceBetweenOuterCanthuses();
+    void inputDistanceBetweenOuterCanthuses();
     
     inline int n_images(){return imnames.size();}
     

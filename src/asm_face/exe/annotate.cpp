@@ -404,6 +404,12 @@ int main(int argc,char** argv)
         annotation.data.points.resize(annotation.data.imnames.size());
     }
     
+    if (annotation.data.distanceBetweenOuterCanthuses <= 0.0f) {
+        annotation.data.inputDistanceBetweenOuterCanthuses();
+        save_ft(annotation.data.baseDir+"annotations.yaml",annotation.data);
+    }
+    
+    
     //annotate first image
     setMouseCallback(annotation.wname,pp_MouseCallback,0);
     annotation.set_pick_points_instructions();
