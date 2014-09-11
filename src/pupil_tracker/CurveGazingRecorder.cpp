@@ -143,9 +143,14 @@ bool showResult() {
 }
 
 void writeAnimationTraceFile(string path) {
-    FileStorage storage(path,FileStorage::WRITE);
-    storage<<"AnimationPoints"<<Mat(animatePoints);
-    storage.release();
+
+    Mat points = Mat(animatePoints).reshape(1);
+    CSVFileWriter logger;
+    for (int j = 0; j < points.rows; j++) {
+        logger.addSlot(points.row(j));
+    }
+    
+    logger.writeToFile(fs::path(path));
 }
 
 void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path userProfilePath, fs::path outputfilePrefix) {
