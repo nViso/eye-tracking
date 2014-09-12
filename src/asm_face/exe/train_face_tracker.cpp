@@ -40,7 +40,7 @@ int main(int argc,char** argv)
     
   //create face tracker model
   face_tracker tracker;
-    load_ft<shape_model>(string(ftdata.baseDir+"shapemodel.yaml").c_str());
+  tracker.annotations = ftdata;
   tracker.smodel = load_ft<shape_model>(string(ftdata.baseDir+"shapemodel.yaml").c_str());
   tracker.pmodel = load_ft<patch_models>(string(ftdata.baseDir+"patchmodels.yaml").c_str());
   tracker.detector = load_ft<face_detector>(string(ftdata.baseDir+"detectormodel.yaml").c_str());

@@ -12,13 +12,36 @@
  ft_data: face tracker data
  Jason Saragih (2012)
  */
+#include "asm_face/ft.hpp"
 #include "asm_face/ft_data.hpp"
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include "stdio.h"	
+#include <boost/lexical_cast.hpp>
+
 
 
 //==============================================================================
+
+float ft_data::getDistanceBetweenOuterCanthuses() {
+    if (distanceBetweenOuterCanthuses <= 0.0f) {
+        inputDistanceBetweenOuterCanthuses();
+    }
+    return distanceBetweenOuterCanthuses;
+}
+
+void ft_data::inputDistanceBetweenOuterCanthuses() {
+    while(true) {
+        cout<<endl<<"Please input the distance between outer canthus:";
+        string input;
+        cin >> input;
+        if (is_number_asm(input)) {
+            distanceBetweenOuterCanthuses = boost::lexical_cast<float>(input);
+            break;
+        } else cout<<"error input, not a number."<<endl;
+    }
+}
+
 void
 ft_data::
 rm_incomplete_samples()
@@ -187,6 +210,7 @@ write(FileStorage &fs) const
 {
     assert(fs.isOpened());
     fs << "{";
+    fs<< "distanceBetweenOuterCanthuses" << distanceBetweenOuterCanthuses ;
     fs << "n_connections" << (int)connections.size();
     for(int i = 0; i < int(connections.size()); i++){
         char str[256]; const char* ss;
@@ -222,6 +246,7 @@ ft_data::
 read(const FileNode& node)
 {
     assert(node.type() == FileNode::MAP);
+    node["distanceBetweenOuterCanthuses"] >> distanceBetweenOuterCanthuses;
     int n; node["n_connections"] >> n; connections.resize(n);
     for(int i = 0; i < n; i++){
         char str[256]; const char* ss;

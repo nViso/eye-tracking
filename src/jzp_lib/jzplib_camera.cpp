@@ -11,6 +11,17 @@
 
 using namespace boost::lockfree;
 
+bool readCameraProfile(const fs::path & filepath, Mat & cameraMatrix, Mat & distCoeffs) {
+    FileStorage fileLoader(filepath.string(),FileStorage::READ);
+    fileLoader["cameraMatrix"]>>cameraMatrix;
+    fileLoader["distCoeffs"] >> distCoeffs;
+    fileLoader.release();
+    if (cameraMatrix.empty() || distCoeffs.empty()) {
+        return false;
+    }
+    else return true;
+}
+
 Mat cameraMatrixByCropNResize(const Mat originalCameraMatrix, Size originalSize, Rect currentRect, float resizeFactor) {
     Mat nowcm = originalCameraMatrix;
     cout<<nowcm.channels()<<" "<<nowcm.size()<<endl;

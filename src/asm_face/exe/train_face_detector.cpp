@@ -55,18 +55,6 @@ parse_mirror(int argc,char** argv)
     }return false;
 }
 
-bool is_number(const std::string& s)
-{
-    try
-    {
-        boost::lexical_cast<double>(s);
-        return true;
-    }
-    catch(boost::bad_lexical_cast &)
-    {
-        return false;
-    }
-}
 //==============================================================================
 int main(int argc,char** argv)
 {
@@ -100,7 +88,7 @@ int main(int argc,char** argv)
             cout<<"your choice:";
             string input;
             cin >> input;
-            if (is_number(input) && boost::lexical_cast<int>(input)>0 && boost::lexical_cast<int>(input) <= detectorFiles.size()) {
+            if (is_number_asm(input) && boost::lexical_cast<int>(input)>0 && boost::lexical_cast<int>(input) <= detectorFiles.size()) {
                 
                 int index = boost::lexical_cast<int>(input)-1;
                 detectorFilePath =workingDirPath / detectorFiles[index].filename();
