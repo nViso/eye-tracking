@@ -50,7 +50,7 @@ void invoke_train_face_tracker(fs::path userProfileDir) {
 
 void invoke_visualize_shape_model(fs::path userProfileDir) {
     cout<<"------- Invoking ./visualize_shape_model -------"<<endl;
-    string cmdpath = (fs::current_path()/"train_shape_model").string();
+    string cmdpath = (fs::current_path()/"visualize_shape_model").string();
     string cmd(cmdpath+" "+userProfileDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
@@ -91,6 +91,14 @@ void invoke_PupilTracker(fs::path userProfileDir) {
 void invoke_HeadPoseEstimation(fs::path userProfileDir,fs::path cameraFile) {
     cout<<"------- Invoking ./HeadPoseEstimation ----------"<<endl;
     string cmdpath = (fs::current_path()/"HeadPoseEstimation").string();
+    string cmd = cmdpath+" "+userProfileDir.string()+" "+cameraFile.string();
+    system(cmd.c_str());
+    cout<<"------- Invocation Done ------------------------"<<endl;
+}
+
+void invoke_HeadPoseAdviser(fs::path userProfileDir,fs::path cameraFile) {
+    cout<<"------- Invoking ./HeadPoseAdviser ----------"<<endl;
+    string cmdpath = (fs::current_path()/"HeadPoseAdviser").string();
     string cmd = cmdpath+" "+userProfileDir.string()+" "+cameraFile.string();
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
@@ -268,6 +276,7 @@ int main(int argc, const char * argv[])
         cout<<"6. run head pose estimation."<<endl;
         cout<<"7. run chessboard camera calibration."<<endl;
         cout<<"8. regenerate pupil tracking coordinates for existing tests."<<endl;
+        cout<<"9. run head pose adviser."<<endl;
         cout<<"q. quit"<<endl;
         cout<<"------ Your choice : ";
         string input;
@@ -275,7 +284,7 @@ int main(int argc, const char * argv[])
         
         if (is_number(input)) {
             int c = boost::lexical_cast<int>(input);
-            if (c<1 || c>8) {
+            if (c<1 || c>9) {
                 cout<<"error number"<<endl;
                 continue;
             }
@@ -329,6 +338,15 @@ int main(int argc, const char * argv[])
             
             if (c == 8) {
                 regeneratePupilCoordiantesFromExistingTests(resultsPath);
+            }
+            
+            if (c == 9) {
+                cout<<"Choose user profile:"<<endl;
+                fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
+                fs::path cameraProfilePath = chooseCameraProfile(cameraCalibPath);
+                if (targetProfilePath.empty() == false) {
+                    invoke_HeadPoseAdviser(targetProfilePath,cameraProfilePath);
+                }
             }
             
             
