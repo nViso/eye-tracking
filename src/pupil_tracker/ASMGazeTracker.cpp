@@ -6,12 +6,16 @@
 //
 //
 
-#include "ASMPupilTracker.h"
+#include "ASMGazeTracker.h"
 
-ASM_Pupil_Tracker::ASM_Pupil_Tracker(fs::path path) {
-    trackerFilePath = path;
-    tracker = load_ft<face_tracker>(path.string());
-    tracker.detector.baseDir = path.parent_path().string() + fs::path("/").make_preferred().native();
+ASM_Pupil_Tracker::ASM_Pupil_Tracker(const fs::path & trackermodel, const fs::path & cameraProfile) {
+    tracker = load_ft<face_tracker>(trackermodel.string());
+    tracker.detector.baseDir = trackermodel.parent_path().string() + fs::path("/").make_preferred().native();
+    findBestFrontalFaceShapeIn3D();
+    if (cameraProfile.empty() == false) {
+        readCameraProfile(cameraProfile, cameraMatrix, distCoeffs);
+        
+    }
 }
 
 vector<float> ASM_Pupil_Tracker::toDataSlot() {
@@ -36,16 +40,28 @@ vector<float> ASM_Pupil_Tracker::toDataSlot() {
     return slot;
 }
 
-void ASM_Pupil_Tracker::reDetectFace() {
-    tracker.reset();
-}
-
-bool ASM_Pupil_Tracker::processFrame(const cv::Mat & im) {
-    Mat  leftEyeImg,rightEyeImg,cropped;
+bool ASM_Pupil_Tracker::featureTracking(const cv::Mat & im) {
     if(tracker.track(im) == 0) {// failed
         isTrackingSuccess = false;
         return false;
     }
+    im.copyTo(this->im);
+    isTrackingSuccess = true;
+    return true;
+    
+}
+
+void ASM_Pupil_Tracker::reDetectFace() {
+    tracker.reset();
+}
+
+bool ASM_Pupil_Tracker::calculatePupilCenter(){
+    Mat  leftEyeImg,rightEyeImg,cropped;
+
+    if (isTrackingSuccess == false) {
+        return false;
+    }
+    
     canthusPts = vector<Point2f>(tracker.points.begin(),tracker.points.begin()+4);
     nosePts = vector<Point2f>(tracker.points.begin()+4,tracker.points.begin()+6);
     
@@ -97,4 +113,41 @@ bool ASM_Pupil_Tracker::processFrame(const cv::Mat & im) {
     rightEyePoint= rotatePointByRotationMatrix(rightEyeCenter, Mback);
     isTrackingSuccess = true;
     return true;
+}
+
+bool ASM_Pupil_Tracker::estimateFacePose() {
+    if (isTrackingSuccess == false) {
+        return false;
+    }
+    vector<Point2f> imagePoints = tracker.points;
+    fliplr(imagePoints, im.size());
+    solvePnP(facialPointsIn3D, imagePoints, cameraMatrix, distCoeffs, rvec, tvec);
+    return true;
+}
+
+void ASM_Pupil_Tracker::projectPoints(const vector<Point3f> & sourcePoints, vector<Point2f> & destPoints) {
+    cv::projectPoints(sourcePoints, rvec, tvec, cameraMatrix, distCoeffs, destPoints);
+    fliplr(destPoints, im.size());
+}
+
+void ASM_Pupil_Tracker::findBestFrontalFaceShapeIn3D()  {
+    int currentIndex = -1;
+    vector<vector<Point2f> > pointsSeries = tracker.smodel.matY2pts();
+    
+    currentIndex = 0;
+    vector<Point2f> points = pointsSeries[currentIndex];
+    Point2f center = points[0]*0.5f + points[1]*0.5f;
+    float normVaue = tracker.annotations.getDistanceBetweenOuterCanthuses()/norm(points[3]-points[2]);
+    for (int i = 0 ; i < points.size(); i++) {
+        points[i] =points[i]-  center;
+        points[i] *=normVaue;
+    }
+    vector<Point3f> faceFeatures;
+    for (int i =0 ; i < points.size() ; i ++) {
+        faceFeatures.push_back(Point3f(points[i].x,points[i].y,0));
+    }
+    faceFeatures[4].z = 8;
+    faceFeatures[5].z = 8;
+    
+    facialPointsIn3D = faceFeatures;
 }

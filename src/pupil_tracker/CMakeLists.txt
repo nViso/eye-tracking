@@ -1,10 +1,10 @@
-SET(asmptsource
-ASMPupilTracker.h ASMPupilTracker.cpp
+SET(asmgazesource
+ASMGazeTracker.h ASMGazeTracker.cpp
 )
 
-ADD_EXECUTABLE(PupilTracker PupilTracker.cpp ${asmptsource})
-ADD_EXECUTABLE(HeadPoseAdviser HeadPoseAdviser.cpp ${asmptsource})
-ADD_EXECUTABLE(HeadPoseEstimation HeadPoseEstimation.cpp )
+ADD_EXECUTABLE(PupilTracker PupilTracker.cpp ${asmgazesource})
+ADD_EXECUTABLE(HeadPoseAdviser HeadPoseAdviser.cpp ${asmgazesource})
+ADD_EXECUTABLE(HeadPoseEstimation HeadPoseEstimation.cpp ${asmgazesource} )
 ADD_EXECUTABLE(CurveDrawer CurveDrawer.cpp )
 ADD_EXECUTABLE(CurveGazingRecorder CurveGazingRecorder.cpp)
 ADD_EXECUTABLE(CameraCalibrator CameraCalibrator.cpp)

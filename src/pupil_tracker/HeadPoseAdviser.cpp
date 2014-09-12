@@ -6,7 +6,7 @@
 //
 //
 
-#include "ASMPupilTracker.h"
+#include "ASMGazeTracker.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -41,7 +41,9 @@ int main(int argc, const char * argv[])
         }
         
         imresize(origin,zoomRatio,im);
-        bool succeeded = pupilTracker.processFrame(im);
+        bool succeeded = pupilTracker.featureTracking(im);
+        if (succeeded)
+            pupilTracker.calculatePupilCenter();
 
 
         drawPoints(im, pupilTracker.canthusPts);
