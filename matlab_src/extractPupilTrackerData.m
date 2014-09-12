@@ -23,7 +23,12 @@ for k = 1:length(testsDir)
             currentGT = importdata(currentGTFile);
             currentTest = importdata(currentTestFile);
             currentTest = currentTest(1:size(currentGT),:);
+            currentTest(currentTest == 0) = nan;
             assert(size(currentGT,1) == size(currentTest,1), ['length not equal,' num2str(i) ' ' num2str(j)]);
+            slot.testname = testsDir(k).name;
+            slot.username = userDirs(i).name;
+            strsplit(testFiles(j).name,'.');
+            slot.tracename = ans{1};
             slot.groundtruth = currentGT;
             slot.leftPupilCenter  =  currentTest(:,1:2);
             slot.rightPupilCenter = currentTest(:,3:4);
@@ -33,10 +38,6 @@ for k = 1:length(testsDir)
             slot.rightOuterCanthus= currentTest(:,11:12);
             slot.leftNostrils     = currentTest(:,13:14);
             slot.rightNostrils    = currentTest(:,15:16);
-            slot.testname = testsDir(k).name;
-            slot.username = userDirs(i).name;
-            strsplit(testFiles(j).name,'.');
-            slot.tracename = ans{1};
             resultsData{i,j} = slot;
         end
     end

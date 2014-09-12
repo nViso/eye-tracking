@@ -224,6 +224,7 @@ write(FileStorage &fs) const
 {
   assert(fs.isOpened()); 
   fs << "{"
+     << "annotations" << annotations
      << "detector" << detector
      << "smodel"   << smodel
      << "pmodel"   << pmodel
@@ -238,5 +239,6 @@ read(const FileNode& node)
   node["detector"] >> detector;
   node["smodel"]   >> smodel;
   node["pmodel"]   >> pmodel;
+  node["annotations"] >> annotations;
 }
 //==============================================================================

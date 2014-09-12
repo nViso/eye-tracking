@@ -6,7 +6,21 @@
 //
 //
 #include "ft.hpp"
+#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+
+bool is_number_asm(const std::string& s)
+{
+    try
+    {
+        boost::lexical_cast<double>(s);
+        return true;
+    }
+    catch(boost::bad_lexical_cast &)
+    {
+        return false;
+    }
+}
 
 ft_data load_ft_jzp(string fname) {
     fs::path filepath(fname);

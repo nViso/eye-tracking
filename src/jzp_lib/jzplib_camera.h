@@ -16,6 +16,8 @@ using namespace boost::lockfree;
 using namespace cv;
 using namespace std;
 
+bool readCameraProfile(const fs::path & filepath, Mat & cameraMatrix, Mat & distCoeffs);
+
 Mat cameraMatrixByCropNResize(Mat originalCameraMatrix, Size originalSize, Rect currentRect, float resizeFactor);
 
 bool captureImage(VideoCapture& capture, Mat& color_img, bool flip = true);
