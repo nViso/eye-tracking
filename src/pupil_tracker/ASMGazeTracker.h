@@ -11,9 +11,9 @@
 #include "jzp_lib/jzplib_all.h"
 #include <boost/thread.hpp>
 
-class ASM_Pupil_Tracker {
+class ASM_Gaze_Tracker {
 public:
-    ASM_Pupil_Tracker(const fs::path & trackermodel, const fs::path & cameraProfile = fs::path());
+    ASM_Gaze_Tracker(const fs::path & trackermodel, const fs::path & cameraProfile = fs::path());
     bool featureTracking(const cv::Mat & im);
     void reDetectFace();
     

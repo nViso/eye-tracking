@@ -37,7 +37,7 @@ int main(int argc, const char * argv[])
     }
     
     fs::path baseDirPath(argv[1]);
-    ASM_Pupil_Tracker pupilTracker(baseDirPath / "trackermodel.yaml");
+    ASM_Gaze_Tracker pupilTracker(baseDirPath / "trackermodel.yaml");
     windowName += ( " by profile ["+baseDirPath.string()+"]");
     
     Mat origin, im ;

@@ -8,7 +8,7 @@
 
 #include "ASMGazeTracker.h"
 
-ASM_Pupil_Tracker::ASM_Pupil_Tracker(const fs::path & trackermodel, const fs::path & cameraProfile) {
+ASM_Gaze_Tracker::ASM_Gaze_Tracker(const fs::path & trackermodel, const fs::path & cameraProfile) {
     tracker = load_ft<face_tracker>(trackermodel.string());
     tracker.detector.baseDir = trackermodel.parent_path().string() + fs::path("/").make_preferred().native();
     findBestFrontalFaceShapeIn3D();
@@ -18,7 +18,7 @@ ASM_Pupil_Tracker::ASM_Pupil_Tracker(const fs::path & trackermodel, const fs::pa
     }
 }
 
-vector<float> ASM_Pupil_Tracker::toDataSlot() {
+vector<float> ASM_Gaze_Tracker::toDataSlot() {
     vector<float> slot;
     
     if (isTrackingSuccess == false) {
@@ -40,7 +40,7 @@ vector<float> ASM_Pupil_Tracker::toDataSlot() {
     return slot;
 }
 
-bool ASM_Pupil_Tracker::featureTracking(const cv::Mat & im) {
+bool ASM_Gaze_Tracker::featureTracking(const cv::Mat & im) {
     if(tracker.track(im) == 0) {// failed
         isTrackingSuccess = false;
         return false;
@@ -51,11 +51,11 @@ bool ASM_Pupil_Tracker::featureTracking(const cv::Mat & im) {
     
 }
 
-void ASM_Pupil_Tracker::reDetectFace() {
+void ASM_Gaze_Tracker::reDetectFace() {
     tracker.reset();
 }
 
-bool ASM_Pupil_Tracker::calculatePupilCenter(){
+bool ASM_Gaze_Tracker::calculatePupilCenter(){
     Mat  leftEyeImg,rightEyeImg,cropped;
 
     if (isTrackingSuccess == false) {
@@ -115,7 +115,7 @@ bool ASM_Pupil_Tracker::calculatePupilCenter(){
     return true;
 }
 
-bool ASM_Pupil_Tracker::estimateFacePose() {
+bool ASM_Gaze_Tracker::estimateFacePose() {
     if (isTrackingSuccess == false) {
         return false;
     }
@@ -125,12 +125,12 @@ bool ASM_Pupil_Tracker::estimateFacePose() {
     return true;
 }
 
-void ASM_Pupil_Tracker::projectPoints(const vector<Point3f> & sourcePoints, vector<Point2f> & destPoints) {
+void ASM_Gaze_Tracker::projectPoints(const vector<Point3f> & sourcePoints, vector<Point2f> & destPoints) {
     cv::projectPoints(sourcePoints, rvec, tvec, cameraMatrix, distCoeffs, destPoints);
     fliplr(destPoints, im.size());
 }
 
-void ASM_Pupil_Tracker::findBestFrontalFaceShapeIn3D()  {
+void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
     int currentIndex = -1;
     vector<vector<Point2f> > pointsSeries = tracker.smodel.matY2pts();
     

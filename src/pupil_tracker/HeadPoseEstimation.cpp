@@ -31,7 +31,7 @@ int main(int argc, const char * argv[])
 //    readCameraProfile(fs::path(argv[2]), cameraMatrix, distCoeffs);
     
     fs::path baseDirPath(argv[1]);
-    ASM_Pupil_Tracker pupilTracker(baseDirPath / "trackermodel.yaml", fs::path(argv[2]));
+    ASM_Gaze_Tracker poseTracker(baseDirPath / "trackermodel.yaml", fs::path(argv[2]));
     
     
     
@@ -60,9 +60,9 @@ int main(int argc, const char * argv[])
             break;
         }
         
-        bool succeeded = pupilTracker.featureTracking(im);
+        bool succeeded = poseTracker.featureTracking(im);
         if (succeeded)
-            pupilTracker.estimateFacePose();
+            poseTracker.estimateFacePose();
 
 //        Mat hM = findHomography(featuresTruPts ,frontPerspective2D, 0);
 //        Mat frontim;
@@ -75,7 +75,7 @@ int main(int argc, const char * argv[])
         
         vector<Point2f> reprjCrdRefPts;
 
-        pupilTracker.projectPoints(faceCrdRefVecs, reprjCrdRefPts);
+        poseTracker.projectPoints(faceCrdRefVecs, reprjCrdRefPts);
         line(im, reprjCrdRefPts[0], reprjCrdRefPts[1], Scalar(255,0,0),2);
         line(im, reprjCrdRefPts[0], reprjCrdRefPts[2], Scalar(0,255,0),2);
         line(im, reprjCrdRefPts[0], reprjCrdRefPts[3], Scalar(0,0,255),2);
@@ -84,7 +84,7 @@ int main(int argc, const char * argv[])
         
         int c = waitKey(1);
         if(c == 'q')break;
-        else if(c == 'd') pupilTracker.reDetectFace();
+        else if(c == 'd') poseTracker.reDetectFace();
         
     }
     
