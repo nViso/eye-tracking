@@ -130,6 +130,10 @@ void ASM_Gaze_Tracker::projectPoints(const vector<Point3f> & sourcePoints, vecto
     fliplr(destPoints, im.size());
 }
 
+float ASM_Gaze_Tracker::distanceToCamera() {
+    return norm(tvec);
+}
+
 void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
     int currentIndex = -1;
     vector<vector<Point2f> > pointsSeries = tracker.smodel.matY2pts();

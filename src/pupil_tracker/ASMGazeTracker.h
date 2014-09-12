@@ -21,6 +21,7 @@ public:
     
     bool estimateFacePose();
     void projectPoints(const vector<Point3f> & sourcePoints, vector<Point2f> & destPoints);
+    float distanceToCamera();
     void findBestFrontalFaceShapeIn3D() ;
     
     vector<float> toDataSlot();

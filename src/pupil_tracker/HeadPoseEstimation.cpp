@@ -79,7 +79,7 @@ int main(int argc, const char * argv[])
         line(im, reprjCrdRefPts[0], reprjCrdRefPts[1], Scalar(255,0,0),2);
         line(im, reprjCrdRefPts[0], reprjCrdRefPts[2], Scalar(0,255,0),2);
         line(im, reprjCrdRefPts[0], reprjCrdRefPts[3], Scalar(0,0,255),2);
-        
+        drawStringAtTopLeftCorner(im, "distance to camera:" + boost::lexical_cast<string>(poseTracker.distanceToCamera()));
         imshow("head pose",im);
         
         int c = waitKey(1);

@@ -162,7 +162,11 @@ protected:
 void pp_MouseCallback(int event, int x, int y, int /*flags*/, void* /*param*/)
 {
     if(event == CV_EVENT_LBUTTONDOWN){
-        annotation.data.points[0].push_back(Point2f(x,y));
+        for (int i = 0; i < annotation.data.points.size(); i++) {
+            annotation.data.points[i].push_back(Point2f(x,y));
+        }
+        // the newly added points is at the last, so its symmetry number is its position.
+        annotation.data.symmetry.push_back(annotation.data.symmetry.size());
         annotation.draw_points();
         imshow(annotation.wname,annotation.image);
     }
@@ -171,8 +175,21 @@ void pp_MouseCallback(int event, int x, int y, int /*flags*/, void* /*param*/)
         if (imin <0) {
             return ;
         }
-        //        cout<<"cancel point"<<imin<<endl;
-        annotation.data.points[0].erase(annotation.data.points[0].begin() + imin);
+        for (int i = 0 ; i < annotation.data.points.size(); i++) {
+            annotation.data.points[i].erase(annotation.data.points[i].begin()+imin);
+        }
+        // reset all symmetry connections with the deleting point
+        for (int i = 0 ; i < annotation.data.symmetry.size(); i++) {
+            if (annotation.data.symmetry[i] == imin) {
+                annotation.data.symmetry[i] = i;
+            }
+        }
+        annotation.data.symmetry.erase(annotation.data.symmetry.begin()+imin);
+        for (int i = 0 ; i < annotation.data.symmetry.size(); i++) {
+            if (annotation.data.symmetry[i] >imin) {
+                annotation.data.symmetry[i] -=1;
+            }
+        }
         annotation.copy_clean_image();
         annotation.draw_points();
         imshow(annotation.wname,annotation.image);
@@ -409,6 +426,9 @@ int main(int argc,char** argv)
         save_ft(annotation.data.baseDir+"annotations.yaml",annotation.data);
     }
     
+    while (annotation.data.points[0].size() > annotation.data.symmetry.size()) {
+        annotation.data.symmetry.push_back(annotation.data.symmetry.size());
+    }
     
     //annotate first image
     setMouseCallback(annotation.wname,pp_MouseCallback,0);
