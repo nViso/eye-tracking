@@ -11,10 +11,10 @@
 ASM_Gaze_Tracker::ASM_Gaze_Tracker(const fs::path & trackermodel, const fs::path & cameraProfile) {
     tracker = load_ft<face_tracker>(trackermodel.string());
     tracker.detector.baseDir = trackermodel.parent_path().string() + fs::path("/").make_preferred().native();
-    findBestFrontalFaceShapeIn3D();
+    
     if (cameraProfile.empty() == false) {
         readCameraProfile(cameraProfile, cameraMatrix, distCoeffs);
-        
+        findBestFrontalFaceShapeIn3D();
     }
 }
 
@@ -135,16 +135,36 @@ float ASM_Gaze_Tracker::distanceToCamera() {
 }
 
 void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
-    int currentIndex = -1;
     vector<vector<Point2f> > pointsSeries = tracker.smodel.matY2pts();
     
-    currentIndex = 0;
-    vector<Point2f> points = pointsSeries[currentIndex];
+    int bestIndex = 0;
+    float largestArea = 0.0f;
+    for (int i = 0; i < pointsSeries.size(); i++) {
+        vector<Point2f> points = pointsSeries[i];
+        Point2f center = points[0]*0.5f + points[1]*0.5f;
+        float normVaue = tracker.annotations.getDistanceBetweenOuterCanthuses()/norm(points[3]-points[2]);
+        for (int j = 0 ; j < points.size(); j++) {
+            points[j] =points[j]-  center;
+            points[j] *=normVaue;
+        }
+        points.erase(points.begin()+4, points.begin()+6);
+        points.erase(points.begin()  , points.begin()+2);
+        float area =contourArea(points);
+        cout<<i<<" "<<area<<endl;
+        if (contourArea(points) > largestArea) {
+            bestIndex = i;
+            largestArea = area;
+        }
+    }
+    cout<<"bestIndex"<<bestIndex<<endl;
+    bestIndex = 0;
+    vector<Point2f> points = pointsSeries[bestIndex];
+    
     Point2f center = points[0]*0.5f + points[1]*0.5f;
     float normVaue = tracker.annotations.getDistanceBetweenOuterCanthuses()/norm(points[3]-points[2]);
-    for (int i = 0 ; i < points.size(); i++) {
-        points[i] =points[i]-  center;
-        points[i] *=normVaue;
+    for (int j = 0 ; j < points.size(); j++) {
+        points[j] =points[j] - center;
+        points[j] *=normVaue;
     }
     vector<Point3f> faceFeatures;
     for (int i =0 ; i < points.size() ; i ++) {

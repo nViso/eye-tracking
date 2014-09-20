@@ -186,7 +186,7 @@ void findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCoord, floa
             index_img.at<float>(r,c) +=1;
         }
     }
-    //    imagesc("layered",mat2gray(index_img));
+    
     Mat layerweighted_img = index_img.mul(index_img);
     layerweighted_img = mat2gray(layerweighted_img);
     gray_img.convertTo(gray_img, CV_32FC1,1/255.0);

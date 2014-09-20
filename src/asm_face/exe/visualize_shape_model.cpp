@@ -89,7 +89,8 @@ int main(int argc,char** argv)
                 p.at<float>(k) = scale*val[j]*3.0*sqrt(smodel.e.at<float>(k));
                 p.copyTo(smodel.p); img = Scalar::all(255);
                 vector<Point2f> q = smodel.calc_shape();
-//                q.erase(q.begin()+2, q.begin()+4);
+//                q.erase(q.begin()+4, q.begin()+6);
+//                q.erase(q.begin()+0, q.begin()+2);
                 cout<<"contour area "<<contourArea(q)<<endl;
                 char str[256]; sprintf(str,"mode: %d,area: %f, val: %f sd,  ",k-3,contourArea(q),val[j]/3.0);
                 draw_string(img,str);

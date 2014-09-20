@@ -10,10 +10,7 @@
 #include <cmath>
 #include "ASMGazeTracker.h"
 
-vector<Point3f> findBestFrontalFaceShape(shape_model smodel) ;
-vector<Point2f> findBestFrontalFaceShape2D(ft_data smodel);
 
-// test pushing to github by xcode
 int main(int argc, const char * argv[])
 {
     
@@ -74,11 +71,13 @@ int main(int argc, const char * argv[])
         
         
         vector<Point2f> reprjCrdRefPts;
-
+        vector<Point2f> reprjFeaturePts;
+        poseTracker.projectPoints(poseTracker.facialPointsIn3D, reprjFeaturePts);
         poseTracker.projectPoints(faceCrdRefVecs, reprjCrdRefPts);
         line(im, reprjCrdRefPts[0], reprjCrdRefPts[1], Scalar(255,0,0),2);
         line(im, reprjCrdRefPts[0], reprjCrdRefPts[2], Scalar(0,255,0),2);
         line(im, reprjCrdRefPts[0], reprjCrdRefPts[3], Scalar(0,0,255),2);
+        drawPoints(im, reprjFeaturePts);
         drawStringAtTopLeftCorner(im, "distance to camera:" + boost::lexical_cast<string>(poseTracker.distanceToCamera()));
         imshow("head pose",im);
         

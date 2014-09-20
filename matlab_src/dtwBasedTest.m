@@ -27,7 +27,7 @@ for i = selectedGraphs
                     testM = eval([ 'testsData{m}{l,i}.' selectedFeatures{j}]);
                     testM = pdist2(testM,testM);
                     SM = simmx(baseM,testM);
-                    [p,q,C] = dp(1-SM);
+%                     [p,q,C] = dp(1-SM);
                     subplotAxis = optimalSubplot(gcf,cols,rows,col,row);
 %                     hold on;
                     imagesc(SM);
