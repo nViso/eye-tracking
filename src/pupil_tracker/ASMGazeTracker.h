@@ -43,6 +43,7 @@ public:
     Mat cameraMatrix;
     Mat distCoeffs;
     vector<Point3f> facialPointsIn3D;
+    vector<Point2f> facialPointsIn2D;
     
     fs::path trackerFilePath;
     face_tracker tracker;

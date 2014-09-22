@@ -167,11 +167,15 @@ void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
         points[j] *=normVaue;
     }
     vector<Point3f> faceFeatures;
+    vector<Point2f> faceFeatures2;
     for (int i =0 ; i < points.size() ; i ++) {
         faceFeatures.push_back(Point3f(points[i].x,points[i].y,0));
+        faceFeatures2.push_back(Point2f(points[i].x,points[i].y));
     }
     faceFeatures[4].z = 8;
     faceFeatures[5].z = 8;
     
     facialPointsIn3D = faceFeatures;
+    facialPointsIn2D = faceFeatures2;
+    cout<<"facial points 2d:"<<endl<<faceFeatures2<<endl;
 }
