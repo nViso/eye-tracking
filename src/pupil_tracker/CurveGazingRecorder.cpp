@@ -116,6 +116,14 @@ void showPrelude() {
     
 }
 
+void invoke_HeadPoseAdviser(fs::path userProfileDir,fs::path cameraFile) {
+    cout<<"------- Invoking ./HeadPoseAdviser ----------"<<endl;
+    string cmdpath = (fs::current_path()/"HeadPoseAdviser").string();
+    string cmd = cmdpath+" "+userProfileDir.string()+" "+cameraFile.string();
+    system(cmd.c_str());
+    cout<<"------- Invocation Done ------------------------"<<endl;
+}
+
 void showResultPreviewAndSave(fs::path videoFilePath, fs::path userProfilePath) {
     cout<<"------- Invoking ./PupilTracker ----------------"<<endl;
     string cmdpath = (fs::current_path()/"PupilTracker").string();
@@ -199,13 +207,14 @@ void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path userProfilePa
 int main (int argc, char *argv[])
 {
     if (argc < 4) {
-        cout<<argv[0]<<" "<<"trajectoies_set_dir user_profile_dir output_dir"<<endl;
+        cout<<argv[0]<<" "<<"trajectoies_set_dir user_profile_dir camera_profile output_dir"<<endl;
         return 0;
     }
     
     fs::path pathDirPath(argv[1]);
     fs::path userProfilePath(argv[2]);
-    fs::path resultsBasePath(argv[3]);
+    fs::path cameraProfilePath(argv[3]);
+    fs::path resultsBasePath(argv[4]);
     vector<fs::path> trajectoryFiles;
     if (setupTrajectories(pathDirPath,trajectoryFiles) == 0) {
         return 0;
@@ -228,6 +237,7 @@ int main (int argc, char *argv[])
         trainQueue.push_back(trajectoryFiles[i]);
     }
     while (trainQueue.empty() == false) {
+        invoke_HeadPoseAdviser(userProfilePath,cameraProfilePath);
         fs::path currentPath =trainQueue.front();
         trainQueue.pop_front();
         fs::path outputfilepath = resultDirPath / currentPath.stem().string();

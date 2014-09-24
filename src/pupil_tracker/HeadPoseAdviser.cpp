@@ -36,6 +36,7 @@ int main(int argc, const char * argv[])
     float zoomRatio = 1.0f;
     
     float currentDistance;
+    float advicedPosition = 0.4;
     
     while(true){
         bool success = captureImage(cam, origin, true);
@@ -51,12 +52,15 @@ int main(int argc, const char * argv[])
         }
         
         
-        line(im, Point(im.cols/2,0), Point(im.cols/2,im.rows-1), Scalar(0,255,0),3);
-        line(im, Point(0,im.rows/3), Point(im.cols-1,im.rows/3), Scalar(0,255,0),3);
-        circle(im, Point(im.cols/2,im.rows/3), 5, Scalar(0,0,255),-1);
-        drawStringAtPoint(im, "distance:"+boost::lexical_cast<string>(currentDistance), Point(im.cols/2,im.rows/2));
-
         
+        
+        circle(im, poseTracker.glabellaPoint, 6, Scalar(0,255,255),-1);
+        drawPoints(im, poseTracker.tracker.points);
+        
+        line(im, Point(im.cols/2,0), Point(im.cols/2,im.rows-1), Scalar(0,255,0),3);
+        line(im, Point(0,im.rows*advicedPosition), Point(im.cols-1,im.rows*advicedPosition), Scalar(0,255,0),3);
+        circle(im, Point(im.cols/2,im.rows*advicedPosition), 5, Scalar(0,0,255),-1);
+        drawStringAtPoint(im, "distance:"+boost::lexical_cast<string>(currentDistance), Point(im.cols/2,im.rows/2));
         
         
         imshow(windowName,im);

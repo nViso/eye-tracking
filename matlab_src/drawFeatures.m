@@ -33,10 +33,10 @@ for u = selectedtests
                 end
                 
                 if size(data,2) ==2
-                    %plot(data(:,1),data(:,2),'.-');
-                    plot(data(:,1),data(:,2),'-');
+                    data(:,3) = [1:length(data)]';
+                    plot3(data(:,1),data(:,2),data(:,3),'-');
                     hold on;
-                    scatter(data(:,1),data(:,2),20,1:size(data,1),'filled');
+                    scatter3(data(:,1),data(:,2),data(:,3),20,1:size(data,1),'filled');
                     hold off;
                 end
                 

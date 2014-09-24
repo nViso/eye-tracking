@@ -112,10 +112,10 @@ void invoke_CurveDrawer(fs::path curvesDir) {
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
-void invoke_CurveGazingRecorder(fs::path curvesDir, fs::path userProfileDir, fs::path outputDir) {
+void invoke_CurveGazingRecorder(fs::path curvesDir, fs::path userProfileDir, fs::path cameraProfilePath, fs::path outputDir) {
     cout<<"------- Invoking ./CurveGazingRecorder ---------"<<endl;
     string cmdpath = (fs::current_path()/"CurveGazingRecorder").string();
-    string cmd(cmdpath+" "+curvesDir.string()+" "+userProfileDir.string()+" "+outputDir.string());
+    string cmd(cmdpath+" "+curvesDir.string()+" "+userProfileDir.string()+" "+cameraProfilePath.string()+" "+outputDir.string());
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
@@ -309,8 +309,10 @@ int main(int argc, const char * argv[])
             if (c == 4) {
                 cout<<"Choose user profile:"<<endl;
                 fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
+                cout<<"Choose camera profile:"<<endl;
+                fs::path cameraProfilePath = chooseCameraProfile(cameraCalibPath);
                 if (targetProfilePath.empty() == false) {
-                    invoke_CurveGazingRecorder(curvesPath,targetProfilePath,resultsPath);
+                    invoke_CurveGazingRecorder(curvesPath,targetProfilePath,cameraProfilePath,resultsPath);
                 }
                 
             }

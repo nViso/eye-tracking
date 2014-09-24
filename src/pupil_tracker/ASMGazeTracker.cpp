@@ -45,6 +45,7 @@ bool ASM_Gaze_Tracker::featureTracking(const cv::Mat & im) {
         isTrackingSuccess = false;
         return false;
     }
+    glabellaPoint = tracker.points[0]*0.5 + tracker.points[1]*0.5;
     im.copyTo(this->im);
     isTrackingSuccess = true;
     return true;
@@ -150,7 +151,7 @@ void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
         points.erase(points.begin()+4, points.begin()+6);
         points.erase(points.begin()  , points.begin()+2);
         float area =contourArea(points);
-        cout<<i<<" "<<area<<endl;
+//        cout<<i<<" "<<area<<endl;
         if (contourArea(points) > largestArea) {
             bestIndex = i;
             largestArea = area;
@@ -177,5 +178,5 @@ void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
     
     facialPointsIn3D = faceFeatures;
     facialPointsIn2D = faceFeatures2;
-    cout<<"facial points 2d:"<<endl<<faceFeatures2<<endl;
+//    cout<<"facial points 2d:"<<endl<<faceFeatures2<<endl;
 }

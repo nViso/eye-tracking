@@ -19,14 +19,7 @@ int main(int argc, const char * argv[])
         cout<<argv[0]<<" user_profile_dir camera_profile.yaml";
         return 0;
     }
-//    string fname =string(argv[1]);
-//    ftdata = load_ft_jzp(fname);
-//    face_tracker tracker = load_ft<face_tracker>(string(ftdata.baseDir+"trackermodel.yaml").c_str());
-//    tracker.detector.baseDir = ftdata.baseDir;
-//    
-//    Mat cameraMatrix, distCoeffs;
-//    readCameraProfile(fs::path(argv[2]), cameraMatrix, distCoeffs);
-    
+
     fs::path baseDirPath(argv[1]);
     ASM_Gaze_Tracker poseTracker(baseDirPath / "trackermodel.yaml", fs::path(argv[2]));
     
@@ -61,14 +54,11 @@ int main(int argc, const char * argv[])
         if (succeeded)
             poseTracker.estimateFacePose();
 
-//        Mat hM = findHomography(featuresTruPts ,frontPerspective2D, 0);
-//        Mat frontim;
-//        Mat gray;
-//        warpPerspective(im.clone(), frontim, hM, im.size());
-//        imshow("front", frontim);
         
         
         
+        Mat frontim,flipback;
+        flip(im,flipback,1);
         
         vector<Point2f> reprjCrdRefPts;
         vector<Point2f> reprjFeaturePts;
@@ -80,6 +70,15 @@ int main(int argc, const char * argv[])
         drawPoints(im, reprjFeaturePts);
         drawStringAtTopLeftCorner(im, "distance to camera:" + boost::lexical_cast<string>(poseTracker.distanceToCamera()));
         imshow("head pose",im);
+        
+        vector<Point2f> transformedPoints = poseTracker.tracker.points;
+        fliplr(transformedPoints, im.size());
+        Mat part;
+        
+        Mat hM = findHomography(poseTracker.facialPointsIn2D ,transformedPoints, 0);
+        warpPerspective(flipback(boundingRect(transformedPoints)), frontim, hM, im.size());
+        imshow("front", frontim);
+
         
         int c = waitKey(1);
         if(c == 'q')break;
