@@ -42,9 +42,9 @@ void drawRotatedRect(Mat image, RotatedRect eyeRRect) {
 
 void drawStringAtPoint(Mat img, const string text, Point position) {
     
-    putText(img,text,Point(position.x+1,position.y+1),FONT_HERSHEY_COMPLEX,0.6f,
+    putText(img,text,Point(position.x+1,position.y+1),FONT_HERSHEY_COMPLEX,1.0f,
             Scalar::all(0),1,CV_AA);
-    putText(img,text,Point(position.x,position.y),FONT_HERSHEY_COMPLEX,0.6f,
+    putText(img,text,Point(position.x,position.y),FONT_HERSHEY_COMPLEX,1.0f,
             Scalar::all(255),1,CV_AA);
     
     

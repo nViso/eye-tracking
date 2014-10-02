@@ -37,4 +37,6 @@ void ind2sub(const int sub,const int cols,const int rows,int &row,int &col);
 
 Mat matrixPointCoordinates(int rows, int cols ,bool matlabColumnFirst) ;
 
+Mat logOnGrayImage(const Mat &im);
+
 #endif /* defined(__OPENCV_HOTSHOTS__jzplib_img__) */

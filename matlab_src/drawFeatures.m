@@ -4,13 +4,20 @@ close all;
 
 clearvars -except testsData ;
 
-selectedtests = 1:length(testsData);
+selectedtests = 1:4;
 selectedGraphs = 1: size(testsData{1},2);
-selectedPeople = 1: size(testsData{1},1);
+
+peopleNames = {};
+for i = 1:length(testsData)
+    for j = 1:size(testsData{i},1)
+        peopleNames = [ peopleNames ; testsData{i}{j}.username ];
+    end
+end
+peopleNames = unique(peopleNames);
+selectedPeople = peopleNames;
+
 featureBank = fieldnames(testsData{1}{1,1});
 selectedFeature = featureBank([5 6 13 14]);
-
-
 %%
 cols = length(selectedPeople);
 rows = length(selectedFeature);
@@ -21,23 +28,29 @@ for u = selectedtests
         [sx sy sw sh] = getMatlabWindowPosition;
         set(gcf,'Position',[sx sy sw sh]);
         set(gcf,'NumberTitle','off','Name',[testsData{u}{1,1}.testname ' ' testsData{u}{1,i}.tracename])
-        for j = selectedPeople
+        for j = 1:length(selectedPeople)
             for k = 1:length(selectedFeature)
-                col = find(selectedPeople==j);
+                col = j;
+                userIndex = find(cellfun(@(x) strcmp(x.username,selectedPeople(j)), testsData{u}(:,i),'UniformOutput',true));
                 row = k;
                 subplotAxis = optimalSubplot(gcf,cols,rows,col,row);
-                data = eval(['testsData{u}{j,i}.' selectedFeature{k}]);
+                
+                data = eval(['testsData{u}{userIndex,i}.' selectedFeature{k}]);
                 
                 if size(data,2) >=20
                     imagesc(data);
                 end
                 
                 if size(data,2) ==2
-                    data(:,3) = [1:length(data)]';
-                    plot3(data(:,1),data(:,2),data(:,3),'-');
+%                     data(:,3) = [1:length(data)]';
+%                     plot3(data(:,1),data(:,2),data(:,3),'-');
+                    
+                    plot(data(:,1),data(:,2),'-');
                     hold on;
-                    scatter3(data(:,1),data(:,2),data(:,3),20,1:size(data,1),'filled');
+%                     scatter3(data(:,1),data(:,2),data(:,3),20,1:size(data,1),'filled');
+                    scatter(data(:,1),data(:,2),20,1:size(data,1),'filled');
                     hold off;
+                    set(gca,'YDir','reverse');
                 end
                 
                 if size(data,2) == 1
@@ -59,5 +72,5 @@ for u = selectedtests
 end
 
 %%
-clearvars -except testsData ; featureBank;
+clearvars -except testsData  featureBank;
 

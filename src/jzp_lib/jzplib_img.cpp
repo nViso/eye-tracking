@@ -262,3 +262,19 @@ Mat equalizeImage(const Mat& inputImage)
     return Mat();
 }
 
+Mat logOnGrayImage(const Mat &im)
+{
+    Mat I;
+    if(im.channels() == 1){
+        if(im.type() != CV_32F)im.convertTo(I,CV_32F);
+        else I = im;
+    }else{
+        if(im.channels() == 3){
+            Mat img; cvtColor(im,img,CV_BGR2GRAY);
+            if(img.type() != CV_32F)img.convertTo(I,CV_32F);
+            else I = img;
+        }else{cout << "Unsupported image type!" << endl; abort();}
+    }
+    I += 1.0; log(I,I); return I;
+}
+
