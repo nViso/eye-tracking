@@ -7,6 +7,7 @@
 //
 #include "jzplib_draw.h"
 #include "jzplib_detections.h"
+#include <boost/lexical_cast.hpp>
 #include <queue>
 
 
@@ -130,6 +131,8 @@ Mat calculateImageSymmetryScore(const Mat& image) {
 
 void findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCoord, float coordinateWeight, int kmeansIterations, int kmeansRepeats, int blurSize)  {
     
+    findEyeCenterByIsoPhote(image,eyeCoord,5);
+    
     Mat img, gray_img;
     Mat colorpoints, kmeansPoints;
     
@@ -203,8 +206,6 @@ void findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCoord, floa
     Point minLoc, maxLoc;
     minMaxLoc(scoresum,&minVal,&maxVal,&minLoc,&maxLoc);
     float initialHC = (float)maxLoc.x/zoomRatio;
-    line(zoomed, Point(maxLoc.x,0), Point(maxLoc.x,zoomed.rows-1), Scalar::all(255));
-//    imshow("zoomed", zoomed);
     int bestx = 0,bestlayer = 0;
     Mat bestIndex_img = index_img >=1;
     minMaxLoc(index_img,&minVal,&maxVal,&minLoc,&maxLoc);
@@ -217,6 +218,9 @@ void findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCoord, floa
         
         indexlayer_img = fillHoleInBinary(indexlayer_img);
         indexlayer_img = fillConvexHulls(indexlayer_img);
+        
+        
+        
         Mat score = calculateImageSymmetryScore(indexlayer_img);
         Mat scoresum;
         reduce(score.rowRange(0, indexlayer_img.cols/6), scoresum, 0, CV_REDUCE_SUM,CV_32FC1);
@@ -234,10 +238,39 @@ void findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCoord, floa
         }
     }
     
-    Point2f massCenter = findMassCenter_BinaryBiggestBlob(bestIndex_img);
+//    Point2f massCenter = findMassCenter_BinaryBiggestBlob(bestIndex_img);
     
-    
-    eyeCoord =  Point2f(initialHC,massCenter.y);
+
+    Point2f isoCenter;
+    findEyeCenterByIsoPhote(bestIndex_img,isoCenter,5);
+    eyeCoord =  Point2f(initialHC,isoCenter.y);
 }
 
 
+void findEyeCenterByIsoPhote(const Mat& image, Point2f & eyeCoord, int blurSize)  {
+    Mat img, gray_img;
+    
+    if (image.channels() == 1) {
+        img = equalizeImage(image);
+        medianBlur(img, img, blurSize);
+        gray_img = img;
+    }
+    else {
+        img = equalizeImage(image);
+        medianBlur(img, img, blurSize);
+        cvtColor(image, gray_img, CV_BGR2GRAY);
+    }
+    int width = gray_img.cols;
+    int ksize = width /5;
+    if (ksize %2 ==0) {
+        ksize ++;
+    }
+    Mat centermap = isoPhote(gray_img, false, width/7, width*1/4, Size(ksize,ksize), ksize,Size(ksize,ksize), ksize/2);
+//    imagesc("centermap", imresize(centermap, 3));
+    
+    double minVal , maxVal;
+    Point minLoc, maxLoc;
+    minMaxLoc(centermap,&minVal,&maxVal,&minLoc,&maxLoc);
+    
+    eyeCoord = maxLoc;
+}

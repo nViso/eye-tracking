@@ -39,4 +39,10 @@ Mat matrixPointCoordinates(int rows, int cols ,bool matlabColumnFirst) ;
 
 Mat logOnGrayImage(const Mat &im);
 
+Mat isoPhote(const Mat &im, bool lookForDarkCenter, int minrad, int maxrad, Size gaussianKernelSize, double gaussianSigma,Size gaussianKernelSize2, double gaussianSigma2);
+void unitGradient(const Mat & im , Mat & Lx, Mat & Ly);
+Mat curvature(const Mat &im);
+Mat curvedness(const Mat &im);
+
+
 #endif /* defined(__OPENCV_HOTSHOTS__jzplib_img__) */
