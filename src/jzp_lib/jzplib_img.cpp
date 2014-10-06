@@ -303,7 +303,7 @@ Mat isoPhote(const Mat &im, bool lookForDarkCenter, int minrad, int maxrad, Size
             if (lookForDarkCenter != isocurvature.at<float>(row,col) < 0) {
                     continue;
             }
-            if (abs(dy.at<float>(row,col) / dx.at<float>(row,col)) > 3) {
+            if (abs(dy.at<float>(row,col) / dx.at<float>(row,col)) > 1.3) {
                 continue;
             }
             if (vectorMag.at<float>(row,col) >=minrad && vectorMag.at<float>(row,col) <= maxrad) {

@@ -131,15 +131,14 @@ Mat calculateImageSymmetryScore(const Mat& image) {
 
 void findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCoord, float coordinateWeight, int kmeansIterations, int kmeansRepeats, int blurSize)  {
     
-    findEyeCenterByIsoPhote(image,eyeCoord,5);
-    
-    Mat img, gray_img;
+    Mat img, gray_img, temp;
     Mat colorpoints, kmeansPoints;
     
     img = equalizeImage(image);
     
     medianBlur(img, img, blurSize);
     cvtColor(image, gray_img, CV_BGR2GRAY);
+    temp = gray_img.clone();
     gray_img = imcomplement(gray_img);
     vector<Mat> layers(3);
     split(img, layers);
@@ -238,11 +237,15 @@ void findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCoord, floa
         }
     }
     
+    
+    Mat maskOut(bestIndex_img.size(),CV_8UC1,Scalar::all(255));
+    temp.copyTo(maskOut, bestIndex_img);
+//    imshow("maskout",maskOut);
 //    Point2f massCenter = findMassCenter_BinaryBiggestBlob(bestIndex_img);
     
 
     Point2f isoCenter;
-    findEyeCenterByIsoPhote(bestIndex_img,isoCenter,5);
+    findEyeCenterByIsoPhote(maskOut,isoCenter,5);
     eyeCoord =  Point2f(initialHC,isoCenter.y);
 }
 
@@ -265,7 +268,7 @@ void findEyeCenterByIsoPhote(const Mat& image, Point2f & eyeCoord, int blurSize)
     if (ksize %2 ==0) {
         ksize ++;
     }
-    Mat centermap = isoPhote(gray_img, false, width/7, width*1/4, Size(ksize,ksize), ksize,Size(ksize,ksize), ksize/2);
+    Mat centermap = isoPhote(gray_img, true, width/7, width/4, Size(ksize,ksize), ksize*0.1,Size(ksize,ksize), ksize*0.5);
 //    imagesc("centermap", imresize(centermap, 3));
     
     double minVal , maxVal;

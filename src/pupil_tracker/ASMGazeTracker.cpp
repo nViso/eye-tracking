@@ -100,8 +100,8 @@ bool ASM_Gaze_Tracker::calculatePupilCenter(){
 //    findEyeCenterByColorSegmentation(cropped(rightEyeRect), rightEyeCenter);
 //    cout<<"debug"<<endl;
     
-    boost::thread leftEyeThread(findEyeCenterByColorSegmentation, cropped(leftEyeRect), boost::ref(leftEyeCenter), 0.4,3,3,5);
-    boost::thread  rightEyeThread(findEyeCenterByColorSegmentation, cropped(rightEyeRect), boost::ref(rightEyeCenter), 0.4,3,3,5);
+    boost::thread leftEyeThread(findEyeCenterByColorSegmentation, cropped(leftEyeRect), boost::ref(leftEyeCenter), 0.4,4,3,5);
+    boost::thread  rightEyeThread(findEyeCenterByColorSegmentation, cropped(rightEyeRect), boost::ref(rightEyeCenter), 0.4,4,3,5);
     leftEyeThread.join();
     rightEyeThread.join();
     
