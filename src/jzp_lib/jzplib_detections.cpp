@@ -238,15 +238,15 @@ void findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCoord, floa
     }
     
     
-    Mat maskOut(bestIndex_img.size(),CV_8UC1,Scalar::all(255));
-    temp.copyTo(maskOut, bestIndex_img);
+//    Mat maskOut(bestIndex_img.size(),CV_8UC1,Scalar::all(255));
+//    temp.copyTo(maskOut, bestIndex_img);
 //    imshow("maskout",maskOut);
-//    Point2f massCenter = findMassCenter_BinaryBiggestBlob(bestIndex_img);
+    Point2f massCenter = findMassCenter_BinaryBiggestBlob(bestIndex_img);
     
 
-    Point2f isoCenter;
-    findEyeCenterByIsoPhote(maskOut,isoCenter,5);
-    eyeCoord =  Point2f(initialHC,isoCenter.y);
+//    Point2f isoCenter;
+//    findEyeCenterByIsoPhote(maskOut,isoCenter,5);
+    eyeCoord =  Point2f(initialHC,massCenter.y);
 }
 
 

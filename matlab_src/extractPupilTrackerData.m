@@ -1,13 +1,14 @@
-baseDir = '/Users/ZhipingJiang/base/results';
+baseDir = '/Volumes/MobileDrive/base/results';
+system(['find ' baseDir ' -name *.*DS_Store* -delete']);
 testsDir = dir(baseDir);
-testsDir(1:3) = [];
+testsDir(1:2) = [];
 
 testsData = {};
 for k = 1:length(testsDir) 
     disp(['extracting tests: ' testsDir(k).name]);
     currentDir = [baseDir filesep testsDir(k).name];
     userDirs = dir([currentDir filesep] );
-    userDirs(1:3) = [];
+    userDirs(1:2) = [];
     
     resultsData = {};
     
@@ -22,8 +23,13 @@ for k = 1:length(testsDir)
             currentGTFile = [usertestDir filesep groundtruthFiles(j).name];
             currentGT = importdata(currentGTFile);
             currentTest = importdata(currentTestFile);
-            currentTest = currentTest(1:size(currentGT),:);
+            currentTest = currentTest(1:size(currentGT,1),:);
             currentTest(currentTest == 0) = nan;
+            currentTest = currentTest(:,1:16);
+            if ~isempty(find(isnan(currentTest)))
+                [row, col] = find(isnan(currentTest));
+                currentTest(:,unique(col)) = interp1(setdiff(1:size(currentTest,1),unique(row))',currentTest(setdiff(1:size(currentTest,1),unique(row))',unique(col)),1:size(currentTest,1),'nearest','extrap');
+            end
             assert(size(currentGT,1) == size(currentTest,1), ['length not equal,' num2str(i) ' ' num2str(j)]);
             slot.testname = testsDir(k).name;
             slot.username = userDirs(i).name;

@@ -29,7 +29,7 @@ int main(int argc, const char * argv[])
     
     ASM_Gaze_Tracker poseTracker(fs::path(argv[1])/ "trackermodel.yaml",fs::path(argv[2]));
     windowName += ( " by profile ["+string(argv[1])+"]");
-    namedWindow(windowName);
+    namedWindow(windowName, CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO |CV_GUI_NORMAL);
     moveWindow(windowName, 43, 0);
     
     Mat origin, im ;

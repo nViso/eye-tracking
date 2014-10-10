@@ -88,7 +88,7 @@ void animateFuc(Mat* bg) {
     for (int i = 0; i<animatePoints.size(); i++) {
         Mat temp ;
         whitebg.copyTo(temp);
-        circle(temp, animatePoints[i], 10, Scalar(0,0,255),-1,CV_AA);
+        circle(temp, animatePoints[i], 15, Scalar(0,0,255),-1,CV_AA);
         temp.copyTo((*bg));
         currentAnimationPoint = i;
         fpsDelayer.controlledDelay();
@@ -228,9 +228,9 @@ int main (int argc, char *argv[])
     copyDirRecursively(userProfilePath, resultDirPath/"user_profile");
     
     //setup
-    namedWindow(windowName);
+    namedWindow(windowName,CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO |CV_GUI_NORMAL);
     moveWindow(windowName, 0, 0);
-    setWindowProperty(windowName, CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
+//    setWindowProperty(windowName, CV_WND_PROP_FULLSCREEN, CV_WINDOW_FULLSCREEN);
 
     deque<fs::path> trainQueue;
     for (int i = 0; i < trajectoryFiles.size(); i++) {

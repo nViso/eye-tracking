@@ -17,7 +17,7 @@ peopleNames = unique(peopleNames);
 selectedPeople = peopleNames;
 
 featureBank = fieldnames(testsData{1}{1,1});
-selectedFeature = featureBank([5 6 13 14]);
+selectedFeature = featureBank([5 6 13 14 17 18 19 20]);
 %%
 cols = length(selectedPeople);
 rows = length(selectedFeature);
@@ -25,8 +25,10 @@ rows = length(selectedFeature);
 for u = selectedtests
     for i = selectedGraphs
         figure;
+        set(gcf,'visible','off');
         [sx sy sw sh] = getMatlabWindowPosition;
-        set(gcf,'Position',[sx sy sw sh]);
+        set(gcf,'Position',[sx sy 1000 1950]);
+        
         set(gcf,'NumberTitle','off','Name',[testsData{u}{1,1}.testname ' ' testsData{u}{1,i}.tracename])
         for j = 1:length(selectedPeople)
             for k = 1:length(selectedFeature)
@@ -58,7 +60,7 @@ for u = selectedtests
                 end
                 
                 if k == 1
-                    title([testsData{u}{col,1}.testname ' ' testsData{u}{col,1}.username ' ' selectedFeature{k}],'Interpreter','non');
+                    title([testsData{u}{col,1}.username ' ' selectedFeature{k}],'Interpreter','non');
                 else
                     title([selectedFeature(k)]);
                 end
@@ -66,7 +68,7 @@ for u = selectedtests
             
         end
         
-        %     save2pdf([num2str(i) '.pdf'],gcf);
+        save2pdf([testsData{u}{1,1}.testname ' ' testsData{u}{1,i}.tracename '.pdf'],gcf);
     end
     
 end
