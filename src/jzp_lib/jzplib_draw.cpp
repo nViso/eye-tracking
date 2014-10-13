@@ -42,9 +42,9 @@ void drawRotatedRect(Mat image, RotatedRect eyeRRect) {
 
 void drawStringAtPoint(Mat img, const string text, Point position) {
     
-    putText(img,text,Point(position.x+1,position.y+1),FONT_HERSHEY_TRIPLEX,2.0f,
+    putText(img,text,Point(position.x+1,position.y+1),FONT_HERSHEY_TRIPLEX,4.0f,
             Scalar::all(0),1,CV_AA);
-    putText(img,text,Point(position.x,position.y),FONT_HERSHEY_TRIPLEX,2.0f,
+    putText(img,text,Point(position.x,position.y),FONT_HERSHEY_TRIPLEX,4.0f,
             Scalar::all(255),1,CV_AA);
     
     
@@ -54,7 +54,7 @@ void
 drawStringAtTopLeftCorner(Mat img,                       //image to draw on
                           const string text)             //text to draw
 {
-    Size size = getTextSize(text,FONT_HERSHEY_TRIPLEX,2.0f,1,NULL);
+    Size size = getTextSize(text,FONT_HERSHEY_TRIPLEX,4.0f,1,NULL);
     drawStringAtPoint(img, text, Point(1,size.height+1));
 }
 

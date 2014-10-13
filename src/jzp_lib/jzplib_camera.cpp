@@ -164,3 +164,40 @@ bool chessboardCameraCalibration(int gridW, int gridH, float gridSize, vector<fs
     
     return true;
 }
+
+/// Given a video file, this function will call "ffprobe" command to check the "rotation metadata", which gives an 90/180/270 degree return.
+int  readRotationMetadataForVideo(fs::path filePath) {
+    int result = 0;
+    // in Xcode debug mode, the $PATH doesn't include /usr/local/bin, so "which ffprobe" got nothing. We have to add it to the $PATH
+    string addUserLocalBinPathCommand = "PATH=$PATH:/usr/local/bin; export PATH; which ffprobe";
+    string ffprobePath = execSystemCall(addUserLocalBinPathCommand);
+    // remove the ending "next line" in the output.
+    ffprobePath.pop_back();
+    string command = ffprobePath+ " -show_streams " + filePath.string()+ " 2>/dev/null | grep TAG:rotate='[0-9]\\+' | grep  -o '[0-9]\\+'";
+    string stringResult = execSystemCall(command);
+    stringResult.pop_back();
+    if (stringResult.empty()) {
+        result =  0;
+    } else {
+        result = boost::lexical_cast<int>(stringResult);
+        cout<<result<<" degrees frame rotation detected on video file:"<<filePath.string()<<endl;
+    }
+    
+    return result;
+}
+
+/// transpose and/or flip image according to the rotationDegree, which is extracted by readRotationMetadataForVideo method.
+void imageOrientationFix(Mat & source, int degree) {
+    switch(degree) {
+        case 90:
+            transpose(source, source);
+            break;
+        case 180:
+            flip(source,source,0);
+            break;
+        case 270:
+            transpose(source, source);
+            flip(source,source,0);
+            break;
+    }
+}

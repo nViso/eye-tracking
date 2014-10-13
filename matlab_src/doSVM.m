@@ -5,7 +5,8 @@ close all;
 clearvars -except testsData ;
 
 %%
-trainingSet = 1:3;
+randomTrainSet = randperm(length(testsData));
+trainingSet = randomTrainSet(1:3);
 testSet = setdiff(1:length(testsData),trainingSet);
 selectedGraphs = 1: size(testsData{1},2);
 
@@ -16,10 +17,10 @@ for i = 1:length(testsData)
     end
 end
 peopleNames = unique(peopleNames);
-selectedUsers = peopleNames;
+selectedUsers = peopleNames(3:end);
 
 featureBank = fieldnames(testsData{1}{1,1});
-selectedFeatures = featureBank([13:14])';
+selectedFeatures = featureBank([5:6 13:14])';
 
 %% prepare data
 %positive samples

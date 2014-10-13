@@ -31,3 +31,6 @@ void videoWriterThreadFun(VideoWriter * writer, spsc_queue<Mat,boost::lockfree::
 vector<vector<Point3f> > calcBoardCornerPositions(int gridW, int gridH, float squareSize, int imagesCount);
 
 bool chessboardCameraCalibration(int gridW, int gridH, float gridSize, vector<fs::path> imagePaths, Mat & cameraMatrix, Mat & distCoeffs, bool drawCorners);
+
+int  readRotationMetadataForVideo(fs::path filePath);
+void imageOrientationFix(Mat & source, int degree) ;

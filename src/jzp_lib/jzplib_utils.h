@@ -31,6 +31,8 @@ using namespace boost::asio;
 namespace io = boost::iostreams;
 namespace fs = boost::filesystem;
 
+string execSystemCall(string cmd);
+
 bool is_number(const std::string& s);
 bool copyDirRecursively(
              boost::filesystem::path const & source,

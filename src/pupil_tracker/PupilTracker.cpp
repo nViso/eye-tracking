@@ -12,6 +12,7 @@ int main(int argc, const char * argv[])
     bool dumpFile = false;
     bool noShow = false;
     fs::path inputFilePath;
+    int videoFrameRotation = 0;
     if (argc<2) {
         cout<<argv[0]<<" userProfileDir"<<" [dumping Video file]"<<" [noshow]"<<endl;
         return 0;
@@ -22,12 +23,14 @@ int main(int argc, const char * argv[])
         dumpFile = true;
         cam.open(argv[2]);
         inputFilePath = fs::path(argv[2]);
+        videoFrameRotation = readRotationMetadataForVideo(inputFilePath);
         windowName = "Pupil tracking from video [" + string(argv[2]) +"]";
     } else if(argc == 4 && boost::iequals(string(argv[3]), "noshow")) {
         dumpFile = true;
         noShow = true;
         cam.open(argv[2]);
         inputFilePath = fs::path(argv[2]);
+        videoFrameRotation = readRotationMetadataForVideo(inputFilePath);
         windowName = "Pupil tracking from video [" + string(argv[2]) +"]";
     }
     
@@ -48,6 +51,7 @@ int main(int argc, const char * argv[])
     while(true){
         timer.tick();
         bool success = captureImage(cam, origin, !dumpFile);
+        imageOrientationFix(origin,videoFrameRotation);
         if (success == false) {
             break;
         }

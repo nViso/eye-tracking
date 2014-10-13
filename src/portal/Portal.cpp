@@ -239,7 +239,7 @@ void regeneratePupilCoordiantesFromExistingTests(fs::path resultsPath) {
 int main(int argc, const char * argv[])
 {
     
-    fs::path  basePath, userBasePath, curvesPath, resultsPath, cameraCalibPath;
+    fs::path  basePath, userBasePath, curvesPath, resultsPath, cameraCalibPath, videoParingPath;
     if (argc <=1) {
         cout<<"usage:"<<argv[0]<<" base_dir"<<" [result_sub_dir]"<<endl;
     }
@@ -252,10 +252,12 @@ int main(int argc, const char * argv[])
     curvesPath = basePath/"curves";
     resultsPath = basePath/"results";
     cameraCalibPath = basePath /"camera_calibration";
+    videoParingPath = basePath /"video_parsing";
     fs::create_directories(userBasePath);
     fs::create_directories(curvesPath);
     fs::create_directories(resultsPath);
     fs::create_directories(cameraCalibPath);
+    fs::create_directories(videoParingPath);
     
     if (argc == 3) {
         resultsPath /= string(argv[2]);
@@ -277,6 +279,7 @@ int main(int argc, const char * argv[])
         cout<<"7. run chessboard camera calibration."<<endl;
         cout<<"8. regenerate pupil tracking coordinates for existing tests."<<endl;
         cout<<"9. run head pose adviser."<<endl;
+        cout<<"10. run video parser."<<endl;
         cout<<"q. quit"<<endl;
         cout<<"------ Your choice : ";
         string input;
@@ -284,7 +287,7 @@ int main(int argc, const char * argv[])
         
         if (is_number(input)) {
             int c = boost::lexical_cast<int>(input);
-            if (c<1 || c>9) {
+            if (c<1 || c>10) {
                 cout<<"error number"<<endl;
                 continue;
             }
@@ -343,6 +346,15 @@ int main(int argc, const char * argv[])
             }
             
             if (c == 9) {
+                cout<<"Choose user profile:"<<endl;
+                fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
+                fs::path cameraProfilePath = chooseCameraProfile(cameraCalibPath);
+                if (targetProfilePath.empty() == false) {
+                    invoke_HeadPoseAdviser(targetProfilePath,cameraProfilePath);
+                }
+            }
+            
+            if (c == 10) {
                 cout<<"Choose user profile:"<<endl;
                 fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
                 fs::path cameraProfilePath = chooseCameraProfile(cameraCalibPath);
