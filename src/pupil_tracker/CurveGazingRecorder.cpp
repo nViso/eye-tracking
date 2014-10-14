@@ -174,7 +174,10 @@ void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path userProfilePa
     string videoOutputFileName = outputfilePrefix.string()+".avi";
     string animationTraceOutputFileName =outputfilePrefix.string()+".groundtruth";
     writeAnimationTraceFile(animationTraceOutputFileName);
-    string ccstr = "MJPG";
+    // mp4v is small , acceptable.
+    // mjpg is big, slow, but clear.
+    // divx is small, slower than mp4v, less acceptable.
+    string ccstr = "mp4v";
 	VideoWriter videoWriter(videoOutputFileName,CV_FOURCC(ccstr[0],ccstr[1],ccstr[2],ccstr[3]), writeRate, cvSize((int)cameraWidth,(int)cameraHeight));
     BlockDelayer::delay_milisec(50);
     boost::thread frameBufferThread(videoBufferThreadFun,&matQueue,&capturedFrame,writeRate,0,&writeEnabled,&writeFinishSign);
@@ -199,7 +202,7 @@ void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path userProfilePa
     frameWriteThread.join();
     waitKey(50);
     captureFinishSign = true;
-    waitKey(300);
+    waitKey(100);
     
     showResultPreviewAndSave(fs::path(videoOutputFileName),userProfilePath);
 }
