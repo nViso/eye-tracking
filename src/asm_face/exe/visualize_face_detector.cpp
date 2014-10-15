@@ -59,7 +59,7 @@ int main(int argc,char** argv)
                 circle(im,p[i],1,CV_RGB(0,255,0),2,CV_AA);
         }
         imshow("face detector",im);
-        if(waitKey(10) == 'q')break;
+        if(waitKey(10)%256 == 'q')break;
     }
     destroyWindow("face detector"); cam.release(); return 0;
 }

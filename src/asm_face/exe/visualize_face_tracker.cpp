@@ -78,7 +78,7 @@ int main(int argc,char** argv)
         draw_string(im,"d - redetection");
         tracker.timer.display_fps(im,Point(1,im.rows-1));
         imshow("face tracker",im);
-        int c = waitKey(10);
+        int c = waitKey(10)%256;
         if(c == 'q')break;
         else if(c == 'd')tracker.reset();
     }

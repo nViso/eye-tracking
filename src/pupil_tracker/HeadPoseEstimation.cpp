@@ -76,7 +76,7 @@ int main(int argc, const char * argv[])
         imshow("front", im);
 
         
-        int c = waitKey(1);
+        int c = waitKey(1)%256;
         if(c == 'q')break;
         else if(c == 'd') poseTracker.reDetectFace();
         

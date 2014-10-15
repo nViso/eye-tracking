@@ -64,7 +64,7 @@ int main(int argc, const char * argv[])
         
         
         imshow(windowName,im);
-        int c = waitKey(1);
+        int c = waitKey(1)%256;
         if(c == 'q')
             break;
         if(c == 'd')

@@ -96,7 +96,7 @@ int main(int argc, const char * argv[])
             drawStringAtTopLeftCorner(im, "d:" + boost::lexical_cast<string>(pupilTracker.distanceToCamera()));
         }
         imshow(windowName,im);
-        int c = waitKey(1);
+        int c = waitKey(1)%256;
         if(c == 'q' && ! dumpFile)
             break;
         if(c == 'd')

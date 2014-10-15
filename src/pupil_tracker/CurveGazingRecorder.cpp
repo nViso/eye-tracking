@@ -108,7 +108,7 @@ void showPrelude() {
     drawStringAtPoint(current, "Ready to go? Press [y]es !", Point(100,100));
     while(true) {
         imshow(windowName,current);
-        int k = waitKey();
+        int k = waitKey()%256;
         if (k == 'y' || k=='Y') {
             break;
         }
@@ -138,7 +138,7 @@ bool showResult() {
     bool result = true;
     while(true) {
         imshow(windowName,current);
-        int k = waitKey();
+        int k = waitKey()%256;
         if (k == 'y' || k=='Y') {
             break;
         }
@@ -202,7 +202,7 @@ void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path userProfilePa
     frameWriteThread.join();
     waitKey(50);
     captureFinishSign = true;
-    waitKey(100);
+    waitKey(50);
     
     showResultPreviewAndSave(fs::path(videoOutputFileName),userProfilePath,cameraProfilePath);
 }

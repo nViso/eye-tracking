@@ -96,7 +96,7 @@ int main(int argc,char** argv)
                 draw_string(img,str);
                 draw_shape(img,q,smodel.C);
                 imshow("shape model",img);
-                if(waitKey(100) == 'q')return 0;
+                if(waitKey(100)%256 == 'q')return 0;
             }
         }
     }return 0;

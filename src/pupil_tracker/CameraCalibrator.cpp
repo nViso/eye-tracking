@@ -81,7 +81,7 @@ int main (int argc, char *argv[])
         bool success = captureImage(cam, origin,false);
         imshow("Image Intake",origin);
         
-        int c = waitKey(1);
+        int c = waitKey(1)%256;
         if(c == 'q')
             break;
         if (c == 32) {
