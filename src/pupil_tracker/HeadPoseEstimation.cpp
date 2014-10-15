@@ -24,15 +24,11 @@ int main(int argc, const char * argv[])
     ASM_Gaze_Tracker poseTracker(baseDirPath / "trackermodel.yaml", fs::path(argv[2]));
     
     
-    
-//    vector<Point3f> faceFeatures ; //findBestFrontalFaceShape(smodel);
     vector<Point3f> faceCrdRefVecs;
     faceCrdRefVecs.push_back(Point3f(0,0,0));
     faceCrdRefVecs.push_back(Point3f(50,0,0));
     faceCrdRefVecs.push_back(Point3f(0,50,0));
     faceCrdRefVecs.push_back(Point3f(0,0,50));
-    
-//    vector<Point2f> frontPerspective2D = findBestFrontalFaceShape2D(ftdata);
     
     VideoCapture cam;
     cam.open(0);
@@ -77,7 +73,7 @@ int main(int argc, const char * argv[])
         
         Mat hM = findHomography(poseTracker.facialPointsIn2D ,transformedPoints, 0);
         warpPerspective(flipback(boundingRect(transformedPoints)), frontim, hM, im.size());
-        imshow("front", frontim);
+        imshow("front", im);
 
         
         int c = waitKey(1);

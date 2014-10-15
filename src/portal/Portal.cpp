@@ -80,10 +80,10 @@ void invoke_visualize_face_tracker(fs::path userProfileDir) {
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
-void invoke_PupilTracker(fs::path userProfileDir) {
+void invoke_PupilTracker(fs::path userProfileDir,fs::path cameraFile) {
     cout<<"------- Invoking ./PupilTracker ----------------"<<endl;
     string cmdpath = (fs::current_path()/"PupilTracker").string();
-    string cmd(cmdpath+" "+userProfileDir.string());
+    string cmd = cmdpath+" "+userProfileDir.string()+" "+cameraFile.string();
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
@@ -323,9 +323,11 @@ int main(int argc, const char * argv[])
             if (c == 5) {
                 cout<<"Choose user profile:"<<endl;
                 fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
+                fs::path cameraProfilePath = chooseCameraProfile(cameraCalibPath);
                 if (targetProfilePath.empty() == false) {
-                    invoke_PupilTracker(targetProfilePath);
+                    invoke_PupilTracker(targetProfilePath,cameraProfilePath);
                 }
+
             }
             
             if (c == 6) {

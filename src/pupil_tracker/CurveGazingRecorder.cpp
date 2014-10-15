@@ -124,10 +124,10 @@ void invoke_HeadPoseAdviser(fs::path userProfileDir,fs::path cameraFile) {
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
-void showResultPreviewAndSave(fs::path videoFilePath, fs::path userProfilePath) {
+void showResultPreviewAndSave(fs::path videoFilePath, fs::path userProfilePath,fs::path cameraFile) {
     cout<<"------- Invoking ./PupilTracker ----------------"<<endl;
     string cmdpath = (fs::current_path()/"PupilTracker").string();
-    string cmd = cmdpath+" "+userProfilePath.string()+" "+videoFilePath.string();
+    string cmd = cmdpath+" "+userProfilePath.string()+" "+cameraFile.string()+" "+videoFilePath.string();
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
@@ -161,7 +161,7 @@ void writeAnimationTraceFile(string path) {
     logger.writeToFile(fs::path(path));
 }
 
-void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path userProfilePath, fs::path outputfilePrefix) {
+void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path userProfilePath, fs::path cameraProfilePath, fs::path outputfilePrefix) {
     readPathData(trajectoryfile);
     showPrelude();
     // start up camera
@@ -204,7 +204,7 @@ void showAnimationAndRecordVideo(fs::path trajectoryfile, fs::path userProfilePa
     captureFinishSign = true;
     waitKey(100);
     
-    showResultPreviewAndSave(fs::path(videoOutputFileName),userProfilePath);
+    showResultPreviewAndSave(fs::path(videoOutputFileName),userProfilePath,cameraProfilePath);
 }
 
 int main (int argc, char *argv[])
@@ -245,7 +245,7 @@ int main (int argc, char *argv[])
         trainQueue.pop_front();
         fs::path outputfilepath = resultDirPath / currentPath.stem().string();
         cout<<outputfilepath<<endl;
-        showAnimationAndRecordVideo(currentPath, userProfilePath, outputfilepath);
+        showAnimationAndRecordVideo(currentPath, userProfilePath, cameraProfilePath, outputfilepath);
         if (showResult() == false) {
             trainQueue.push_front(currentPath);
         }

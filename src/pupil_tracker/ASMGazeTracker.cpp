@@ -36,6 +36,12 @@ vector<float> ASM_Gaze_Tracker::toDataSlot() {
         slot.push_back(tracker.points[i].x);
         slot.push_back(tracker.points[i].y);
     }
+    for (int i = 0 ; i < 3 ; i ++) {
+        slot.push_back((float)tvec.at<double>(i));
+    }
+    for (int i = 0 ; i < 3 ; i ++) {
+        slot.push_back((float)rvec.at<double>(i));
+    }
     
     return slot;
 }
@@ -157,7 +163,7 @@ void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
             largestArea = area;
         }
     }
-    cout<<"bestIndex"<<bestIndex<<endl;
+//    cout<<"bestIndex"<<bestIndex<<endl;
     bestIndex = 0;
     vector<Point2f> points = pointsSeries[bestIndex];
     

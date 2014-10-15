@@ -11,27 +11,33 @@ int main(int argc, const char * argv[])
     VideoCapture cam;
     bool dumpFile = false;
     bool noShow = false;
-    fs::path inputFilePath;
+    fs::path userProfilePath,cameraProfilePath,inputFilePath;
     int videoFrameRotation = 0;
-    if (argc<2) {
-        cout<<argv[0]<<" userProfileDir"<<" [dumping Video file]"<<" [noshow]"<<endl;
+    if (argc<3) {
+        cout<<argv[0]<<" userProfileDir"<<" cameraProfile"<<" [dumping Video file]"<<" [noshow]"<<endl;
         return 0;
-    } else if (argc == 2) {
+    } else if (argc == 3) {
         windowName = "Pupil tracking from camera";
         cam.open(0);
-    } else if(argc == 3) {
+        userProfilePath = fs::path(argv[1]);
+        cameraProfilePath = fs::path(argv[2]);
+    } else if(argc == 4) {
         dumpFile = true;
-        cam.open(argv[2]);
-        inputFilePath = fs::path(argv[2]);
+        userProfilePath = fs::path(argv[1]);
+        cameraProfilePath = fs::path(argv[2]);
+        inputFilePath = fs::path(argv[3]);
+        cam.open(inputFilePath.string());
         videoFrameRotation = readRotationMetadataForVideo(inputFilePath);
-        windowName = "Pupil tracking from video [" + string(argv[2]) +"]";
-    } else if(argc == 4 && boost::iequals(string(argv[3]), "noshow")) {
+        windowName = "Pupil tracking from video [" + inputFilePath.string() +"]";
+    } else if(argc == 5 && boost::iequals(string(argv[4]), "noshow")) {
         dumpFile = true;
         noShow = true;
-        cam.open(argv[2]);
-        inputFilePath = fs::path(argv[2]);
+        userProfilePath = fs::path(argv[1]);
+        cameraProfilePath = fs::path(argv[2]);
+        inputFilePath = fs::path(argv[3]);
+        cam.open(inputFilePath.string());
         videoFrameRotation = readRotationMetadataForVideo(inputFilePath);
-        windowName = "Pupil tracking from video [" + string(argv[2]) +"]";
+        windowName = "Pupil tracking from video [" + inputFilePath.string() +"]";
     }
     
     if(!cam.isOpened()){
@@ -39,9 +45,14 @@ int main(int argc, const char * argv[])
         return 0;
     }
     
-    fs::path baseDirPath(argv[1]);
-    ASM_Gaze_Tracker pupilTracker(baseDirPath / "trackermodel.yaml");
-    windowName += ( " by profile ["+baseDirPath.string()+"]");
+    ASM_Gaze_Tracker pupilTracker(userProfilePath / "trackermodel.yaml",cameraProfilePath);
+    windowName += ( " by profile ["+userProfilePath.string()+"]");
+    
+    vector<Point3f> faceCrdRefVecs;
+    faceCrdRefVecs.push_back(Point3f(0,0,0));
+    faceCrdRefVecs.push_back(Point3f(50,0,0));
+    faceCrdRefVecs.push_back(Point3f(0,50,0));
+    faceCrdRefVecs.push_back(Point3f(0,0,50));
     
     Mat origin, im ;
     float zoomRatio = 1.0f;
@@ -51,15 +62,17 @@ int main(int argc, const char * argv[])
     while(true){
         timer.tick();
         bool success = captureImage(cam, origin, !dumpFile);
-        imageOrientationFix(origin,videoFrameRotation);
         if (success == false) {
             break;
         }
         
+        imageOrientationFix(origin,videoFrameRotation);
         imresize(origin,zoomRatio,im);
         bool succeeded = pupilTracker.featureTracking(im);
-        if (succeeded)
+        if (succeeded) {
             pupilTracker.calculatePupilCenter();
+            pupilTracker.estimateFacePose();
+        }
         
         printf("\b\rfps: %f, frame count: %d",1.0/timer.tock(), ++frameCount);
         fflush(stdout);
@@ -75,6 +88,12 @@ int main(int argc, const char * argv[])
             drawPoints(im, pupilTracker.nosePts);
             circle(im, pupilTracker.leftEyePoint, 3, Scalar(0,255,0));
             circle(im, pupilTracker.rightEyePoint, 3, Scalar(0,255,0));
+            vector<Point2f> reprjCrdRefPts;
+            pupilTracker.projectPoints(faceCrdRefVecs, reprjCrdRefPts);
+            line(im, reprjCrdRefPts[0], reprjCrdRefPts[1], Scalar(255,0,0),2);
+            line(im, reprjCrdRefPts[0], reprjCrdRefPts[2], Scalar(0,255,0),2);
+            line(im, reprjCrdRefPts[0], reprjCrdRefPts[3], Scalar(0,0,255),2);
+            drawStringAtTopLeftCorner(im, "d:" + boost::lexical_cast<string>(pupilTracker.distanceToCamera()));
         }
         imshow(windowName,im);
         int c = waitKey(1);
