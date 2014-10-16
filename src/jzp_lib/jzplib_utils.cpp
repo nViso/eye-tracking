@@ -7,6 +7,7 @@
 //
 
 #include "jzplib_utils.h"
+#include <boost/algorithm/string.hpp>
 
 string execSystemCall(string cmd) {
     FILE* pipe = popen(cmd.c_str(), "r");
@@ -115,11 +116,15 @@ bool copyDirRecursively(
 
 vector<fs::path> listFilesRecursivelyWithExtension(fs::path folderPath, string prefix, string surfix)
 {
+    boost::algorithm::to_lower(surfix);
+    boost::algorithm::to_lower(prefix);
     vector<fs::path> files;
     fs::recursive_directory_iterator iterend;
     for (fs::recursive_directory_iterator it(folderPath); it != iterend; it++) {
-        if (boost::ends_with(it->path().filename().string(), surfix)
-            && boost::starts_with(it->path().filename().string(), prefix) ) {
+        string fileName =it->path().filename().string();
+        boost::algorithm::to_lower(fileName);
+        if (boost::ends_with(fileName, surfix)
+            && boost::starts_with(fileName, prefix) ) {
             files.push_back(it->path());
         }
     }
@@ -128,11 +133,15 @@ vector<fs::path> listFilesRecursivelyWithExtension(fs::path folderPath, string p
 
 
 vector<fs::path> listFilesWithExtension(fs::path folderPath, string prefix, string surfix) {
+    boost::algorithm::to_lower(surfix);
+    boost::algorithm::to_lower(prefix);
     vector<fs::path> files;
     fs::directory_iterator iterend;
     for (fs::directory_iterator it(folderPath); it != iterend; it++) {
-        if (boost::ends_with(it->path().filename().string(), surfix)
-            && boost::starts_with(it->path().filename().string(), prefix) ) {
+        string fileName =it->path().filename().string();
+        boost::algorithm::to_lower(fileName);
+        if (boost::ends_with(fileName, surfix)
+            && boost::starts_with(fileName, prefix) ) {
             files.push_back(it->path());
         }
     }
