@@ -1,3 +1,4 @@
+function raw = DeviceMotionAxesShift(raw);
 % switch to body coordinate, x for long, y for width, z toward ground.
 data = raw.gravity;
 data(:,1) = data(:,1) + data(:,2);

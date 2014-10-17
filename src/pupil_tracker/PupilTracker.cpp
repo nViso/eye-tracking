@@ -61,7 +61,7 @@ int main(int argc, const char * argv[])
     int frameCount = 0;
     while(true){
         timer.tick();
-        bool success = captureImage(cam, origin, !dumpFile);
+        bool success = captureImage(cam, origin);
         if (success == false) {
             break;
         }

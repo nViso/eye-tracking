@@ -1,8 +1,8 @@
-raw = sensorTextReadFromDisk('sensor.txt');
-DeviceMotionAxesShift;
+raw = sensorTextReadFromDisk('/Users/ZhipingJiang/trackingdata/video_parsing/trace1.sensor.txt');
+raw = DeviceMotionAxesShift(raw);
 
 %% filtering
-HhpSpec = fdesign.highpass(0.3,0.5,60,1,raw.samplingRate);
+HhpSpec = fdesign.highpass(0.01,0.2,60,1,raw.samplingRate);
 Hhp = design(HhpSpec);
 [delay, ~] = phasedelay(Hhp);
 delay = median(delay(isnan(delay)==false));
@@ -32,7 +32,7 @@ for i = 3:size(acc_n,1)
 end
 verletSpeed = diff(verletPos);
 
-% plot3(verletPos(:,1),verletPos(:,2),verletPos(:,3));
+plot3(verletPos(:,1),verletPos(:,2),verletPos(:,3));
 
 %% accleration via velocity decay model
 

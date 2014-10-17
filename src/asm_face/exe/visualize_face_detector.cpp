@@ -52,7 +52,7 @@ int main(int argc,char** argv)
     //detect until user quits
     namedWindow("face detector");
     while(cam.get(CV_CAP_PROP_POS_AVI_RATIO) < 0.999999){
-        Mat im; cam >> im;    flip(im,im,1);
+        Mat im; cam >> im;
         vector<Point2f> p = detector.detect(im);
         if(p.size() > 0){
             for(int i = 0; i < int(p.size()); i++)

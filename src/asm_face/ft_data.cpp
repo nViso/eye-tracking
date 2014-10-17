@@ -210,6 +210,7 @@ write(FileStorage &fs) const
 {
     assert(fs.isOpened());
     fs << "{";
+    fs << "isAnnotationFlipped" << isAnnotationFlipped;
     fs<< "distanceBetweenOuterCanthuses" << distanceBetweenOuterCanthuses ;
     fs << "n_connections" << (int)connections.size();
     for(int i = 0; i < int(connections.size()); i++){
@@ -246,6 +247,7 @@ ft_data::
 read(const FileNode& node)
 {
     assert(node.type() == FileNode::MAP);
+    node["isAnnotationFlipped"] >> isAnnotationFlipped;
     node["distanceBetweenOuterCanthuses"] >> distanceBetweenOuterCanthuses;
     int n; node["n_connections"] >> n; connections.resize(n);
     for(int i = 0; i < n; i++){

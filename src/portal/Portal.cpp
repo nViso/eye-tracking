@@ -136,6 +136,15 @@ void invoke_RegeneratePupilData(fs::path userProfileDir, fs::path videoFilePath)
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
+void invoke_AnnotationFlip(fs::path userProfileDir) {
+    cout<<"------- Invoking ./AnnotationFlip ------------------"<<endl;
+    string cmdpath = (fs::current_path()/"AnnotationFlip").string();
+    string cmd = cmdpath+" "+userProfileDir.string();
+    system(cmd.c_str());
+    cout<<"------- Invocation Done ------------------------"<<endl;
+
+}
+
 
 void trainASMModel(fs::path userProfilePath) {
     invoke_annotate(userProfilePath);
@@ -279,7 +288,7 @@ int main(int argc, const char * argv[])
         cout<<"7. run chessboard camera calibration."<<endl;
         cout<<"8. regenerate pupil tracking coordinates for existing tests."<<endl;
         cout<<"9. run head pose adviser."<<endl;
-        cout<<"10. run video parser."<<endl;
+        cout<<"10. flip the annotation for chosen profile."<<endl;
         cout<<"q. quit"<<endl;
         cout<<"------ Your choice : ";
         string input;
@@ -359,9 +368,8 @@ int main(int argc, const char * argv[])
             if (c == 10) {
                 cout<<"Choose user profile:"<<endl;
                 fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
-                fs::path cameraProfilePath = chooseCameraProfile(cameraCalibPath);
                 if (targetProfilePath.empty() == false) {
-                    invoke_HeadPoseAdviser(targetProfilePath,cameraProfilePath);
+                    invoke_AnnotationFlip(targetProfilePath);
                 }
             }
             

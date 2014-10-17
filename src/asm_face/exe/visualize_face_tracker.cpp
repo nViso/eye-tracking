@@ -72,7 +72,7 @@ int main(int argc,char** argv)
     //detect until user quits
     namedWindow("face tracker");
     while(cam.get(CV_CAP_PROP_POS_AVI_RATIO) < 0.999999){
-        Mat im; cam >> im;  flip(im,im,1);
+        Mat im; cam >> im;
         if(tracker.track(im,p))
             tracker.draw(im);
         draw_string(im,"d - redetection");

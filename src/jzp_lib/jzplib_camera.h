@@ -20,7 +20,7 @@ bool readCameraProfile(const fs::path & filepath, Mat & cameraMatrix, Mat & dist
 
 Mat cameraMatrixByCropNResize(Mat originalCameraMatrix, Size originalSize, Rect currentRect, float resizeFactor);
 
-bool captureImage(VideoCapture& capture, Mat& color_img, bool flip = true);
+bool captureImage(VideoCapture& capture, Mat& color_img, bool flip = false);
 
 void videoCaptureThreadFun(VideoCapture *capture, Mat *frame, int framerate, bool * finishSign);
 

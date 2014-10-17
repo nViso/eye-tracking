@@ -399,7 +399,6 @@ int main(int argc,char** argv)
         annotation.set_capture_instructions();
         Mat im;
         while(cam.read(im)){
-            flip(im,im,1);
             annotation.image = im.clone();
             annotation.draw_instructions();
             imshow(annotation.wname,annotation.image); int c = waitKey(10)%256;

@@ -127,14 +127,12 @@ bool ASM_Gaze_Tracker::estimateFacePose() {
         return false;
     }
     vector<Point2f> imagePoints = tracker.points;
-    fliplr(imagePoints, im.size());
     solvePnP(facialPointsIn3D, imagePoints, cameraMatrix, distCoeffs, rvec, tvec);
     return true;
 }
 
 void ASM_Gaze_Tracker::projectPoints(const vector<Point3f> & sourcePoints, vector<Point2f> & destPoints) {
     cv::projectPoints(sourcePoints, rvec, tvec, cameraMatrix, distCoeffs, destPoints);
-    fliplr(destPoints, im.size());
 }
 
 float ASM_Gaze_Tracker::distanceToCamera() {
@@ -145,24 +143,24 @@ void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
     vector<vector<Point2f> > pointsSeries = tracker.smodel.matY2pts();
     
     int bestIndex = 0;
-    float largestArea = 0.0f;
-    for (int i = 0; i < pointsSeries.size(); i++) {
-        vector<Point2f> points = pointsSeries[i];
-        Point2f center = points[0]*0.5f + points[1]*0.5f;
-        float normVaue = tracker.annotations.getDistanceBetweenOuterCanthuses()/norm(points[3]-points[2]);
-        for (int j = 0 ; j < points.size(); j++) {
-            points[j] =points[j]-  center;
-            points[j] *=normVaue;
-        }
-        points.erase(points.begin()+4, points.begin()+6);
-        points.erase(points.begin()  , points.begin()+2);
-        float area =contourArea(points);
-//        cout<<i<<" "<<area<<endl;
-        if (contourArea(points) > largestArea) {
-            bestIndex = i;
-            largestArea = area;
-        }
-    }
+//    float largestArea = 0.0f;
+//    for (int i = 0; i < pointsSeries.size(); i++) {
+//        vector<Point2f> points = pointsSeries[i];
+//        Point2f center = points[0]*0.5f + points[1]*0.5f;
+//        float normVaue = tracker.annotations.getDistanceBetweenOuterCanthuses()/norm(points[3]-points[2]);
+//        for (int j = 0 ; j < points.size(); j++) {
+//            points[j] =points[j]-  center;
+//            points[j] *=normVaue;
+//        }
+//        points.erase(points.begin()+4, points.begin()+6);
+//        points.erase(points.begin()  , points.begin()+2);
+//        float area =contourArea(points);
+////        cout<<i<<" "<<area<<endl;
+//        if (contourArea(points) > largestArea) {
+//            bestIndex = i;
+//            largestArea = area;
+//        }
+//    }
 //    cout<<"bestIndex"<<bestIndex<<endl;
     bestIndex = 0;
     vector<Point2f> points = pointsSeries[bestIndex];
@@ -170,7 +168,8 @@ void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
     Point2f center = points[0]*0.5f + points[1]*0.5f;
     float normVaue = tracker.annotations.getDistanceBetweenOuterCanthuses()/norm(points[3]-points[2]);
     for (int j = 0 ; j < points.size(); j++) {
-        points[j] =points[j] - center;
+        points[j] =center - points[j] ;
+        points[j].y = - points[j].y;
         points[j] *=normVaue;
     }
     vector<Point3f> faceFeatures;

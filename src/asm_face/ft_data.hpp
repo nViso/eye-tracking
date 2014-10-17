@@ -28,6 +28,7 @@ public:
     vector<vector<Point2f> > points;         //points
     float distanceBetweenOuterCanthuses = 0.0f;
     string baseDir;
+    bool isAnnotationFlipped = false;
     
     float getDistanceBetweenOuterCanthuses();
     void inputDistanceBetweenOuterCanthuses();
