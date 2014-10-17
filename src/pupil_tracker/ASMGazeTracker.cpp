@@ -72,7 +72,7 @@ bool ASM_Gaze_Tracker::calculatePupilCenter(){
     canthusPts = vector<Point2f>(tracker.points.begin(),tracker.points.begin()+4);
     nosePts = vector<Point2f>(tracker.points.begin()+4,tracker.points.begin()+6);
     
-    if (canthusPts[2].x < canthusPts[0].x && canthusPts[0].x < canthusPts[1].x && canthusPts[1].x < canthusPts[3].x) {
+    if (canthusPts[3].x < canthusPts[1].x && canthusPts[1].x < canthusPts[0].x && canthusPts[0].x < canthusPts[2].x) {
     } else {
         return false;
     }
@@ -93,8 +93,8 @@ bool ASM_Gaze_Tracker::calculatePupilCenter(){
     warpAffine(im, rotated_img, rotationMatrix, im.size(),CV_INTER_LINEAR);
     getRectSubPix(rotated_img, eyePairRectSize, glabellaPoint, cropped);
     
-    Rect leftEyeRect = Rect(0,0,rotatedCanthusPts[0].x-rotatedCanthusPts[2].x,eyePairRectSize.height);
-    Rect rightEyeRect = Rect(rotatedCanthusPts[1].x-rotatedCanthusPts[2].x,0,rotatedCanthusPts[3].x-rotatedCanthusPts[1].x,eyePairRectSize.height);
+    Rect rightEyeRect = Rect(0,0,rotatedCanthusPts[1].x-rotatedCanthusPts[3].x,eyePairRectSize.height);
+    Rect leftEyeRect = Rect(rotatedCanthusPts[0].x-rotatedCanthusPts[3].x,0,rotatedCanthusPts[2].x-rotatedCanthusPts[0].x,eyePairRectSize.height);
     
     if (leftEyeRect.area() < 50 || rightEyeRect.area()< 50) {
         return false;

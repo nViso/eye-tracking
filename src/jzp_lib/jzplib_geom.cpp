@@ -31,10 +31,10 @@ float tileRadianBtwn2Pts(Point2f left, Point2f right) {
 
 float calculateEyePairTileAngle(const vector<Point2f>& canthusPts) {
     
-    float tile1 = rad2deg(tileRadianBtwn2Pts(canthusPts[0], canthusPts[1]));
-    float tile2 = rad2deg(tileRadianBtwn2Pts(canthusPts[2], canthusPts[3]));
-    float tile3 = rad2deg(tileRadianBtwn2Pts(canthusPts[2], canthusPts[1]));
-    float tile4 = rad2deg(tileRadianBtwn2Pts(canthusPts[0], canthusPts[3]));
+    float tile1 = rad2deg(tileRadianBtwn2Pts(canthusPts[1], canthusPts[0]));
+    float tile2 = rad2deg(tileRadianBtwn2Pts(canthusPts[3], canthusPts[2]));
+    float tile3 = rad2deg(tileRadianBtwn2Pts(canthusPts[3], canthusPts[0]));
+    float tile4 = rad2deg(tileRadianBtwn2Pts(canthusPts[1], canthusPts[2]));
     float tile5 = (tile3+tile4)/2.0f;
     float tile6 = tile1*0.5f + tile2*0.25f + tile5*0.25f;
     
