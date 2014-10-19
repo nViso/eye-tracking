@@ -75,7 +75,6 @@ int main(int argc,char** argv)
         Mat im; cam >> im;
         if(tracker.track(im,p))
             tracker.draw(im);
-        tracker.timer.display_fps(im,Point(1,im.rows-1));
         imshow("face tracker",im);
         int c = waitKey(10)%256;
         if(c == 'q')break;

@@ -18,25 +18,6 @@
 #include "asm_face/shape_model.hpp"
 #include "asm_face/patch_model.hpp"
 #include "asm_face/face_detector.hpp"
-//==============================================================================
-class fps_timer{                           //frames/second timer for tracking
-public:
-  int64 t_start;                           //start time
-  int64 t_end;                             //end time
-  float fps;                               //current frames/sec
-  int fnum;                                //number of frames since @t_start
-
-  fps_timer(){this->reset();}              //default constructor
-
-  void increment();                        //increment timer index
-
-  void reset();                            //reset timer
-
-  void 
-  display_fps(Mat &im,                     //image to display FPS on
-          Point p = Point(-1,-1));     //bottom left corner of text
-};
-//==============================================================================
 class face_tracker_params{                 //face tracking parameters
 public:
   vector<Size> ssize;                      //search region size/level
@@ -58,25 +39,18 @@ public:
 //==============================================================================
 class face_tracker{                        //face tracking class
 public:
-  bool tracking;                           //are we in tracking mode?
-  fps_timer timer;                         //frames/second timer
   vector<Point2f> points;                  //current tracked points
   face_detector detector;                  //detector for initialisation
   shape_model smodel;                      //shape model
   patch_models pmodel;                     //feature detectors
   ft_data annotations;
   
-  face_tracker(){tracking = false;}
 
   int                                      //0 = failure
   track(const Mat &im,                     //image containing face
     const face_tracker_params &p =     //fitting parameters 
     face_tracker_params());            //default tracking parameters
 
-  void 
-  reset(){                                 //reset tracker 
-    tracking = false; timer.reset();
-  }
   void
   draw(Mat &im,
        const Scalar pts_color = CV_RGB(255,0,0),
