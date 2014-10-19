@@ -7,3 +7,4 @@ halfAnglesSine = sin(angles/2);
 halfAngleCosine = cos(angles/2);
 quat = [halfAngleCosine meshgrid(halfAnglesSine,1:3)'.*axis];
 
+quat = quatnormalize(quat);

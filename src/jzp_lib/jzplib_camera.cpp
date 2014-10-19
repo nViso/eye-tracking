@@ -191,6 +191,7 @@ void imageOrientationFix(Mat & source, int degree) {
     switch(degree) {
         case 90:
             transpose(source, source);
+            flip(source,source,1);
             break;
         case 180:
             flip(source,source,0);

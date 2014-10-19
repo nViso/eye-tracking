@@ -18,4 +18,5 @@ slot.leftNostrils     = currentTest(:,13:14);
 slot.rightNostrils    = currentTest(:,15:16);
 slot.tvec             = currentTest(:,17:19);
 slot.rvec             = currentTest(:,20:22);
+slot.tvec             = slot.tvec /1000;
 slot.quaternion       = AxisAngleToQuaternion(slot.rvec);

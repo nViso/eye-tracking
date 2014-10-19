@@ -22,10 +22,10 @@ vector<float> ASM_Gaze_Tracker::toDataSlot() {
     vector<float> slot;
     
     if (isTrackingSuccess == false) {
-        for (int i = 0; i < 8; i++) {
-            slot.push_back(0.0f);
+        for (int i = 0; i < 34; i++) {
             slot.push_back(0.0f);
         }
+        return slot;
     }
     
     slot.push_back(leftEyePoint.x);
@@ -35,6 +35,10 @@ vector<float> ASM_Gaze_Tracker::toDataSlot() {
     for (int i = 0; i < tracker.points.size(); i++) {
         slot.push_back(tracker.points[i].x);
         slot.push_back(tracker.points[i].y);
+    }
+    for (int i = 0; i < reprojectedFacialPointsInImage.size(); i++) {
+        slot.push_back(reprojectedFacialPointsInImage[i].x);
+        slot.push_back(reprojectedFacialPointsInImage[i].y);
     }
     for (int i = 0 ; i < 3 ; i ++) {
         slot.push_back((float)tvec.at<double>(i));
@@ -128,6 +132,7 @@ bool ASM_Gaze_Tracker::estimateFacePose() {
     }
     vector<Point2f> imagePoints = tracker.points;
     solvePnP(facialPointsIn3D, imagePoints, cameraMatrix, distCoeffs, rvec, tvec);
+    this->projectPoints(facialPointsIn3D, reprojectedFacialPointsInImage);
     return true;
 }
 
@@ -178,8 +183,8 @@ void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
         faceFeatures.push_back(Point3f(points[i].x,points[i].y,0));
         faceFeatures2.push_back(Point2f(points[i].x,points[i].y));
     }
-    faceFeatures[4].z = 8;
-    faceFeatures[5].z = 8;
+    faceFeatures[4].z = 10;
+    faceFeatures[5].z = 10;
     
     facialPointsIn3D = faceFeatures;
     facialPointsIn2D = faceFeatures2;
