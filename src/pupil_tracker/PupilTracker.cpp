@@ -103,8 +103,6 @@ int main(int argc, const char * argv[])
         int c = waitKey(1)%256;
         if(c == 'q' && ! dumpFile)
             break;
-        if(c == 'd')
-            pupilTracker.reDetectFace();
     }
     
     if (dumpFile) {

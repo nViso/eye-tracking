@@ -2,7 +2,7 @@ close all;
 addpath('../');
 addpath('../IMUProcessing/');
 
-traceName = '/Users/ZhipingJiang/trackingdata/video_parsing/141019_1137';
+traceName = '/Users/ZhipingJiang/trackingdata/video_parsing/141019_1659';
 visionTraceName = [traceName 'vision.test'];
 sensorTraceName = [traceName 'sensor.txt'];
 
@@ -14,15 +14,6 @@ clearvars -except *Data;
 q = visionData.quaternion;
 t = visionData.tvec;
 s = 20*(1./visionData.projectionErrorRMS);
-% t(:,1) = - t(:,1);
-% t = t(1:400,:);
-% q = q(1:400,:);
-dcm = quat2dcm(q);
-
-% c = zeros(size(t));
-% for i = 1 :length(t)
-%     c(i,:) = (dcm(:,:,i)'*(t(i,:))')';
-% end
 
 qinverse = quatinv(q);
 c = -quatrotate(qinverse,t);
