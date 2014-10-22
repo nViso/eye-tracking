@@ -84,9 +84,9 @@ int main(int argc, const char * argv[])
             continue;
         }
         if (succeeded) {
-            plotLiveData("tvec[0]", pupilTracker.tvec.at<double>(0));
-            plotLiveData("tvec[1]", pupilTracker.tvec.at<double>(1));
-            plotLiveData("tvec[2]", pupilTracker.tvec.at<double>(2));
+//            plotLiveData("tvec[0]", pupilTracker.tvec.at<double>(0));
+//            plotLiveData("tvec[1]", pupilTracker.tvec.at<double>(1));
+//            plotLiveData("tvec[2]", pupilTracker.tvec.at<double>(2));
             drawPoints(im, pupilTracker.canthusPts);
             drawPoints(im, pupilTracker.nosePts);
             drawPoints(im, pupilTracker.reprojectedFacialPointsInImage,Scalar(0,255,0));

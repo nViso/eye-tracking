@@ -17,7 +17,7 @@ peopleNames = unique(peopleNames);
 selectedPeople = peopleNames;
 
 featureBank = fieldnames(testsData{1}{1,1});
-selectedFeature = featureBank([4 5 6 13 14 17 18 19 20]);
+selectedFeature = featureBank([4 5 6 13 14 17 18 19 20 21 22 23]);
 %%
 cols = length(selectedPeople);
 rows = length(selectedFeature);

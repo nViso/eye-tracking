@@ -20,7 +20,7 @@ peopleNames = unique(peopleNames);
 selectedUsers = peopleNames(3:end);
 
 featureBank = fieldnames(testsData{1}{1,1});
-selectedFeatures = featureBank([5:6])';
+selectedFeatures = featureBank([5:6 21 22 23])';
 
 %% prepare data
 %positive samples

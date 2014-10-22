@@ -87,9 +87,8 @@ rawData.acc = acc;
 rawData.gravity = gravity;
 rawData.gyro = gyro;
 rawData.mag = mag;
-rawData.quat = quat;
-[r1 r2 r3] = quat2angle(quat);
-rawData.ori = [r1 r2 r3];
+rawData.quatNiOStoBiOS = quat;
+rawData.quatBiOStoNiOS = quatinv(quat);
 accTimeLine = accTimeLine - accTimeLine(1);
 rawData.timeline = accTimeLine;
 rawData.interval = median(diff(accTimeLine));
@@ -105,4 +104,3 @@ clear fileName;
 clear ans;
 
 raw = rawData;
-

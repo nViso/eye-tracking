@@ -19,6 +19,9 @@ for k = 1:length(testsData)
             slot.rightPupilCenterDTW = simmx(groundtruthM,rightpupilM);
             slot.leftPupilWRTCanthusDTW = simmx(leftPwrtCanthusM,rightpupilM);
             slot.rightPupilWRTCanthusDTW = simmx(rightPwrtCanthusM,rightpupilM);
+            slot.innerCanthusDifference = slot.leftInnerCanthus - slot.rightInnerCanthus;
+            slot.pupilCenterDifference = slot.leftPupilCenter - slot.rightPupilCenter;
+            slot.pupilCenterDifferenceRatio = slot.pupilCenterDifference./(slot.innerCanthusDifference);
             resultsData{i,j} = slot;
         end
     end

@@ -1,4 +1,4 @@
-baseDir = '/Users/ZhipingJiang/base/results';
+baseDir = '/Volumes/MobileDrive/base/results';
 system(['find ' baseDir ' -name *.*DS_Store* -delete']);
 testsDir = dir(baseDir);
 testsDir(1:2) = [];
@@ -25,7 +25,7 @@ for k = 1:length(testsDir)
             currentTest = importdata(currentTestFile);
             currentTest = currentTest(1:size(currentGT,1),:);
             currentTest(currentTest == 0) = nan;
-            currentTest = currentTest(:,1:22);
+            currentTest = currentTest(:,1:16);
             if ~isempty(find(isnan(currentTest)))
                 [row, col] = find(isnan(currentTest));
                 currentTest(:,unique(col)) = interp1(setdiff(1:size(currentTest,1),unique(row))',currentTest(setdiff(1:size(currentTest,1),unique(row))',unique(col)),1:size(currentTest,1),'nearest','extrap');
@@ -44,9 +44,9 @@ for k = 1:length(testsDir)
             slot.rightOuterCanthus= currentTest(:,11:12);
             slot.leftNostrils     = currentTest(:,13:14);
             slot.rightNostrils    = currentTest(:,15:16);
-            slot.tvec             = currentTest(:,17:19);
-            slot.rvec             = currentTest(:,20:22);
-            slot.quaternion       = AxisAngleToQuaternion(slot.rvec);
+%             slot.tvec             = currentTest(:,17:19);
+%             slot.rvec             = currentTest(:,20:22);
+%             slot.quaternion       = AxisAngleToQuaternion(slot.rvec);
             resultsData{i,j} = slot;
         end
     end

@@ -1,8 +1,7 @@
-raw = sensorTextReadFromDisk('/Users/ZhipingJiang/trackingdata/video_parsing/trace1.sensor.txt');
-raw = DeviceMotionAxesShift(raw);
+raw = sensorTextReadFromDisk('/Users/ZhipingJiang/trackingdata/video_parsing/141020_0033sensor.txt');
 
 %% filtering
-HhpSpec = fdesign.highpass(0.01,0.2,60,1,raw.samplingRate);
+HhpSpec = fdesign.highpass(0.01,0.1,60,1,raw.samplingRate);
 Hhp = design(HhpSpec);
 [delay, ~] = phasedelay(Hhp);
 delay = median(delay(isnan(delay)==false));
@@ -44,3 +43,5 @@ for i = 2 : size(speed,1)
     speed(i,:) = speed(i-1,:) + acc_n(i,:)*(1/raw.samplingRate) * tau;
     pos(i,:) = pos(i-1,:) + speed(i,:) *(1/raw.samplingRate);
 end
+
+figure;plot3(pos(:,1),pos(:,2),pos(:,3));

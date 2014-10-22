@@ -148,6 +148,7 @@ bool chessboardCameraCalibration(int gridW, int gridH, float gridSize, vector<fs
             if (drawCorners) {
                 drawChessboardCorners(images[i], grids, Mat(corners), found);
                 imshow("chessboard"+boost::lexical_cast<std::string>(i),images[i]);
+                waitKey(200);
             }
         }
     }

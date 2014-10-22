@@ -33,7 +33,7 @@ public:
     vector<Point2f> canthusPts;
     vector<Point2f> nosePts;
     
-    
+    Mat poseRMatrix;
     Mat rotationMatrix;
     bool isTrackingSuccess;
     

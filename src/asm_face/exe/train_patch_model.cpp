@@ -52,7 +52,7 @@ parse_patch_size(int argc,char** argv)
                 int p = atoi(argv[i+1]); if(p%2 == 0)return p+1; else return p;
             }
         }
-    }return 11;
+    }return 13;
 }
 //==============================================================================
 int
@@ -66,7 +66,7 @@ parse_search_window_size(int argc,char** argv)
                 int s = atoi(argv[i+1]); if(s%2 == 0)return s+1; else return s;
             }
         }
-    }return 11;
+    }return 13;
 }
 //==============================================================================
 bool

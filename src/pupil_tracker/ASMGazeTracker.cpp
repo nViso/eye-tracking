@@ -43,8 +43,8 @@ vector<float> ASM_Gaze_Tracker::toDataSlot() {
     for (int i = 0 ; i < 3 ; i ++) {
         slot.push_back((float)tvec.at<double>(i));
     }
-    for (int i = 0 ; i < 3 ; i ++) {
-        slot.push_back((float)rvec.at<double>(i));
+    for (int i = 0 ; i < 9 ; i ++) {
+        slot.push_back((float)poseRMatrix.at<double>(i));
     }
     
     return slot;
@@ -130,6 +130,12 @@ bool ASM_Gaze_Tracker::estimateFacePose() {
     vector<Point2f> imagePoints = tracker.points;
     solvePnP(facialPointsIn3D, imagePoints, cameraMatrix, distCoeffs, rvec, tvec);
     this->projectPoints(facialPointsIn3D, reprojectedFacialPointsInImage);
+    // change the rvec to rotation matrix, and then reshape the matrix to a row vector.
+    // please note that, the opencv reshapes the matrix by the row-first order. However,
+    // Matlab's reshape is column-first, so, here the matrix is transposed before opencv's reshape.
+    Rodrigues(rvec, poseRMatrix);
+    poseRMatrix = poseRMatrix.t();
+    poseRMatrix = poseRMatrix.reshape(1,1);
     return true;
 }
 
