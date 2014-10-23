@@ -114,7 +114,7 @@ track(const Mat &im,const face_tracker_params &p)
   Mat gray; if(im.channels()==1)gray = im; else cvtColor(im,gray,CV_BGR2GRAY);
 
   //initialise
-//  if(!tracking)
+  if(!tracking)
     points = detector.detect(gray,p.scaleFactor,p.minNeighbours,p.minSize);
   if((int)points.size() != smodel.npts())return 0;
 
@@ -123,7 +123,7 @@ track(const Mat &im,const face_tracker_params &p)
     points = this->fit(gray,points,p.ssize[level],p.robust,p.itol,p.ftol);
 
   //set tracking flag and increment timer
-    return 1;
+  tracking = true;  return 1;
 }
 //==============================================================================
 void

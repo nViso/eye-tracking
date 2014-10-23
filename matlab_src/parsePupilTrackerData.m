@@ -25,12 +25,11 @@ slot.reprojectedFeaturePoints = currentTest(:,17:28);
 % coords.
 slot.projectionErrorRMS = rms((slot.allFeaturePoints - slot.reprojectedFeaturePoints)');
 slot.tvec             = currentTest(:,29:31);
-slot.rvec             = currentTest(:,32:40);
-slot.rvec             = reshape(slot.rvec',[3 3 size(slot.rvec,1)]);
 % millimeter to meter.
 slot.tvec             = slot.tvec /1000;
-% this is a self-written function to convert the opencv rvec in axis/angle
-% representation into more standard quaternion representation.
+% 32 to 40 is the rotation matrix in column-first order.
+slot.rvec             = currentTest(:,32:40);
+slot.rvec             = reshape(slot.rvec',[3 3 size(slot.rvec,1)]);
 slot.quaternion       = dcm2quat(slot.rvec);
 % the rvec turns a vector in world coords into camera coords, and this
 % rvec_back do the reverse.

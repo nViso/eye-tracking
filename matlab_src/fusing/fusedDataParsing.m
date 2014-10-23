@@ -2,7 +2,7 @@ close all;
 addpath('../');
 addpath('../IMUProcessing/');
 
-traceName = '/Users/ZhipingJiang/trackingdata/video_parsing/141022_1636';
+traceName = '/Users/ZhipingJiang/trackingdata/video_parsing/141022_1512';
 visionTraceName = [traceName 'vision.test'];
 sensorTraceName = [traceName 'sensor.txt'];
 
@@ -12,17 +12,27 @@ visionData = parsePupilTrackerData(visionTraceName);
 
 clearvars -except *Data;
 
-q_cfToBN = dcm2quat([0 -1 0; -1 0 0; 0 0 -1]);
-q_faceToNN  = zeros(size(visionData.rvec_back));
-q_faceToBN  = zeros(size(visionData.rvec_back));
+%% get the rotation from face-centered coords to navigational NED coords.
+quatCfToBN = dcm2quat([0 -1 0; -1 0 0; 0 0 -1]);
+quatFaceToNN  = zeros(size(visionData.rvec_back));
+quatFaceToBN  = zeros(size(visionData.rvec_back));
 
 for i = 1:length(visionData.quaternion)
     sensorIndex = floor(i/length(visionData.quaternion)*length(sensorData.quatBNtoNN));
-    q_faceToBN(i,:) = quatmultiply(visionData.quaternion(i,:),q_cfToBN);
-    q_faceToNN(i,:) = quatmultiply(q_faceToBN(i,:),sensorData.quatBNtoNN(sensorIndex,:));
+    quatFaceToBN(i,:) = quatmultiply(visionData.quaternion(i,:),quatCfToBN);
+    quatFaceToNN(i,:) = quatmultiply(quatFaceToBN(i,:),sensorData.quatBNtoNN(sensorIndex,:));
 end
-output = quatrotate(q_faceToNN,[0 0 1]);
 
-showAxesDirection(q_faceToNN);
-figure;scatter3(visionData.tc_vec(:,1),visionData.tc_vec(:,2),visionData.tc_vec(:,3),50./visionData.projectionErrorRMS,1:length(visionData.tc_vec),'filled');
-figure;scatter3(output(:,1),output(:,2),output(:,3),50./visionData.projectionErrorRMS,1:length(output),'filled');
+%% get phone position through rotating the tv_vec by quatFaceToNN
+tPhoneNNbyFace = quatrotate(quatFaceToNN,visionData.tc_vec);
+
+%% get phone position through rotating the tvec by sensor.quaternion
+tvecBN = quatrotate(quatCfToBN,visionData.tvec);
+tFaceNNbySensorOrientation = [];
+for i = 1:length(tvecBN)
+    sensorIndex = floor(i/length(tvecBN)*length(sensorData.quatBNtoNN));
+    tFaceNNbySensorOrientation(i,:) = quatrotate(sensorData.quatBNtoNN(sensorIndex,:),tvecBN(i,:));
+end
+
+tPhoneNNbySensorOrientation = - tFaceNNbySensorOrientation;
+

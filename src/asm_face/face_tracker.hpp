@@ -39,12 +39,14 @@ public:
 //==============================================================================
 class face_tracker{                        //face tracking class
 public:
+  bool tracking;
   vector<Point2f> points;                  //current tracked points
   face_detector detector;                  //detector for initialisation
   shape_model smodel;                      //shape model
   patch_models pmodel;                     //feature detectors
   ft_data annotations;
   
+  face_tracker(){tracking = false;}
 
   int                                      //0 = failure
   track(const Mat &im,                     //image containing face
