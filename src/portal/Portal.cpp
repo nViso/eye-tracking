@@ -386,6 +386,11 @@ int main(int argc, const char * argv[])
             }
             
             if (c == 11) {
+                cout<<"Choose video file for parsing:"<<endl;
+                fs::path videoFilePath = chooseVideoFile(videoParingPath);
+                if (videoFilePath.empty()) {
+                    continue;
+                }
                 cout<<"Choose user profile:"<<endl;
                 fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
                 if (targetProfilePath.empty()) {
@@ -396,11 +401,7 @@ int main(int argc, const char * argv[])
                 if (cameraProfilePath.empty()) {
                     continue;
                 }
-                cout<<"Choose video file for parsing:"<<endl;
-                fs::path videoFilePath = chooseVideoFile(videoParingPath);
-                if (videoFilePath.empty()) {
-                    continue;
-                }
+                
                 
                 invoke_VideoParsing(targetProfilePath, cameraProfilePath, videoFilePath);
             }
