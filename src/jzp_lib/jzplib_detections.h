@@ -25,9 +25,6 @@ using namespace cv;
 Rect haarPatternDetection(CascadeClassifier classifier, Mat image, int imageWidthforDetection, Rect parentRect);
 
 Point2f findMassCenter_BinaryBiggestBlob(const Mat& image);
-void findEyeCenterByIsoPhote(const Mat& image, Point2f & eyeCoord, int blurSize);
-
-void  findEyeCenterByColorSegmentation(const Mat& image, Point2f & eyeCord, float coordinateWeight= 0.4, int kmeansIterations = 3, int kmeansRepeats= 3, int blurSize= 5);
 
 Mat calculateImageSymmetryScore(const Mat& image );
 

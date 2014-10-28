@@ -278,7 +278,7 @@ Mat logOnGrayImage(const Mat &im)
     I += 1.0; log(I,I); return I;
 }
 
-Mat isoPhote(const Mat &im, bool lookForDarkCenter, int minrad, int maxrad, Size gaussianKernelSize, double gaussianSigma,Size gaussianKernelSize2, double gaussianSigma2)  {
+Mat isoPhote(const Mat &im, bool lookForDarkCenter, int minrad, int maxrad, Size gaussianKernelSize, double gaussianSigma, const Mat &Mask)  {
     
     Mat workingCopy = im;
     if (workingCopy.channels() == 3) {
@@ -303,7 +303,7 @@ Mat isoPhote(const Mat &im, bool lookForDarkCenter, int minrad, int maxrad, Size
             if (lookForDarkCenter != isocurvature.at<float>(row,col) < 0) {
                     continue;
             }
-            if (abs(dy.at<float>(row,col) / dx.at<float>(row,col)) > 1.3) {
+            if (abs(dy.at<float>(row,col) / dx.at<float>(row,col)) > 1) {
                 continue;
             }
             if (vectorMag.at<float>(row,col) >=minrad && vectorMag.at<float>(row,col) <= maxrad) {
@@ -315,9 +315,11 @@ Mat isoPhote(const Mat &im, bool lookForDarkCenter, int minrad, int maxrad, Size
             }
         }
     }
+    centermap.copyTo(centermap,Mask);
+    Mat masked;
+    centermap.copyTo(masked,Mask);
 //    imagesc("before blur",centermap);
-    GaussianBlur(centermap, centermap, gaussianKernelSize2, gaussianSigma2);
-    return centermap;
+    return masked;
 }
 
 void unitGradient(const Mat & im , Mat & Lx, Mat & Ly) {

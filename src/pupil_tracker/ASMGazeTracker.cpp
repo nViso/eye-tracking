@@ -22,7 +22,7 @@ vector<float> ASM_Gaze_Tracker::toDataSlot() {
     vector<float> slot;
     
     if (isTrackingSuccess == false) {
-        for (int i = 0; i < 34; i++) {
+        for (int i = 0; i < 40; i++) {
             slot.push_back(0.0f);
         }
         return slot;
@@ -103,12 +103,12 @@ bool ASM_Gaze_Tracker::calculatePupilCenter(){
     
     Point2f leftEyeCenter, rightEyeCenter;
     
-//    findEyeCenterByColorSegmentation(cropped(leftEyeRect), leftEyeCenter);
-//    findEyeCenterByColorSegmentation(cropped(rightEyeRect), rightEyeCenter);
+//    eyeCenterLocalizationImpl(cropped(leftEyeRect), leftEyeCenter);
+//    eyeCenterLocalizationImpl(cropped(rightEyeRect), rightEyeCenter);
 //    cout<<"debug"<<endl;
     
-    boost::thread leftEyeThread(findEyeCenterByColorSegmentation, cropped(leftEyeRect), boost::ref(leftEyeCenter), 0.4,4,3,5);
-    boost::thread  rightEyeThread(findEyeCenterByColorSegmentation, cropped(rightEyeRect), boost::ref(rightEyeCenter), 0.4,4,3,5);
+    boost::thread leftEyeThread(eyeCenterLocalizationImpl, cropped(leftEyeRect), boost::ref(leftEyeCenter), 0.35,4,3,0.26);
+    boost::thread  rightEyeThread(eyeCenterLocalizationImpl, cropped(rightEyeRect), boost::ref(rightEyeCenter), 0.34,4,3,0.26);
     leftEyeThread.join();
     rightEyeThread.join();
     
@@ -192,4 +192,129 @@ void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
     facialPointsIn3D = faceFeatures;
     facialPointsIn2D = faceFeatures2;
 //    cout<<"facial points 2d:"<<endl<<faceFeatures2<<endl;
+}
+
+void ASM_Gaze_Tracker::eyeCenterLocalizationImpl(const Mat& image, Point2f & eyeCoord, float coordinateWeight, int kmeansIterations, int kmeansRepeats, float blurSizeRatio) {
+    
+    Mat img, gray_img, bluredGrayImg, temp;
+    Mat colorpoints, kmeansPoints;
+    
+    img = equalizeImage(image);
+    
+    int width = img.cols;
+    int ksize =(int) (blurSizeRatio * width);
+    if (ksize %2 ==0) {
+        ksize ++;
+    }
+    
+    //        GaussianBlur(img, img, Size(ksize,ksize),ksize);
+    gray_img = img.clone();
+    medianBlur(img, img, ksize);
+    //        imshow("blured",img);
+    cvtColor(img, bluredGrayImg, CV_BGR2GRAY);
+    
+    bluredGrayImg = imcomplement(bluredGrayImg);
+    vector<Mat> layers(3);
+    split(img, layers);
+    for (int i = 0 ; i < layers.size(); i++) {
+        layers[i] = layers[i].reshape(1,1).t();
+    }
+    hconcat(layers, colorpoints);
+    
+    // add coordinates
+    colorpoints.convertTo(colorpoints, CV_32FC1);
+    Mat coordinates = matrixPointCoordinates(img.rows,img.cols,false) *coordinateWeight;
+    hconcat(colorpoints, coordinates, kmeansPoints);
+    
+    Mat locIndex(img.size().area(),kmeansIterations,CV_32FC1,Scalar::all(-1));
+    linspace(0, img.size().area(), 1).copyTo(locIndex.col(0));
+    Mat index_img(img.rows,img.cols,CV_32FC1,Scalar::all(0));
+    Mat bestLabels, centers, clustered , colorsum , minColorPtIndex;
+    for(int it = 1 ; it < kmeansIterations ; it++) {
+        if (kmeansPoints.rows < 2) {
+            break;
+        }
+        kmeans(kmeansPoints,2,bestLabels,TermCriteria(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, kmeansRepeats, 0.001),kmeansRepeats,KMEANS_PP_CENTERS,centers);
+        reduce(centers.colRange(0, 3), colorsum, 1, CV_REDUCE_SUM);
+        
+        if (colorsum.at<float>(0) < colorsum.at<float>(1)) {
+            
+            findNonZero(bestLabels==0, minColorPtIndex);
+        }
+        else {
+            findNonZero(bestLabels==1, minColorPtIndex);
+        }
+        
+        minColorPtIndex = minColorPtIndex.reshape(1).col(1);
+        
+        for (int  i = 0; i <minColorPtIndex.rows ; i ++) {
+            locIndex.at<float>(i,it) = locIndex.at<float>(minColorPtIndex.at<int>(i),it-1);
+        }
+        Mat temp;
+        for (int  i = 0; i <minColorPtIndex.rows ; i ++) {
+            temp.push_back(kmeansPoints.row(minColorPtIndex.at<int>(i)));
+        }
+        temp.copyTo(kmeansPoints);
+        temp.release();
+        for (int i = 0 ; i < minColorPtIndex.rows ; i ++) {
+            int r, c;
+            ind2sub(locIndex.at<float>(i,it), index_img.cols, index_img.rows, r, c);
+            index_img.at<float>(r,c) +=1;
+        }
+    }
+    //        imagesc("layed", index_img);
+    double minVal , maxVal;
+    Point minLoc, maxLoc;
+    
+    int bestx = 0,bestscore = 9999999 ,bestlayer = 0;
+    Mat bestIndex_img = index_img >=1;
+    minMaxLoc(index_img,&minVal,&maxVal,&minLoc,&maxLoc);
+    int levels = maxVal;
+    for (int i = 1 ; i<=levels; i++) {
+        Mat indexlayer_img = index_img >=i;
+        medianBlur(indexlayer_img, indexlayer_img, 5);
+        erode(indexlayer_img, indexlayer_img, ksize);
+        erode(indexlayer_img, indexlayer_img, ksize);
+        indexlayer_img = removeSmallBlobs(indexlayer_img);
+        
+        indexlayer_img = fillHoleInBinary(indexlayer_img);
+        indexlayer_img = fillConvexHulls(indexlayer_img);
+        
+        Mat score = calculateImageSymmetryScore(indexlayer_img);
+        Mat scoresum;
+        reduce(score.rowRange(0, width/6), scoresum, 0, CV_REDUCE_SUM,CV_32FC1);
+        
+        int currentScore = sum(scoresum).val[0];
+        //            cout<<"score"+boost::lexical_cast<string>(i)+":"<<currentScore<<endl;
+        //            plotLiveData("score"+boost::lexical_cast<string>(i), currentScore);
+        //            plotVectors("scoresum"+boost::lexical_cast<string>(i), scoresum.t());
+        if (bestscore > currentScore && currentScore > 0) {
+            bestscore = currentScore;
+            minMaxLoc(scoresum,&minVal,&maxVal,&minLoc,&maxLoc);
+            bestx = maxLoc.x;
+            bestlayer = i;
+            bestIndex_img = indexlayer_img.clone();
+        }
+    }
+    
+    //        imshow("best",bestIndex_img);
+    Point2f massCenter = findMassCenter_BinaryBiggestBlob(bestIndex_img);
+    
+    Mat maskOut(bestIndex_img.size(),CV_8UC1,Scalar::all(255));
+    gray_img.copyTo(maskOut, bestIndex_img);
+    //    imshow("maskout",maskOut);
+    Point2f isoCenter;
+    Mat centermap = isoPhote(gray_img, true, width/7, width/4, Size(ksize,ksize), ksize*0.25,bestIndex_img);
+    
+    if (massCenter.x >0 && massCenter.y >0) {
+        circle(centermap, Point2f(bestx,massCenter.y), ksize/4, Scalar::all(50));
+    }
+    
+    GaussianBlur(centermap, centermap, Size(ksize,ksize), ksize/2);
+    
+    //        imagesc("hybrid",centermap);
+    
+    minMaxLoc(centermap,&minVal,&maxVal,&minLoc,&maxLoc);
+    eyeCoord =  Point2f(bestx,maxLoc.y);
+
 }

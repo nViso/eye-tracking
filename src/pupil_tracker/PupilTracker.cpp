@@ -90,8 +90,8 @@ int main(int argc, const char * argv[])
             drawPoints(im, pupilTracker.canthusPts);
             drawPoints(im, pupilTracker.nosePts);
             drawPoints(im, pupilTracker.reprojectedFacialPointsInImage,Scalar(0,255,0));
-            circle(im, pupilTracker.leftEyePoint, 3, Scalar(0,255,0));
-            circle(im, pupilTracker.rightEyePoint, 3, Scalar(0,255,0));
+            circle(im, pupilTracker.leftEyePoint, 1, Scalar(0,255,0),-1);
+            circle(im, pupilTracker.rightEyePoint, 1, Scalar(0,255,0),-1);
             vector<Point2f> reprjCrdRefPts;
             pupilTracker.projectPoints(faceCrdRefVecs, reprjCrdRefPts);
             line(im, reprjCrdRefPts[0], reprjCrdRefPts[1], Scalar(255,0,0),2);

@@ -21,8 +21,6 @@ public:
     bool estimateFacePose();
     void projectPoints(const vector<Point3f> & sourcePoints, vector<Point2f> & destPoints);
     float distanceToCamera();
-    void findBestFrontalFaceShapeIn3D() ;
-    
     vector<float> toDataSlot();
     
     
@@ -52,4 +50,6 @@ private:
     
     Mat im;
     Mat rotated_img;
+    void findBestFrontalFaceShapeIn3D() ;
+    static void eyeCenterLocalizationImpl(const Mat& image, Point2f & eyeCord, float coordinateWeight= 0.35, int kmeansIterations = 4, int kmeansRepeats= 3, float blurSizeRatio=0.26);
 };

@@ -2,7 +2,7 @@ close all;
 addpath('../');
 addpath('../IMUProcessing/');
 
-traceName = '/Users/ZhipingJiang/trackingdata/video_parsing/141022_1512';
+traceName = '/Users/ZhipingJiang/trackingdata/video_parsing/141027_1123';
 visionTraceName = [traceName 'vision.test'];
 sensorTraceName = [traceName 'sensor.txt'];
 
@@ -24,9 +24,12 @@ for i = 1:length(visionData.quaternion)
 end
 
 %% get phone position through rotating the tv_vec by quatFaceToNN
+% this is actually R_bn^nn * R_cf^bn * V_cf(tvec)
 tPhoneNNbyFace = quatrotate(quatFaceToNN,visionData.tc_vec);
 
 %% get phone position through rotating the tvec by sensor.quaternion
+% this is R_bn^nn *R_cf^bn * R_fe^cf * ( -R_cf*fe * V_cf(tvec) )
+% both this two forms are mathmatically identical!!!!
 tvecBN = quatrotate(quatCfToBN,visionData.tvec);
 tFaceNNbySensorOrientation = [];
 for i = 1:length(tvecBN)
@@ -36,3 +39,9 @@ end
 
 tPhoneNNbySensorOrientation = - tFaceNNbySensorOrientation;
 
+%%
+densePhoneNNByFace = interp1([0:sensorData.timeline(end)/length(tPhoneNNbyFace):sensorData.timeline(end)-sensorData.timeline(end)/length(tPhoneNNbyFace)]',tPhoneNNbyFace,sensorData.timeline);
+densePhoneSpeedNNByFace = [0 0 0; diff(densePhoneNNByFace)];
+densePhoneAccNNByFace = [0 0 0; diff(densePhoneSpeedNNByFace)];
+sensorAccNN = quatrotate(sensorData.quatBNtoNN,sensorData.acc(:,1:3));
+accDiff = sensorAccNN - densePhoneAccNNByFace;
