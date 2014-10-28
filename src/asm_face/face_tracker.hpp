@@ -53,6 +53,10 @@ public:
     const face_tracker_params &p =     //fitting parameters 
     face_tracker_params());            //default tracking parameters
 
+  void reset() {
+    tracking = false;
+  }
+    
   void
   draw(Mat &im,
        const Scalar pts_color = CV_RGB(255,0,0),

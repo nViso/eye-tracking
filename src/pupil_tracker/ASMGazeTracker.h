@@ -15,6 +15,7 @@ class ASM_Gaze_Tracker {
 public:
     ASM_Gaze_Tracker(const fs::path & trackermodel, const fs::path & cameraProfile = fs::path());
     bool featureTracking(const cv::Mat & im);
+    void reDetectFace();
     
     bool calculatePupilCenter();
     

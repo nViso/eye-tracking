@@ -62,6 +62,9 @@ bool ASM_Gaze_Tracker::featureTracking(const cv::Mat & im) {
     
 }
 
+void ASM_Gaze_Tracker::reDetectFace() {
+    tracker.reset();
+}
 
 bool ASM_Gaze_Tracker::calculatePupilCenter(){
     Mat  leftEyeImg,rightEyeImg,cropped;
