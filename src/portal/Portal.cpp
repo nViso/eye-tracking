@@ -88,14 +88,6 @@ void invoke_PupilTracker(fs::path userProfileDir,fs::path cameraFile) {
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
-void invoke_HeadPoseEstimation(fs::path userProfileDir,fs::path cameraFile) {
-    cout<<"------- Invoking ./HeadPoseEstimation ----------"<<endl;
-    string cmdpath = (fs::current_path()/"HeadPoseEstimation").string();
-    string cmd = cmdpath+" "+userProfileDir.string()+" "+cameraFile.string();
-    system(cmd.c_str());
-    cout<<"------- Invocation Done ------------------------"<<endl;
-}
-
 void invoke_HeadPoseAdviser(fs::path userProfileDir,fs::path cameraFile) {
     cout<<"------- Invoking ./HeadPoseAdviser ----------"<<endl;
     string cmdpath = (fs::current_path()/"HeadPoseAdviser").string();
@@ -143,6 +135,14 @@ void invoke_AnnotationFlip(fs::path userProfileDir) {
     system(cmd.c_str());
     cout<<"------- Invocation Done ------------------------"<<endl;
 
+}
+
+void invoke_VideoParsing(fs::path userProfileDir,fs::path cameraProfilePath, fs::path videoFilePath) {
+    cout<<"------- Invoking ./Pupil Tracker (video parsing) ------------------"<<endl;
+    string cmdpath = (fs::current_path()/"PupilTracker").string();
+    string cmd = cmdpath+" "+userProfileDir.string()+" "+cameraProfilePath.string()+" "+videoFilePath.string();
+    system(cmd.c_str());
+    cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
 
@@ -225,6 +225,27 @@ fs::path chooseUserProfile(fs::path userBasePath, bool withNew) {
     return fs::path();
 }
 
+fs::path chooseVideoFile(fs::path videoParingPath) {
+    vector<fs::path> videoFiles = listFilesWithExtension(videoParingPath, "", "vision.mov");
+    int index = 0;
+    while (videoFiles.size()>0) {
+        
+        cout<<"There are "<<videoFiles.size()<<" videos:"<<endl;
+        for (index = 0; index < videoFiles.size(); index++) {
+            cout<<"("<<index<<") "<<videoFiles[index].string()<<endl;
+        }
+        string input;
+        cout<<"which one do you choose ? ";
+        cin >> input;
+        
+        if (is_number(input) && boost::lexical_cast<int>(input) >=0 && boost::lexical_cast<int>(input) < videoFiles.size()) {
+            return videoFiles[boost::lexical_cast<int>(input)];
+        }
+    }
+    cout<<"There is no video for parsing."<<endl;
+    return fs::path();
+}
+
 void regeneratePupilCoordiantesFromExistingTests(fs::path resultsPath) {
     vector<fs::path> videoFiles = listFilesRecursivelyWithExtension(resultsPath, "", "avi");
     
@@ -284,11 +305,11 @@ int main(int argc, const char * argv[])
         cout<<"3. create, modify, visualize curves."<<endl;
         cout<<"4. run gazing curve recorder"<<endl;
         cout<<"5. run pupil tracker."<<endl;
-        cout<<"6. run head pose estimation."<<endl;
         cout<<"7. run chessboard camera calibration."<<endl;
         cout<<"8. regenerate pupil tracking coordinates for existing tests."<<endl;
         cout<<"9. run head pose adviser."<<endl;
         cout<<"10. flip the annotation for chosen profile."<<endl;
+        cout<<"11. parse video file."<<endl;
         cout<<"q. quit"<<endl;
         cout<<"------ Your choice : ";
         string input;
@@ -296,7 +317,7 @@ int main(int argc, const char * argv[])
         
         if (is_number(input)) {
             int c = boost::lexical_cast<int>(input);
-            if (c<1 || c>10) {
+            if (c<1 || c>11) {
                 cout<<"error number"<<endl;
                 continue;
             }
@@ -339,15 +360,6 @@ int main(int argc, const char * argv[])
 
             }
             
-            if (c == 6) {
-                cout<<"Choose user profile:"<<endl;
-                fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
-                fs::path cameraProfilePath = chooseCameraProfile(cameraCalibPath);
-                if (targetProfilePath.empty() == false) {
-                    invoke_HeadPoseEstimation(targetProfilePath,cameraProfilePath);
-                }
-            }
-            
             if (c == 7) {
                 invoke_CameraCalibrator(cameraCalibPath);
             }
@@ -371,6 +383,26 @@ int main(int argc, const char * argv[])
                 if (targetProfilePath.empty() == false) {
                     invoke_AnnotationFlip(targetProfilePath);
                 }
+            }
+            
+            if (c == 11) {
+                cout<<"Choose user profile:"<<endl;
+                fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
+                if (targetProfilePath.empty()) {
+                    continue;
+                }
+                cout<<"Choose camera profile:"<<endl;
+                fs::path cameraProfilePath = chooseCameraProfile(cameraCalibPath);
+                if (cameraProfilePath.empty()) {
+                    continue;
+                }
+                cout<<"Choose video file for parsing:"<<endl;
+                fs::path videoFilePath = chooseVideoFile(videoParingPath);
+                if (videoFilePath.empty()) {
+                    continue;
+                }
+                
+                invoke_VideoParsing(targetProfilePath, cameraProfilePath, videoFilePath);
             }
             
             

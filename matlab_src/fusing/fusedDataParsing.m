@@ -1,4 +1,4 @@
-close all;
+ clc;clear;
 addpath('../');
 addpath('../IMUProcessing/');
 
@@ -16,9 +16,10 @@ clearvars -except *Data;
 quatCfToBN = dcm2quat([0 -1 0; -1 0 0; 0 0 -1]);
 quatFaceToNN  = zeros(size(visionData.rvec_back));
 quatFaceToBN  = zeros(size(visionData.rvec_back));
-
+quatSensorBNToBN  = zeros(size(visionData.rvec_back));
 for i = 1:length(visionData.quaternion)
     sensorIndex = floor(i/length(visionData.quaternion)*length(sensorData.quatBNtoNN));
+    quatSensorBNToBN(i,:) = sensorData.quatBNtoNN(sensorIndex,:);
     quatFaceToBN(i,:) = quatmultiply(visionData.quaternion(i,:),quatCfToBN);
     quatFaceToNN(i,:) = quatmultiply(quatFaceToBN(i,:),sensorData.quatBNtoNN(sensorIndex,:));
 end
@@ -29,7 +30,7 @@ tPhoneNNbyFace = quatrotate(quatFaceToNN,visionData.tc_vec);
 
 %% get phone position through rotating the tvec by sensor.quaternion
 % this is R_bn^nn *R_cf^bn * R_fe^cf * ( -R_cf*fe * V_cf(tvec) )
-% both this two forms are mathmatically identical!!!!
+% both these two forms are mathmatically identical!!!!
 tvecBN = quatrotate(quatCfToBN,visionData.tvec);
 tFaceNNbySensorOrientation = [];
 for i = 1:length(tvecBN)
@@ -39,9 +40,24 @@ end
 
 tPhoneNNbySensorOrientation = - tFaceNNbySensorOrientation;
 
-%%
-densePhoneNNByFace = interp1([0:sensorData.timeline(end)/length(tPhoneNNbyFace):sensorData.timeline(end)-sensorData.timeline(end)/length(tPhoneNNbyFace)]',tPhoneNNbyFace,sensorData.timeline);
-densePhoneSpeedNNByFace = [0 0 0; diff(densePhoneNNByFace)];
-densePhoneAccNNByFace = [0 0 0; diff(densePhoneSpeedNNByFace)];
-sensorAccNN = quatrotate(sensorData.quatBNtoNN,sensorData.acc(:,1:3));
-accDiff = sensorAccNN - densePhoneAccNNByFace;
+%% three frames in angle.
+[r3 r2 r1] = quat2angle(sensorData.quatBNtoNN);
+phoneAngleNN = rad2deg(unwrap([r1 r2 r3]));
+[r3 r2 r1] = quat2angle(quatFaceToBN);
+faceAngleBN = rad2deg(unwrap([r1 r2 r3]));
+[r3 r2 r1] = quat2angle(quatFaceToNN);
+faceAngleNN = rad2deg(unwrap([r1 r2 r3]));
+clear r*;
+
+%% calculate the error correction rotation if head not moving.
+if sum(std(faceAngleNN)) < 25
+    quatFaceToNNIdeal = angle2quat(deg2rad(median(faceAngleNN(:,3))),deg2rad(median(faceAngleNN(:,2))),deg2rad(median(faceAngleNN(:,1))));
+    quatFaceToNNIdeal = ones(length(quatFaceToNN),1) * quatFaceToNNIdeal;
+    
+    m1 = quatmultiply(quatinv(visionData.quaternion),quatFaceToNNIdeal);
+    m2 = quatmultiply(m1,quatinv(quatSensorBNToBN));
+    quatError = quatmultiply(m2,quatinv(quatCfToBN));
+    
+    [r3 r2 r1] = quat2angle(quatError);
+    errorAngle = rad2deg(unwrap([r1 r2 r3]));
+end
