@@ -176,7 +176,9 @@ int  readRotationMetadataForVideo(fs::path filePath) {
     ffprobePath.pop_back();
     string command = ffprobePath+ " -show_streams " + filePath.string()+ " 2>/dev/null | grep TAG:rotate='[0-9]\\+' | grep  -o '[0-9]\\+'";
     string stringResult = execSystemCall(command);
-    stringResult.pop_back();
+    if (boost::ends_with(stringResult, "\n")) {
+        stringResult.pop_back();
+    }
     if (stringResult.empty()) {
         result =  0;
     } else {
