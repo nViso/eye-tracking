@@ -1,4 +1,6 @@
- clc;clear;
+error('This script is deprecated. User ParseFusedData function instead');
+
+clc;clear;
 addpath('../');
 addpath('../IMUProcessing/');
 

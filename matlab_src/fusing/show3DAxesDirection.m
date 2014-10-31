@@ -24,3 +24,9 @@ zlim([-1 1]);
 xlabel('North (X)');
 ylabel('East (Y)');
 zlabel('Down (Z)');
+
+if nargout < 1
+    xvec = [];
+    yvec = [];
+    zvec = [];
+end
