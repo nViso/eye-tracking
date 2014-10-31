@@ -57,5 +57,5 @@ read(const FileNode& node,
     if(node.empty())x = d; else x.read(node);
 }
 
-
+bool is_number_asm(const std::string& s);
 ft_data load_ft_jzp(string fname);

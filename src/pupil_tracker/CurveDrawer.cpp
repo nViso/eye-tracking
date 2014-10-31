@@ -94,7 +94,7 @@ void showAnimation() {
     
     for(;;){
         imshow(windowName, bgcopy);
-        int key = waitKey(1);
+        int key = waitKey(1)%256;
         if (key == 's') {
             animationFinishSign = true;
             animateThread.join();
@@ -166,7 +166,7 @@ void showCurveCanvas() {
     while(true) {
         adjustPointsOrder();
         drawCanvas();
-        int key =  waitKey();
+        int key =  waitKey()%256;
         switch (key) {
             case 'a':
                 showAnimation();

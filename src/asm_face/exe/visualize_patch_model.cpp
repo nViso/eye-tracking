@@ -120,7 +120,7 @@ int main(int argc,char** argv)
                   CV_RGB(255,0,0),2,CV_AA);
         char str[256]; sprintf(str,"patch %d",i); draw_string(img,str);
         imshow("patch model",img);
-        int c = waitKey(0);
+        int c = waitKey(0)%256;
         if(c == 'q')break;
         else if(c == 'p')i++;
         else if(c == 'o')i--;

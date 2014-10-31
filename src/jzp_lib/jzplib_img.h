@@ -37,4 +37,12 @@ void ind2sub(const int sub,const int cols,const int rows,int &row,int &col);
 
 Mat matrixPointCoordinates(int rows, int cols ,bool matlabColumnFirst) ;
 
+Mat logOnGrayImage(const Mat &im);
+
+Mat isoPhote(const Mat &im, bool lookForDarkCenter, int minrad, int maxrad, Size gaussianKernelSize, double gaussianSigma, const Mat &mask = Mat());
+void unitGradient(const Mat & im , Mat & Lx, Mat & Ly);
+Mat curvature(const Mat &im);
+Mat curvedness(const Mat &im);
+
+
 #endif /* defined(__OPENCV_HOTSHOTS__jzplib_img__) */

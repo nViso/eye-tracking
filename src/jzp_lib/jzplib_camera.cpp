@@ -11,6 +11,17 @@
 
 using namespace boost::lockfree;
 
+bool readCameraProfile(const fs::path & filepath, Mat & cameraMatrix, Mat & distCoeffs) {
+    FileStorage fileLoader(filepath.string(),FileStorage::READ);
+    fileLoader["cameraMatrix"]>>cameraMatrix;
+    fileLoader["distCoeffs"] >> distCoeffs;
+    fileLoader.release();
+    if (cameraMatrix.empty() || distCoeffs.empty()) {
+        return false;
+    }
+    else return true;
+}
+
 Mat cameraMatrixByCropNResize(const Mat originalCameraMatrix, Size originalSize, Rect currentRect, float resizeFactor) {
     Mat nowcm = originalCameraMatrix;
     cout<<nowcm.channels()<<" "<<nowcm.size()<<endl;
@@ -137,6 +148,7 @@ bool chessboardCameraCalibration(int gridW, int gridH, float gridSize, vector<fs
             if (drawCorners) {
                 drawChessboardCorners(images[i], grids, Mat(corners), found);
                 imshow("chessboard"+boost::lexical_cast<std::string>(i),images[i]);
+                waitKey(200);
             }
         }
     }
@@ -152,4 +164,44 @@ bool chessboardCameraCalibration(int gridW, int gridH, float gridSize, vector<fs
     double rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distCoeffs, rvecs, tvecs);
     
     return true;
+}
+
+/// Given a video file, this function will call "ffprobe" command to check the "rotation metadata", which gives an 90/180/270 degree return.
+int  readRotationMetadataForVideo(fs::path filePath) {
+    int result = 0;
+    // in Xcode debug mode, the $PATH doesn't include /usr/local/bin, so "which ffprobe" got nothing. We have to add it to the $PATH
+    string addUserLocalBinPathCommand = "PATH=$PATH:/usr/local/bin; export PATH; which ffprobe";
+    string ffprobePath = execSystemCall(addUserLocalBinPathCommand);
+    // remove the ending "next line" in the output.
+    ffprobePath.pop_back();
+    string command = ffprobePath+ " -show_streams " + filePath.string()+ " 2>/dev/null | grep TAG:rotate='[0-9]\\+' | grep  -o '[0-9]\\+'";
+    string stringResult = execSystemCall(command);
+    if (boost::ends_with(stringResult, "\n")) {
+        stringResult.pop_back();
+    }
+    if (stringResult.empty()) {
+        result =  0;
+    } else {
+        result = boost::lexical_cast<int>(stringResult);
+        cout<<result<<" degrees frame rotation detected on video file:"<<filePath.string()<<endl;
+    }
+    
+    return result;
+}
+
+/// transpose and/or flip image according to the rotationDegree, which is extracted by readRotationMetadataForVideo method.
+void imageOrientationFix(Mat & source, int degree) {
+    switch(degree) {
+        case 90:
+            transpose(source, source);
+            flip(source,source,1);
+            break;
+        case 180:
+            flip(source,source,0);
+            break;
+        case 270:
+            transpose(source, source);
+            flip(source,source,0);
+            break;
+    }
 }

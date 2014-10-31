@@ -16,9 +16,11 @@ using namespace boost::lockfree;
 using namespace cv;
 using namespace std;
 
+bool readCameraProfile(const fs::path & filepath, Mat & cameraMatrix, Mat & distCoeffs);
+
 Mat cameraMatrixByCropNResize(Mat originalCameraMatrix, Size originalSize, Rect currentRect, float resizeFactor);
 
-bool captureImage(VideoCapture& capture, Mat& color_img, bool flip = true);
+bool captureImage(VideoCapture& capture, Mat& color_img, bool flip = false);
 
 void videoCaptureThreadFun(VideoCapture *capture, Mat *frame, int framerate, bool * finishSign);
 
@@ -29,3 +31,6 @@ void videoWriterThreadFun(VideoWriter * writer, spsc_queue<Mat,boost::lockfree::
 vector<vector<Point3f> > calcBoardCornerPositions(int gridW, int gridH, float squareSize, int imagesCount);
 
 bool chessboardCameraCalibration(int gridW, int gridH, float gridSize, vector<fs::path> imagePaths, Mat & cameraMatrix, Mat & distCoeffs, bool drawCorners);
+
+int  readRotationMetadataForVideo(fs::path filePath);
+void imageOrientationFix(Mat & source, int degree) ;

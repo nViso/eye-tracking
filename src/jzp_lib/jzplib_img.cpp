@@ -5,7 +5,7 @@
 //  Created by Zhiping Jiang on 14-7-18.
 //
 //
-
+#include "jzplib_draw.h"
 #include "jzplib_img.h"
 #include "jzplib_geom.h"
 #include "jzplib_utils.h"
@@ -129,7 +129,7 @@ Mat calculateColorHistogram(Mat image,Mat mask, int dims = 2, int colorSpace = C
     const int hist1Size[] = { hbins , sbins};
     const int hist2Size[] = { hbins , sbins};
     const int hist3Size[] = { hbins , sbins, vbins};
-    const float hranges[] = {0,180}; 
+    const float hranges[] = {0,180};
     const float sranges[] = {0,256};
     const float vranges[] = {0,100};
     const float* hist1Ranges[] = {hranges};
@@ -260,5 +260,123 @@ Mat equalizeImage(const Mat& inputImage)
         return gray;
     }
     return Mat();
+}
+
+Mat logOnGrayImage(const Mat &im)
+{
+    Mat I;
+    if(im.channels() == 1){
+        if(im.type() != CV_32F)im.convertTo(I,CV_32F);
+        else I = im;
+    }else{
+        if(im.channels() == 3){
+            Mat img; cvtColor(im,img,CV_BGR2GRAY);
+            if(img.type() != CV_32F)img.convertTo(I,CV_32F);
+            else I = img;
+        }else{cout << "Unsupported image type!" << endl; abort();}
+    }
+    I += 1.0; log(I,I); return I;
+}
+
+Mat isoPhote(const Mat &im, bool lookForDarkCenter, int minrad, int maxrad, Size gaussianKernelSize, double gaussianSigma, const Mat &Mask)  {
+    
+    Mat workingCopy = im;
+    if (workingCopy.channels() == 3) {
+        cvtColor(workingCopy, workingCopy, CV_BGR2GRAY);
+    }
+    GaussianBlur(workingCopy, workingCopy, gaussianKernelSize, gaussianSigma);
+//    imshow("workingcopy",workingCopy);
+    Mat isocurvature = curvature(workingCopy);
+    Mat isocurvedness = curvedness(workingCopy);
+    Mat dx, dy, ULx, ULy, vectorMag(1,1,CV_32FC1);
+    unitGradient(workingCopy, ULx, ULy);
+    
+    dx = ULx/isocurvature;
+    dy = ULy/isocurvature;
+    vectorMag = dx.mul(dx) + dy.mul(dy);
+    sqrt(vectorMag, vectorMag);
+    
+    Mat centermap(workingCopy.size(),CV_32FC1,Scalar::all(0));
+    
+    for (int row = 0 ; row < centermap.rows; row++) {
+        for (int col = 0; col < centermap.cols; col++) {
+            if (lookForDarkCenter != isocurvature.at<float>(row,col) < 0) {
+                    continue;
+            }
+            if (abs(dy.at<float>(row,col) / dx.at<float>(row,col)) > 1) {
+                continue;
+            }
+            if (vectorMag.at<float>(row,col) >=minrad && vectorMag.at<float>(row,col) <= maxrad) {
+                int ncol = col + round(dx.at<float>(row,col));
+                int nrow = row + round(dy.at<float>(row,col));
+                if (nrow >= 0 && nrow <centermap.rows && ncol >=0 && ncol <centermap.cols) {
+                    centermap.at<float>(nrow,ncol) += isocurvedness.at<float>(row,col);
+                }
+            }
+        }
+    }
+    centermap.copyTo(centermap,Mask);
+    Mat masked;
+    centermap.copyTo(masked,Mask);
+//    imagesc("before blur",centermap);
+    return masked;
+}
+
+void unitGradient(const Mat & im , Mat & Lx, Mat & Ly) {
+    Mat workingCopy = im;
+    if (workingCopy.channels() == 3) {
+        cvtColor(workingCopy, workingCopy, CV_BGR2GRAY);
+    }
+    
+    Sobel(workingCopy, Lx, CV_32F, 1, 0);
+    Sobel(workingCopy, Ly, CV_32F, 0, 1);
+    
+    Mat norm = Lx.mul(Lx) + Ly.mul(Ly);
+    sqrt(norm,norm);
+    Lx = Lx/norm;
+    Ly = Ly/norm;
+}
+
+Mat curvedness(const Mat &im) {
+    Mat workingCopy = im;
+    if (workingCopy.channels() == 3) {
+        cvtColor(workingCopy, workingCopy, CV_BGR2GRAY);
+    }
+    
+    Mat Lx, Ly, Lxx, Lxy, Lyy;
+    
+    Sobel(workingCopy, Lx, CV_32F, 1, 0);
+    Sobel(workingCopy, Ly, CV_32F, 0, 1);
+    Sobel(Lx, Lxx, CV_32F, 1, 0);
+    Sobel(Lx, Lxy, CV_32F, 0, 1);
+    Sobel(Ly, Lyy, CV_32F, 0, 1);
+    
+    Mat curvedness = (Lxx.mul(Lxx) + 2*Lxy.mul(Lxy) + Lyy.mul(Lyy));
+    pow(curvedness, 0.5, curvedness);
+    
+    return curvedness;
+    
+}
+
+Mat curvature(const Mat &im) {
+    Mat workingCopy = im;
+    if (workingCopy.channels() == 3) {
+        cvtColor(workingCopy, workingCopy, CV_BGR2GRAY);
+    }
+    
+    Mat Lx, Ly, Lxx, Lxy, Lyy;
+    
+    Sobel(workingCopy, Lx, CV_32F, 1, 0);
+    Sobel(workingCopy, Ly, CV_32F, 0, 1);
+    Sobel(Lx, Lxx, CV_32F, 1, 0);
+    Sobel(Lx, Lxy, CV_32F, 0, 1);
+    Sobel(Ly, Lyy, CV_32F, 0, 1);
+    
+    Mat numerator = Ly.mul(Ly).mul(Lxx) - 2* Lx.mul(Lxy).mul(Ly) + Lx.mul(Lx).mul(Lyy);
+    Mat denominator = Lx.mul(Lx) + Ly.mul(Ly);
+    pow(denominator, 1.5,denominator);
+    Mat curvature = - numerator / denominator;
+    
+    return curvature;
 }
 

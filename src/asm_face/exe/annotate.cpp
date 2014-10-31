@@ -162,7 +162,11 @@ protected:
 void pp_MouseCallback(int event, int x, int y, int /*flags*/, void* /*param*/)
 {
     if(event == CV_EVENT_LBUTTONDOWN){
-        annotation.data.points[0].push_back(Point2f(x,y));
+        for (int i = 0; i < annotation.data.points.size(); i++) {
+            annotation.data.points[i].push_back(Point2f(x,y));
+        }
+        // the newly added points is at the last, so its symmetry number is its position.
+        annotation.data.symmetry.push_back(annotation.data.symmetry.size());
         annotation.draw_points();
         imshow(annotation.wname,annotation.image);
     }
@@ -171,8 +175,21 @@ void pp_MouseCallback(int event, int x, int y, int /*flags*/, void* /*param*/)
         if (imin <0) {
             return ;
         }
-        //        cout<<"cancel point"<<imin<<endl;
-        annotation.data.points[0].erase(annotation.data.points[0].begin() + imin);
+        for (int i = 0 ; i < annotation.data.points.size(); i++) {
+            annotation.data.points[i].erase(annotation.data.points[i].begin()+imin);
+        }
+        // reset all symmetry connections with the deleting point
+        for (int i = 0 ; i < annotation.data.symmetry.size(); i++) {
+            if (annotation.data.symmetry[i] == imin) {
+                annotation.data.symmetry[i] = i;
+            }
+        }
+        annotation.data.symmetry.erase(annotation.data.symmetry.begin()+imin);
+        for (int i = 0 ; i < annotation.data.symmetry.size(); i++) {
+            if (annotation.data.symmetry[i] >imin) {
+                annotation.data.symmetry[i] -=1;
+            }
+        }
         annotation.copy_clean_image();
         annotation.draw_points();
         imshow(annotation.wname,annotation.image);
@@ -382,10 +399,9 @@ int main(int argc,char** argv)
         annotation.set_capture_instructions();
         Mat im;
         while(cam.read(im)){
-            flip(im,im,1);
             annotation.image = im.clone();
             annotation.draw_instructions();
-            imshow(annotation.wname,annotation.image); int c = waitKey(10);
+            imshow(annotation.wname,annotation.image); int c = waitKey(10)%256;
             if(c == 'q')break;
             else if(c == 's'){
                 int idx = annotation.data.imnames.size();
@@ -397,11 +413,20 @@ int main(int argc,char** argv)
                 //                cout<<fileName<<endl;
                 imwrite(fileName,im);
                 annotation.data.imnames.push_back(str);
-                im = Scalar::all(255); imshow(annotation.wname,im); waitKey(10);
+                im = Scalar::all(255); imshow(annotation.wname,im); waitKey(10)%256;
             }
         }
         if(annotation.data.imnames.size() == 0)return 0;
         annotation.data.points.resize(annotation.data.imnames.size());
+    }
+    
+    if (annotation.data.distanceBetweenOuterCanthuses <= 0.0f) {
+        annotation.data.inputDistanceBetweenOuterCanthuses();
+        save_ft(annotation.data.baseDir+"annotations.yaml",annotation.data);
+    }
+    
+    while (annotation.data.points[0].size() > annotation.data.symmetry.size()) {
+        annotation.data.symmetry.push_back(annotation.data.symmetry.size());
     }
     
     //annotate first image
@@ -413,7 +438,7 @@ int main(int argc,char** argv)
     annotation.set_clean_image();
     annotation.idx = 0;
     while(1){ annotation.draw_points();
-        imshow(annotation.wname,annotation.image); if(waitKey(0) == 'q')break;
+        imshow(annotation.wname,annotation.image); if(waitKey(0)%256 == 'q')break;
     }
     if(annotation.data.points[0].size() == 0)return 0;
     if (type != 3) {
@@ -430,7 +455,7 @@ int main(int argc,char** argv)
     annotation.set_clean_image();
     annotation.idx = 0;
     while(1){ annotation.draw_connections();
-        imshow(annotation.wname,annotation.image); if(waitKey(0) == 'q')break;
+        imshow(annotation.wname,annotation.image); if(waitKey(0)%256 == 'q')break;
     }
     save_ft(annotation.data.baseDir+"annotations.yaml",annotation.data);
     
@@ -446,7 +471,7 @@ int main(int argc,char** argv)
     annotation.set_clean_image();
     annotation.idx = 0; annotation.pidx = -1;
     while(1){ annotation.draw_symmetry();
-        imshow(annotation.wname,annotation.image); if(waitKey(0) == 'q')break;
+        imshow(annotation.wname,annotation.image); if(waitKey(0)%256 == 'q')break;
     }
     save_ft(annotation.data.baseDir+"annotations.yaml",annotation.data);
     
@@ -461,7 +486,7 @@ int main(int argc,char** argv)
             annotation.set_clean_image();
             annotation.draw_connections();
             imshow(annotation.wname,annotation.image);
-            int c = waitKey(0);
+            int c = waitKey(0)%256;
             if     (c == 'q')break;
             else if(c == 'p'){annotation.idx++; annotation.pidx = -1;}
             else if(c == 'o'){annotation.idx--; annotation.pidx = -1;}

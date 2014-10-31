@@ -24,9 +24,19 @@ using namespace cv;
 
 Rect haarPatternDetection(CascadeClassifier classifier, Mat image, int imageWidthforDetection, Rect parentRect);
 
-Point findMassCenter_BinaryBiggestBlob(const Mat& image);
-Point findEyeCenterByColorSegmentation(const Mat& image, float coordinateWeight= 0.4, int kmeansIterations = 3, int kmeansRepeats= 3, int blurSize= 5);
+Point2f findMassCenter_BinaryBiggestBlob(const Mat& image);
 
 Mat calculateImageSymmetryScore(const Mat& image );
+
+class SymmetryScore_tbb : public ParallelLoopBody {
+public:
+    SymmetryScore_tbb(Mat & gray, Mat & score);
+    virtual void operator() (const cv::Range& range) const;
+    
+private:
+    Mat flipped;
+    Mat & score;
+    Mat & gray_img;
+};
 
 #endif /* defined(__OPENCV_HOTSHOTS__jzplib_detections__) */

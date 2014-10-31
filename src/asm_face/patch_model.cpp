@@ -96,7 +96,7 @@ train(const vector<Mat> &images,
       normalize(dP,dP,0,1,NORM_MINMAX);
       normalize(R,R,0,1,NORM_MINMAX);
       imshow("P",PP); imshow("dP",dP); imshow("R",R); 
-      if(waitKey(10) == 27)break;
+      if(waitKey(10)%256 == 27)break;
     }
   }return;
 }

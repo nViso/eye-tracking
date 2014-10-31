@@ -52,14 +52,14 @@ int main(int argc,char** argv)
     //detect until user quits
     namedWindow("face detector");
     while(cam.get(CV_CAP_PROP_POS_AVI_RATIO) < 0.999999){
-        Mat im; cam >> im;    flip(im,im,1);
+        Mat im; cam >> im;
         vector<Point2f> p = detector.detect(im);
         if(p.size() > 0){
             for(int i = 0; i < int(p.size()); i++)
                 circle(im,p[i],1,CV_RGB(0,255,0),2,CV_AA);
         }
         imshow("face detector",im);
-        if(waitKey(10) == 'q')break;
+        if(waitKey(10)%256 == 'q')break;
     }
     destroyWindow("face detector"); cam.release(); return 0;
 }

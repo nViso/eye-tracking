@@ -16,42 +16,7 @@
 #include "asm_face/ft.hpp"
 
 #define fl at<float>
-//==============================================================================
-//==============================================================================
-//==============================================================================
-//=============================== fps_timer ====================================
-//==============================================================================
-//==============================================================================
-//==============================================================================
-void 
-fps_timer::
-increment()
-{
-  if(fnum >= 29) {
-    t_end = cv::getTickCount();
-    fps = 30.0/(float(t_end-t_start)/getTickFrequency()); 
-    t_start = t_end; fnum = 0;
-  }else fnum += 1;
-}
-//==============================================================================
-void 
-fps_timer::
-reset(){
-t_start = cv::getTickCount(); fps = 0; fnum = 0;
-}
-//==============================================================================
-void 
-fps_timer::
-display_fps(Mat &im,
-        Point p)
-{
-  char str[256]; Point pt; if(p.y < 0)pt = Point(10,im.rows-20); else pt = p;
-  sprintf(str,"%d frames/sec",(int)cvRound(fps)); string text = str;
-  putText(im,text,pt,FONT_HERSHEY_SIMPLEX,0.5,Scalar::all(255));
-}
-//==============================================================================
-//==============================================================================
-//==============================================================================
+
 //========================== face_tracker_params ===============================
 //==============================================================================
 //==============================================================================
@@ -158,7 +123,7 @@ track(const Mat &im,const face_tracker_params &p)
     points = this->fit(gray,points,p.ssize[level],p.robust,p.itol,p.ftol);
 
   //set tracking flag and increment timer
-  tracking = true; timer.increment();  return 1;
+  tracking = true;  return 1;
 }
 //==============================================================================
 void
@@ -224,6 +189,7 @@ write(FileStorage &fs) const
 {
   assert(fs.isOpened()); 
   fs << "{"
+     << "annotations" << annotations
      << "detector" << detector
      << "smodel"   << smodel
      << "pmodel"   << pmodel
@@ -238,5 +204,6 @@ read(const FileNode& node)
   node["detector"] >> detector;
   node["smodel"]   >> smodel;
   node["pmodel"]   >> pmodel;
+  node["annotations"] >> annotations;
 }
 //==============================================================================

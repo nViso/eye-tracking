@@ -27,10 +27,10 @@ detect(const Mat &im,
 {
     
     if (detector.empty()) {
-        detector.load(detector_fname.c_str());
-        if (detector.empty()) {
+//        detector.load(detector_fname.c_str());
+//        if (detector.empty()) {
             detector.load(string(baseDir+detector_fname).c_str());
-        }
+//        }
     }
     
     

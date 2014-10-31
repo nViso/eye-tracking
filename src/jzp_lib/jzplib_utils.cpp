@@ -7,6 +7,20 @@
 //
 
 #include "jzplib_utils.h"
+#include <boost/algorithm/string.hpp>
+
+string execSystemCall(string cmd) {
+    FILE* pipe = popen(cmd.c_str(), "r");
+    if (!pipe) return "ERROR";
+    char buffer[128];
+    std::string result = "";
+    while(!feof(pipe)) {
+        if(fgets(buffer, 128, pipe) != NULL)
+            result += buffer;
+    }
+    pclose(pipe);
+    return result;
+}
 
 bool is_number(const std::string& s)
 {
@@ -21,12 +35,113 @@ bool is_number(const std::string& s)
     }
 }
 
+bool copyDirRecursively(
+             boost::filesystem::path const & source,
+             boost::filesystem::path const & destination
+             )
+{
+    namespace fs = boost::filesystem;
+    try
+    {
+        // Check whether the function call is valid
+        if(
+           !fs::exists(source) ||
+           !fs::is_directory(source)
+           )
+        {
+            std::cerr << "Source directory " << source.string()
+            << " does not exist or is not a directory." << '\n'
+            ;
+            return false;
+        }
+        if(fs::exists(destination))
+        {
+            std::cerr << "Destination directory " << destination.string()
+            << " already exists." << '\n'
+            ;
+            return false;
+        }
+        // Create the destination directory
+        if(!fs::create_directory(destination))
+        {
+            std::cerr << "Unable to create destination directory"
+            << destination.string() << '\n'
+            ;
+            return false;
+        }
+    }
+    catch(fs::filesystem_error const & e)
+    {
+        std::cerr << e.what() << '\n';
+        return false;
+    }
+    // Iterate through the source directory
+    for(
+        fs::directory_iterator file(source);
+        file != fs::directory_iterator(); ++file
+        )
+    {
+        try
+        {
+            fs::path current(file->path());
+            if(fs::is_directory(current))
+            {
+                // Found directory: Recursion
+                if(
+                   !copyDirRecursively(
+                            current,
+                            destination / current.filename()
+                            )
+                   )
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                // Found file: Copy
+                fs::copy_file(
+                              current,
+                              destination / current.filename()
+                              );
+            }
+        }
+        catch(fs::filesystem_error const & e)
+        {
+            std:: cerr << e.what() << '\n';
+        }
+    }
+    return true;
+}
+
+vector<fs::path> listFilesRecursivelyWithExtension(fs::path folderPath, string prefix, string surfix)
+{
+    boost::algorithm::to_lower(surfix);
+    boost::algorithm::to_lower(prefix);
+    vector<fs::path> files;
+    fs::recursive_directory_iterator iterend;
+    for (fs::recursive_directory_iterator it(folderPath); it != iterend; it++) {
+        string fileName =it->path().filename().string();
+        boost::algorithm::to_lower(fileName);
+        if (boost::ends_with(fileName, surfix)
+            && boost::starts_with(fileName, prefix) ) {
+            files.push_back(it->path());
+        }
+    }
+    return files;
+}
+
+
 vector<fs::path> listFilesWithExtension(fs::path folderPath, string prefix, string surfix) {
+    boost::algorithm::to_lower(surfix);
+    boost::algorithm::to_lower(prefix);
     vector<fs::path> files;
     fs::directory_iterator iterend;
     for (fs::directory_iterator it(folderPath); it != iterend; it++) {
-        if (boost::ends_with(it->path().filename().string(), surfix)
-            && boost::starts_with(it->path().filename().string(), prefix) ) {
+        string fileName =it->path().filename().string();
+        boost::algorithm::to_lower(fileName);
+        if (boost::ends_with(fileName, surfix)
+            && boost::starts_with(fileName, prefix) ) {
             files.push_back(it->path());
         }
     }

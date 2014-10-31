@@ -1,4 +1,4 @@
-SET(portal_source Portal.h Portal.cpp)
+SET(portal_source Portal.cpp)
 
 ADD_EXECUTABLE(Portal ${portal_source})
 
