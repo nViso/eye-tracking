@@ -150,51 +150,133 @@ float ASM_Gaze_Tracker::distanceToCamera() {
     return norm(tvec);
 }
 
+float 
+calc_distance(Point2f a, Point2f b) {
+
+	return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
+
+float //scaling factor
+calc_scale(const Mat &X, //scaling basis vector
+		const float width) //width of desired shape
+		{
+	int n = X.rows / 2;
+	float xmin = X.at<float>(0), xmax = X.at<float>(0);
+	for (int i = 0; i < n; i++) {
+		xmin = min(xmin, X.at<float>(2 * i));
+		xmax = max(xmax, X.at<float>(2 * i));
+	}
+	return width / (xmax - xmin);
+}
+
+float //symmetric angle dif
+calculateFacePairTileAngle(const vector<Point2f>& canthusPts) {
+
+    float tile1 = rad2deg(tileRadianBtwn2Pts(canthusPts[1], canthusPts[0]));
+    float tile2 = rad2deg(tileRadianBtwn2Pts(canthusPts[4], canthusPts[5]));
+    float tile3 = rad2deg(tileRadianBtwn2Pts(canthusPts[3], canthusPts[4]));
+    float tile4 = rad2deg(tileRadianBtwn2Pts(canthusPts[5], canthusPts[2]));
+    float tile5 = (tile3+tile4)/2.0f;
+    
+    float tile6 = tile1*0.25f +  tile5*0.5f + tile2*0.25f;
+
+    return tile6;
+}
+
 void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
-    vector<vector<Point2f> > pointsSeries = tracker.smodel.matY2pts();
-    
-    int bestIndex = 0;
-//    float largestArea = 0.0f;
-//    for (int i = 0; i < pointsSeries.size(); i++) {
-//        vector<Point2f> points = pointsSeries[i];
-//        Point2f center = points[0]*0.5f + points[1]*0.5f;
-//        float normVaue = tracker.annotations.getDistanceBetweenOuterCanthuses()/norm(points[3]-points[2]);
-//        for (int j = 0 ; j < points.size(); j++) {
-//            points[j] =points[j]-  center;
-//            points[j] *=normVaue;
-//        }
-//        points.erase(points.begin()+4, points.begin()+6);
-//        points.erase(points.begin()  , points.begin()+2);
-//        float area =contourArea(points);
-////        cout<<i<<" "<<area<<endl;
-//        if (contourArea(points) > largestArea) {
-//            bestIndex = i;
-//            largestArea = area;
-//        }
-//    }
-//    cout<<"bestIndex"<<bestIndex<<endl;
-    bestIndex = 0;
-    vector<Point2f> points = pointsSeries[bestIndex];
-    
-    Point2f center = points[0]*0.5f + points[1]*0.5f;
-    float normVaue = tracker.annotations.getDistanceBetweenOuterCanthuses()/norm(points[3]-points[2]);
-    for (int j = 0 ; j < points.size(); j++) {
-        points[j] =center - points[j] ;
-        points[j].y = - points[j].y;
-        points[j] *=normVaue;
-    }
-    vector<Point3f> faceFeatures;
-    vector<Point2f> faceFeatures2;
-    for (int i =0 ; i < points.size() ; i ++) {
-        faceFeatures.push_back(Point3f(points[i].x,points[i].y,0));
-        faceFeatures2.push_back(Point2f(points[i].x,points[i].y));
-    }
-    faceFeatures[4].z = 10;
-    faceFeatures[5].z = 10;
-    
-    facialPointsIn3D = faceFeatures;
-    facialPointsIn2D = faceFeatures2;
-//    cout<<"facial points 2d:"<<endl<<faceFeatures2<<endl;
+   vector<vector<Point2f> > pointsSeries = tracker.smodel.matY2pts();
+	int bestIndex = 0;
+        vector<Point2f> bestFace ;
+	float largestRatio = 0.0f;
+
+
+
+	int n = tracker.smodel.V.rows / 2;
+	float scale = calc_scale(tracker.smodel.V.col(0), 200);
+	float tranx = n * 150.0
+			/ tracker.smodel.V.col(2).dot(Mat::ones(2 * n, 1, CV_32F));
+	float trany = n * 150.0
+			/ tracker.smodel.V.col(3).dot(Mat::ones(2 * n, 1, CV_32F));
+
+//Trajectory parameters
+	vector<float> val;
+	for (int i = 0; i < 100; i++)
+		val.push_back(float(i) / 100);
+	for (int i = 0; i < 100; i++)
+		val.push_back(float(100 - i) / 100);
+	for (int i = 0; i < 100; i++)
+		val.push_back(-float(i) / 100);
+	for (int i = 0; i < 100; i++)
+		val.push_back(-float(100 - i) / 100);
+
+//find best face         
+	for (int k = 4; k < tracker.smodel.V.cols; k++) {
+		for (int j  = 0; j < int(val.size()); j++) {
+                 Mat p = Mat::zeros(tracker.smodel.V.cols,1,CV_32F);
+                 p.at<float>(0) = scale;
+                 p.at<float>(2) = tranx;
+                 p.at<float>(3) = trany;
+         		p.at<float>(k) = scale * val[j] * 3.0
+         						* sqrt(tracker.smodel.e.at<float>(k));
+         		p.copyTo(tracker.smodel.p);
+         		vector<Point2f> q = tracker.smodel.calc_shape();
+
+        		Point2f center = q[0] * 0.5f + q[1] * 0.5f;
+        		float normVaue = tracker.annotations.getDistanceBetweenOuterCanthuses()
+        				/ norm(q[3] - q[2]);
+        		for (int j = 0; j < q.size(); j++) {
+        			q[j] = q[j] - center;
+        			q[j] *= normVaue;
+        		}
+
+         		            Point2f centreOfEyes ;
+         			    Point2f centreOfNose;
+
+         			    centreOfEyes.x =  (q[0].x + q[1].x) / 2;
+         			    centreOfEyes.y =  (q[0].y + q[1].y) / 2;
+         			    centreOfNose.x =  (q[4].x + q[5].x) / 2;
+         			    centreOfNose.y =  (q[4].y + q[5].y) / 2;
+
+         				
+
+         				float ratioOfLine = calc_distance(centreOfEyes, centreOfNose)
+         						/ calc_distance(centreOfNose, q[6]);
+//  symmetric condition1      	         fabs(q[0].y - q[1].y) < 2&& fabs(centreOfEyes.x - centreOfNose.x) < 2
+//  symmetric condition2                 calculateFacePairTileAngle<2
+         				if (fabs(q[0].y - q[1].y) < 2&& fabs(centreOfEyes.x - centreOfNose.x) < 2) {
+ //  					    cout << "candidates" <<  calculateFacePairTileAngle(q) << endl;
+         					if (ratioOfLine > largestRatio) {
+     						    bestFace = q;
+     						    cout<<bestFace<<endl;
+         					    largestRatio = ratioOfLine;
+         					}
+         				}
+
+		}
+
+	}
+//	cout<<bestFace<<endl;
+	vector<Point2f> points = bestFace;
+
+	Point2f center = points[0] * 0.5f + points[1] * 0.5f;
+	float normVaue = tracker.annotations.getDistanceBetweenOuterCanthuses()
+			/ norm(points[3] - points[2]);
+	for (int j = 0; j < points.size(); j++) {
+		points[j] = center - points[j];
+		points[j].y = -points[j].y;
+		points[j] *= normVaue;
+	}
+	vector<Point3f> faceFeatures;
+	vector<Point2f> faceFeatures2;
+	for (int i = 0; i < points.size(); i++) {
+		faceFeatures.push_back(Point3f(points[i].x, points[i].y, 0));
+		faceFeatures2.push_back(Point2f(points[i].x, points[i].y));
+	}
+	faceFeatures[4].z = 10;
+	faceFeatures[5].z = 10;
+
+	facialPointsIn3D = faceFeatures;
+	facialPointsIn2D = faceFeatures2;
 }
 
 void ASM_Gaze_Tracker::eyeCenterLocalizationImpl(const Mat& image, Point2f & eyeCoord, float coordinateWeight, int kmeansIterations, int kmeansRepeats, float blurSizeRatio) {
