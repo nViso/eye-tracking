@@ -56,6 +56,7 @@ int main(int argc, const char * argv[])
     
     Mat origin, im ;
     float zoomRatio = 1.0f;
+    float displayZoomRaitio = 1.0f;
     CSVFileWriter csvlogger;
     LowpassFPSTimer timer(20);
     int frameCount = 0;
@@ -84,11 +85,7 @@ int main(int argc, const char * argv[])
             continue;
         }
         if (succeeded) {
-//            plotLiveData("tvec[0]", pupilTracker.tvec.at<double>(0));
-//            plotLiveData("tvec[1]", pupilTracker.tvec.at<double>(1));
-//            plotLiveData("tvec[2]", pupilTracker.tvec.at<double>(2));
-            drawPoints(im, pupilTracker.canthusPts);
-            drawPoints(im, pupilTracker.nosePts);
+            drawPoints(im, pupilTracker.tracker.points);
             drawPoints(im, pupilTracker.reprojectedFacialPointsInImage,Scalar(0,255,0));
             circle(im, pupilTracker.leftEyePoint, 1, Scalar(0,255,0),-1);
             circle(im, pupilTracker.rightEyePoint, 1, Scalar(0,255,0),-1);
@@ -99,12 +96,17 @@ int main(int argc, const char * argv[])
             line(im, reprjCrdRefPts[0], reprjCrdRefPts[3], Scalar(0,0,255),2);
             drawStringAtTopLeftCorner(im, "d:" + boost::lexical_cast<string>(pupilTracker.distanceToCamera()));
         }
+        imresize(im, displayZoomRaitio, im);
         imshow(windowName,im);
         int c = waitKey(1)%256;
         if(c == 'q' && ! dumpFile)
             break;
         if(c == 'd')
             pupilTracker.reDetectFace();
+        if(c == '-')
+            displayZoomRaitio -=0.1;
+        if(c == '=')
+            displayZoomRaitio +=0.1;
     }
     
     if (dumpFile) {

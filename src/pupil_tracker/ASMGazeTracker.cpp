@@ -131,7 +131,7 @@ bool ASM_Gaze_Tracker::estimateFacePose() {
         return false;
     }
     vector<Point2f> imagePoints = tracker.points;
-    solvePnP(facialPointsIn3D, imagePoints, cameraMatrix, distCoeffs, rvec, tvec);
+    solvePnP(facialPointsIn3D, imagePoints, cameraMatrix, distCoeffs, rvec, tvec,false,CV_EPNP);
     this->projectPoints(facialPointsIn3D, reprojectedFacialPointsInImage);
     // change the rvec to rotation matrix, and then reshape the matrix to a row vector.
     // please note that, the opencv reshapes the matrix by the row-first order. However,
@@ -150,12 +150,6 @@ float ASM_Gaze_Tracker::distanceToCamera() {
     return norm(tvec);
 }
 
-float 
-calc_distance(Point2f a, Point2f b) {
-
-	return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
-}
-
 float //scaling factor
 calc_scale(const Mat &X, //scaling basis vector
 		const float width) //width of desired shape
@@ -169,93 +163,53 @@ calc_scale(const Mat &X, //scaling basis vector
 	return width / (xmax - xmin);
 }
 
-float //symmetric angle dif
-calculateFacePairTileAngle(const vector<Point2f>& canthusPts) {
-
-    float tile1 = rad2deg(tileRadianBtwn2Pts(canthusPts[1], canthusPts[0]));
-    float tile2 = rad2deg(tileRadianBtwn2Pts(canthusPts[4], canthusPts[5]));
-    float tile3 = rad2deg(tileRadianBtwn2Pts(canthusPts[3], canthusPts[4]));
-    float tile4 = rad2deg(tileRadianBtwn2Pts(canthusPts[5], canthusPts[2]));
-    float tile5 = (tile3+tile4)/2.0f;
-    
-    float tile6 = tile1*0.25f +  tile5*0.5f + tile2*0.25f;
-
-    return tile6;
-}
-
+// No matter how to optimize the metric, the result is still not better than the manually annotated first image.
+// This is because, the model is not always aligned with true head 3D movement. The ASM model is just a partial 2D fitting for the 3D points.
 void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
-   vector<vector<Point2f> > pointsSeries = tracker.smodel.matY2pts();
-	int bestIndex = 0;
-        vector<Point2f> bestFace ;
-	float largestRatio = 0.0f;
+    vector<vector<Point2f> > pointsSeries = tracker.smodel.matY2pts();
+    vector<Point2f> bestFace;
+    if (pointsSeries[0].size()<10) {
+        bestFace = pointsSeries[0];
+    } else {
+        
+        float scale = 1.0f;//calc_scale(tracker.smodel.V.col(0), 200);
+        float tranx = 0.0f;//n * 150.0 / tracker.smodel.V.col(2).dot(Mat::ones(2 * n, 1, CV_32F));
+        float trany = 0.0f;//n * 150.0 / tracker.smodel.V.col(3).dot(Mat::ones(2 * n, 1, CV_32F));
+        
+        float largestRatio = 1000.0f;
+        float largestArea = 0.0f;
+        for (float i = -1.0f ; i <1.0f ; i +=0.02)
+            for (float j = -1.0f ; j <1.0f ; j +=0.02) {
+//                cout<<i<<" "<<j<<endl;
+                Mat p = Mat::zeros(tracker.smodel.V.cols,1,CV_32F);
+                p.at<float>(0) = scale;
+                p.at<float>(2) = tranx;
+                p.at<float>(3) = trany;
+                p.at<float>(4) = scale * i * 3.0 * sqrt(tracker.smodel.e.at<float>(4));
+                p.at<float>(5) = scale * j * 3.0 * sqrt(tracker.smodel.e.at<float>(5));
+                
+                p.copyTo(tracker.smodel.p);
+                vector<Point2f> cp = tracker.smodel.calc_shape();
+                Point2f glabellaPoint  = cp[0] * 0.5f + cp[1] * 0.5f ;
+                Point2f noseCenter     = cp[4] * 0.5f + cp[5] * 0.5f ;
+                Point2f philtrumPoint  = cp[6];
 
+                float noisePhiltrumRatio = norm(glabellaPoint - noseCenter)/norm(noseCenter - philtrumPoint);
+                float area = contourArea(cp);
+//                cout<<"ratio"<<noisePhiltrumRatio<<endl;
+                float verticality = tileRadianBtwn2Pts(cp[2],cp[6]) + tileRadianBtwn2Pts(cp[6], cp[3]) + tileRadianBtwn2Pts(cp[0],cp[6]) + tileRadianBtwn2Pts(cp[6], cp[1]) + tileRadianBtwn2Pts(cp[0], cp[4]) + tileRadianBtwn2Pts(cp[5], cp[1]) + tileRadianBtwn2Pts(cp[2],cp[4]) + tileRadianBtwn2Pts(cp[5], cp[3]);
+                verticality = abs(rad2deg(verticality));
+//                cout<< verticality<<endl;
+                if (verticality < 10 && area > largestArea) {
+                    cout<<i<<" "<<j<<endl;
+                    cout<<"best"<<verticality<<" "<<area<<endl;
+                    bestFace = cp;
+                    largestArea = area;
+                }
+                
+            }
+    }
 
-
-	int n = tracker.smodel.V.rows / 2;
-	float scale = calc_scale(tracker.smodel.V.col(0), 200);
-	float tranx = n * 150.0
-			/ tracker.smodel.V.col(2).dot(Mat::ones(2 * n, 1, CV_32F));
-	float trany = n * 150.0
-			/ tracker.smodel.V.col(3).dot(Mat::ones(2 * n, 1, CV_32F));
-
-//Trajectory parameters
-	vector<float> val;
-	for (int i = 0; i < 100; i++)
-		val.push_back(float(i) / 100);
-	for (int i = 0; i < 100; i++)
-		val.push_back(float(100 - i) / 100);
-	for (int i = 0; i < 100; i++)
-		val.push_back(-float(i) / 100);
-	for (int i = 0; i < 100; i++)
-		val.push_back(-float(100 - i) / 100);
-
-//find best face         
-	for (int k = 4; k < tracker.smodel.V.cols; k++) {
-		for (int j  = 0; j < int(val.size()); j++) {
-                 Mat p = Mat::zeros(tracker.smodel.V.cols,1,CV_32F);
-                 p.at<float>(0) = scale;
-                 p.at<float>(2) = tranx;
-                 p.at<float>(3) = trany;
-         		p.at<float>(k) = scale * val[j] * 3.0
-         						* sqrt(tracker.smodel.e.at<float>(k));
-         		p.copyTo(tracker.smodel.p);
-         		vector<Point2f> q = tracker.smodel.calc_shape();
-
-        		Point2f center = q[0] * 0.5f + q[1] * 0.5f;
-        		float normVaue = tracker.annotations.getDistanceBetweenOuterCanthuses()
-        				/ norm(q[3] - q[2]);
-        		for (int j = 0; j < q.size(); j++) {
-        			q[j] = q[j] - center;
-        			q[j] *= normVaue;
-        		}
-
-         		            Point2f centreOfEyes ;
-         			    Point2f centreOfNose;
-
-         			    centreOfEyes.x =  (q[0].x + q[1].x) / 2;
-         			    centreOfEyes.y =  (q[0].y + q[1].y) / 2;
-         			    centreOfNose.x =  (q[4].x + q[5].x) / 2;
-         			    centreOfNose.y =  (q[4].y + q[5].y) / 2;
-
-         				
-
-         				float ratioOfLine = calc_distance(centreOfEyes, centreOfNose)
-         						/ calc_distance(centreOfNose, q[6]);
-//  symmetric condition1      	         fabs(q[0].y - q[1].y) < 2&& fabs(centreOfEyes.x - centreOfNose.x) < 2
-//  symmetric condition2                 calculateFacePairTileAngle<2
-         				if (fabs(q[0].y - q[1].y) < 2&& fabs(centreOfEyes.x - centreOfNose.x) < 2) {
- //  					    cout << "candidates" <<  calculateFacePairTileAngle(q) << endl;
-         					if (ratioOfLine > largestRatio) {
-     						    bestFace = q;
-     						    cout<<bestFace<<endl;
-         					    largestRatio = ratioOfLine;
-         					}
-         				}
-
-		}
-
-	}
-//	cout<<bestFace<<endl;
 	vector<Point2f> points = bestFace;
 
 	Point2f center = points[0] * 0.5f + points[1] * 0.5f;
@@ -274,7 +228,8 @@ void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
 	}
 	faceFeatures[4].z = 10;
 	faceFeatures[5].z = 10;
-
+    faceFeatures[6].z = 5;
+//    cout<<"feature3d:"<<faceFeatures<<endl;
 	facialPointsIn3D = faceFeatures;
 	facialPointsIn2D = faceFeatures2;
 }

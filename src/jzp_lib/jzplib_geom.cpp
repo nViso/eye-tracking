@@ -10,11 +10,11 @@
 
 
 float rad2deg(float radian) {
-    return radian/M_PI*180;
+    return radian/M_PI*180.0f;
 }
 
 float deg2rad(float degree) {
-    return degree/180*M_PI;
+    return degree/180.0f*M_PI;
 }
 
 vector<Point2f> Mat2PointsVector(const Mat& mat) {

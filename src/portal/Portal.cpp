@@ -225,8 +225,9 @@ fs::path chooseUserProfile(fs::path userBasePath, bool withNew) {
     return fs::path();
 }
 
-fs::path chooseVideoFile(fs::path videoParingPath) {
+vector<fs::path> chooseVideoFile(fs::path videoParingPath) {
     vector<fs::path> videoFiles = listFilesWithExtension(videoParingPath, "", "vision.mov");
+    vector<fs::path> selectedFiles;
     int index = 0;
     while (videoFiles.size()>0) {
         
@@ -234,16 +235,24 @@ fs::path chooseVideoFile(fs::path videoParingPath) {
         for (index = 0; index < videoFiles.size(); index++) {
             cout<<"("<<index<<") "<<videoFiles[index].string()<<endl;
         }
+        cout<<"(99) select all video files."<<endl;
         string input;
         cout<<"which one do you choose ? ";
         cin >> input;
         
         if (is_number(input) && boost::lexical_cast<int>(input) >=0 && boost::lexical_cast<int>(input) < videoFiles.size()) {
-            return videoFiles[boost::lexical_cast<int>(input)];
+            selectedFiles.push_back(videoFiles[boost::lexical_cast<int>(input)]);
+            return selectedFiles;
+        }
+        if (is_number(input) && boost::lexical_cast<int>(input) == 99) {
+            for (int i = 0 ; i < videoFiles.size(); i++) {
+                selectedFiles.push_back(videoFiles[i]);
+            }
+            return selectedFiles;
         }
     }
     cout<<"There is no video for parsing."<<endl;
-    return fs::path();
+    return selectedFiles;
 }
 
 void regeneratePupilCoordiantesFromExistingTests(fs::path resultsPath) {
@@ -386,11 +395,6 @@ int main(int argc, const char * argv[])
             }
             
             if (c == 11) {
-                cout<<"Choose video file for parsing:"<<endl;
-                fs::path videoFilePath = chooseVideoFile(videoParingPath);
-                if (videoFilePath.empty()) {
-                    continue;
-                }
                 cout<<"Choose user profile:"<<endl;
                 fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
                 if (targetProfilePath.empty()) {
@@ -401,9 +405,14 @@ int main(int argc, const char * argv[])
                 if (cameraProfilePath.empty()) {
                     continue;
                 }
-                
-                
-                invoke_VideoParsing(targetProfilePath, cameraProfilePath, videoFilePath);
+                cout<<"Choose video file for parsing:"<<endl;
+                vector<fs::path> videoFilePaths = chooseVideoFile(videoParingPath);
+                if (videoFilePaths.empty()) {
+                    continue;
+                }
+                for (int i = 0 ; i < videoFilePaths.size(); i++) {
+                    invoke_VideoParsing(targetProfilePath, cameraProfilePath, videoFilePaths[i]);
+                }
             }
             
             

@@ -99,3 +99,5 @@ pack.faceAngleC  = faceAngleC;
 pack.gapAngle = errorAngle;
 pack.headMobility = sum(std(faceAngleNN));
 pack.reprojectionRMS = visionData.projectionErrorRMS;
+pack.vision = visionData;
+pack.sensor = sensorData;
