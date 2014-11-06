@@ -425,6 +425,16 @@ int main(int argc,char** argv)
         save_ft(annotation.data.baseDir+"annotations.yaml",annotation.data);
     }
     
+    if (annotation.data.noseHeight <= 0.0f) {
+        annotation.data.inputNoseHeight();
+        save_ft(annotation.data.baseDir+"annotations.yaml",annotation.data);
+    }
+    
+    if (annotation.data.philtrumHeight <= 0.0f) {
+        annotation.data.inputPhiltrumHeight();
+        save_ft(annotation.data.baseDir+"annotations.yaml",annotation.data);
+    }
+    
     while (annotation.data.points[0].size() > annotation.data.symmetry.size()) {
         annotation.data.symmetry.push_back(annotation.data.symmetry.size());
     }

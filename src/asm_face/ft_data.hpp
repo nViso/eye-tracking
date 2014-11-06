@@ -27,11 +27,19 @@ public:
     vector<string> imnames;                  //images
     vector<vector<Point2f> > points;         //points
     float distanceBetweenOuterCanthuses = 0.0f;
+    float noseHeight = 0.0f;
+    float philtrumHeight = 0.0f;
     string baseDir;
     bool isAnnotationFlipped = false;
     
     float getDistanceBetweenOuterCanthuses();
     void inputDistanceBetweenOuterCanthuses();
+    
+    float getNoseHeight();
+    void inputNoseHeight();
+    
+    float getPhiltrumHeight();
+    void inputPhiltrumHeight();
     
     inline int n_images(){return imnames.size();}
     

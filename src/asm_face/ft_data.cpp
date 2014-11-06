@@ -42,6 +42,44 @@ void ft_data::inputDistanceBetweenOuterCanthuses() {
     }
 }
 
+float ft_data::getNoseHeight() {
+    if (noseHeight <= 0.0f) {
+        inputNoseHeight();
+    }
+    return noseHeight;
+}
+
+void ft_data::inputNoseHeight() {
+    while(true) {
+        cout<<endl<<"Please input the height of two nose points:";
+        string input;
+        cin >> input;
+        if (is_number_asm(input)) {
+            noseHeight = boost::lexical_cast<float>(input);
+            break;
+        } else cout<<"error input, not a number."<<endl;
+    }
+}
+
+float ft_data::getPhiltrumHeight() {
+    if (philtrumHeight <= 0.0f) {
+        inputPhiltrumHeight();
+    }
+    return philtrumHeight;
+}
+
+void ft_data::inputPhiltrumHeight() {
+    while(true) {
+        cout<<endl<<"Please input the height of mid upper-lip point:";
+        string input;
+        cin >> input;
+        if (is_number_asm(input)) {
+            philtrumHeight = boost::lexical_cast<float>(input);
+            break;
+        } else cout<<"error input, not a number."<<endl;
+    }
+}
+
 void
 ft_data::
 rm_incomplete_samples()
@@ -212,6 +250,8 @@ write(FileStorage &fs) const
     fs << "{";
     fs << "isAnnotationFlipped" << isAnnotationFlipped;
     fs<< "distanceBetweenOuterCanthuses" << distanceBetweenOuterCanthuses ;
+    fs<< "noseHeight" << noseHeight;
+    fs<< "philtrumHeight" << philtrumHeight;
     fs << "n_connections" << (int)connections.size();
     for(int i = 0; i < int(connections.size()); i++){
         char str[256]; const char* ss;
@@ -249,6 +289,8 @@ read(const FileNode& node)
     assert(node.type() == FileNode::MAP);
     node["isAnnotationFlipped"] >> isAnnotationFlipped;
     node["distanceBetweenOuterCanthuses"] >> distanceBetweenOuterCanthuses;
+    node["noseHeight"] >> noseHeight;
+    node["philtrumHeight"] >> philtrumHeight;
     int n; node["n_connections"] >> n; connections.resize(n);
     for(int i = 0; i < n; i++){
         char str[256]; const char* ss;

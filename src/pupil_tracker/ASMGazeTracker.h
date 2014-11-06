@@ -36,6 +36,7 @@ public:
     Mat rotationMatrix;
     bool isTrackingSuccess;
     
+    Mat projectionJacobian;
     Mat rvec;
     Mat tvec;
     Mat cameraMatrix;

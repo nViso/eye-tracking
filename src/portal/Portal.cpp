@@ -145,6 +145,15 @@ void invoke_VideoParsing(fs::path userProfileDir,fs::path cameraProfilePath, fs:
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
+void invoke_Scan3DFaceModel(fs::path userProfileDir,fs::path cameraProfilePath, fs::path testFile, float mnh, float maxnh, float mph, float maxph, float step) {
+    cout<<"------- Invoking ./Scan3DFaceModel (video parsing) ------------------"<<endl;
+    string cmdpath = (fs::current_path()/"Scan3DFaceModel").string();
+    string cmd = cmdpath+" "+userProfileDir.string()+" "+cameraProfilePath.string()+" "+testFile.string()+" "+boost::lexical_cast<string>(mnh)+" "+boost::lexical_cast<string>(maxnh)+" "+boost::lexical_cast<string>(mph)+" "+boost::lexical_cast<string>(maxph)+" "+boost::lexical_cast<string>(step);
+    cout<<cmd<<endl;
+    system(cmd.c_str());
+    cout<<"------- Invocation Done ------------------------"<<endl;
+}
+
 
 void trainASMModel(fs::path userProfilePath) {
     invoke_annotate(userProfilePath);
@@ -235,6 +244,7 @@ vector<fs::path> chooseVideoFile(fs::path videoParingPath) {
         for (index = 0; index < videoFiles.size(); index++) {
             cout<<"("<<index<<") "<<videoFiles[index].string()<<endl;
         }
+        cout<<"(98) select video files from range_1 to range_2."<<endl;
         cout<<"(99) select all video files."<<endl;
         string input;
         cout<<"which one do you choose ? ";
@@ -242,6 +252,22 @@ vector<fs::path> chooseVideoFile(fs::path videoParingPath) {
         
         if (is_number(input) && boost::lexical_cast<int>(input) >=0 && boost::lexical_cast<int>(input) < videoFiles.size()) {
             selectedFiles.push_back(videoFiles[boost::lexical_cast<int>(input)]);
+            return selectedFiles;
+        }
+        if (is_number(input) && boost::lexical_cast<int>(input) == 98) {
+            cout<<"input range_1 and range_2:";
+            vector<string> numberParts;
+            cin.get();
+            string input;
+            getline(cin,input);
+            boost::split(numberParts, input, boost::is_any_of(" "));
+            int  rfrom,rend;
+            rfrom = boost::lexical_cast<int>(numberParts[0]);
+            rend = boost::lexical_cast<int>(numberParts[1]);
+
+            for (int i = rfrom ; i <=rend; i++) {
+                selectedFiles.push_back(videoFiles[i]);
+            }
             return selectedFiles;
         }
         if (is_number(input) && boost::lexical_cast<int>(input) == 99) {
@@ -319,6 +345,7 @@ int main(int argc, const char * argv[])
         cout<<"9. run head pose adviser."<<endl;
         cout<<"10. flip the annotation for chosen profile."<<endl;
         cout<<"11. parse video file."<<endl;
+        cout<<"12. scan pupiltracker variable for video"<<endl;
         cout<<"q. quit"<<endl;
         cout<<"------ Your choice : ";
         string input;
@@ -326,7 +353,7 @@ int main(int argc, const char * argv[])
         
         if (is_number(input)) {
             int c = boost::lexical_cast<int>(input);
-            if (c<1 || c>11) {
+            if (c<1 || c>12) {
                 cout<<"error number"<<endl;
                 continue;
             }
@@ -413,6 +440,43 @@ int main(int argc, const char * argv[])
                 for (int i = 0 ; i < videoFilePaths.size(); i++) {
                     invoke_VideoParsing(targetProfilePath, cameraProfilePath, videoFilePaths[i]);
                 }
+            }
+            
+            if (c == 12) {
+                cout<<"Choose user profile:"<<endl;
+                fs::path targetProfilePath = chooseUserProfile(userBasePath, false);
+                if (targetProfilePath.empty()) {
+                    continue;
+                }
+                cout<<"Choose camera profile:"<<endl;
+                fs::path cameraProfilePath = chooseCameraProfile(cameraCalibPath);
+                if (cameraProfilePath.empty()) {
+                    continue;
+                }
+                cout<<"Choose video file for parsing:"<<endl;
+                vector<fs::path> videoFilePaths = chooseVideoFile(videoParingPath);
+                if (videoFilePaths.empty()) {
+                    continue;
+                }
+                
+                cout << "input scan range \"minNoseHeight maxNoseHeight minMidLipHeight maxMidLipHeight step\":";
+                vector<string> numberParts;
+                cin.get();
+                string input;
+                getline(cin,input);
+                boost::split(numberParts, input, boost::is_any_of(" "));
+                float minNoseHeight,maxNoseHeight,minMidLipHeight,maxMidLipHeight,step;
+                minNoseHeight = boost::lexical_cast<float>(numberParts[0]);
+                maxNoseHeight = boost::lexical_cast<float>(numberParts[1]);
+                minMidLipHeight = boost::lexical_cast<float>(numberParts[2]);
+                maxMidLipHeight = boost::lexical_cast<float>(numberParts[3]);
+                step = boost::lexical_cast<float>(numberParts[4]);
+                for (int i = 0 ; i < videoFilePaths.size(); i++) {
+                    fs::path videoFile =videoFilePaths[i];
+                    fs::path testFile = videoFile.parent_path() / (videoFile.stem().string()+".test");
+                    invoke_Scan3DFaceModel(targetProfilePath,cameraProfilePath,testFile,minNoseHeight,maxNoseHeight,minMidLipHeight,maxMidLipHeight,step);
+                }
+
             }
             
             

@@ -22,7 +22,7 @@ vector<float> ASM_Gaze_Tracker::toDataSlot() {
     vector<float> slot;
     
     if (isTrackingSuccess == false) {
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 44; i++) {
             slot.push_back(0.0f);
         }
         return slot;
@@ -131,7 +131,8 @@ bool ASM_Gaze_Tracker::estimateFacePose() {
         return false;
     }
     vector<Point2f> imagePoints = tracker.points;
-    solvePnP(facialPointsIn3D, imagePoints, cameraMatrix, distCoeffs, rvec, tvec,false,CV_EPNP);
+    float maxErrorDistance = norm(imagePoints[2]-imagePoints[3])/25.0f;
+    solvePnPRansac(facialPointsIn3D, imagePoints, cameraMatrix, distCoeffs, rvec, tvec, false, 100,maxErrorDistance,7);
     this->projectPoints(facialPointsIn3D, reprojectedFacialPointsInImage);
     // change the rvec to rotation matrix, and then reshape the matrix to a row vector.
     // please note that, the opencv reshapes the matrix by the row-first order. However,
@@ -143,7 +144,7 @@ bool ASM_Gaze_Tracker::estimateFacePose() {
 }
 
 void ASM_Gaze_Tracker::projectPoints(const vector<Point3f> & sourcePoints, vector<Point2f> & destPoints) {
-    cv::projectPoints(sourcePoints, rvec, tvec, cameraMatrix, distCoeffs, destPoints);
+    cv::projectPoints(sourcePoints, rvec, tvec, cameraMatrix, distCoeffs, destPoints,projectionJacobian);
 }
 
 float ASM_Gaze_Tracker::distanceToCamera() {
@@ -226,10 +227,10 @@ void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
 		faceFeatures.push_back(Point3f(points[i].x, points[i].y, 0));
 		faceFeatures2.push_back(Point2f(points[i].x, points[i].y));
 	}
-	faceFeatures[4].z = 10;
-	faceFeatures[5].z = 10;
-    faceFeatures[6].z = 5;
-//    cout<<"feature3d:"<<faceFeatures<<endl;
+    faceFeatures[4].z = tracker.annotations.getNoseHeight();//noseHeight;
+    faceFeatures[5].z = tracker.annotations.getNoseHeight();//noseHeight;
+    faceFeatures[6].z = tracker.annotations.getPhiltrumHeight();//philtrumHeight;
+
 	facialPointsIn3D = faceFeatures;
 	facialPointsIn2D = faceFeatures2;
 }
