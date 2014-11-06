@@ -1,8 +1,5 @@
 function raw = sensorTextReadFromDisk(filepath)
 
-format long;
-digits(64);
-format long;
 fid = fopen(filepath,'rt');
 
 DS = textscan(fid,'%s %n %n %n %n %n');

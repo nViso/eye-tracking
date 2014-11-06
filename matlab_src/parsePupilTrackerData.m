@@ -9,10 +9,20 @@ if nargin == 4
     threashold = 0.1;
 end
 
-currentTest = importdata(currentTestFile);
+columns = 44;
+
+fileID = fopen(currentTestFile);
+format = [];
+for i = 1:columns
+    format = [format '%n '];
+end
+format(end) = [];
+currentTest = textscan(fileID,format);
+currentTest = cell2mat(currentTest);
+fclose(fileID);
 % fill all 0 to nan
 currentTest(currentTest == 0) = nan;
-currentTest = currentTest(:,1:40);
+currentTest = currentTest(:,1:columns);
 if ~isempty(find(isnan(currentTest)))
     % interpolate all nan to nearby values.
     [row, col] = find(isnan(currentTest));
@@ -27,17 +37,19 @@ slot.leftOuterCanthus = currentTest(:,9:10);
 slot.rightOuterCanthus= currentTest(:,11:12);
 slot.leftNostrils     = currentTest(:,13:14);
 slot.rightNostrils    = currentTest(:,15:16);
-slot.allFeaturePoints = currentTest(:,5:16);
+slot.midLip           = currentTest(:,17:18);
+slot.allFeaturePoints = currentTest(:,5:18);
 % 17 to 28 is the columns for reprojected points.
-slot.reprojectedFeaturePoints = currentTest(:,17:28);
+slot.reprojectedFeaturePoints = currentTest(:,19:32);
 % calculate the differences between detected feature coords and reprojected
 % coords.
 slot.projectionErrorRMS = rms((slot.allFeaturePoints - slot.reprojectedFeaturePoints)');
-slot.tvec             = currentTest(:,29:31);
+
+slot.tvec             = currentTest(:,33:35);
 % millimeter to meter.
 slot.tvec             = slot.tvec /1000;
 % 32 to 40 is the rotation matrix in column-first order.
-slot.rvec             = currentTest(:,32:40);
+slot.rvec             = currentTest(:,36:end);
 slot.rvec             = reshape(slot.rvec',[3 3 size(slot.rvec,1)]);
 slot.quatFaceToC       = dcm2quat(slot.rvec);
 if withModel == true

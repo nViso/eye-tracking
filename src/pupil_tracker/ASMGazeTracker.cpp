@@ -132,7 +132,7 @@ bool ASM_Gaze_Tracker::estimateFacePose() {
     }
     vector<Point2f> imagePoints = tracker.points;
     float maxErrorDistance = norm(imagePoints[2]-imagePoints[3])/25.0f;
-    solvePnPRansac(facialPointsIn3D, imagePoints, cameraMatrix, distCoeffs, rvec, tvec, false, 100,maxErrorDistance,7);
+    solvePnPRansac(facialPointsIn3D, imagePoints, cameraMatrix, distCoeffs, rvec, tvec, false, 30,maxErrorDistance,7);
     this->projectPoints(facialPointsIn3D, reprojectedFacialPointsInImage);
     // change the rvec to rotation matrix, and then reshape the matrix to a row vector.
     // please note that, the opencv reshapes the matrix by the row-first order. However,
