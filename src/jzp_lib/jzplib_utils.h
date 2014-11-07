@@ -39,8 +39,8 @@ bool copyDirRecursively(
              boost::filesystem::path const & destination
              );
 vector<fs::path> listFilesWithExtension(fs::path folderPath, string prefix, string surfix);
-vector<fs::path> listFilesRecursivelyWithExtension(fs::path folderPath, string prefix, string surfix)
-;
+vector<fs::path> listFilesRecursivelyWithExtension(fs::path folderPath, string prefix, string surfix);
+vector< vector<float> > parseTextTableFile(string filePath, string delimeter);
 std::string simpleDataFormat(boost::posix_time::ptime now, std::string format);
 
 class LowpassFPSTimer {

@@ -39,6 +39,52 @@ slot.leftNostrils     = currentTest(:,13:14);
 slot.rightNostrils    = currentTest(:,15:16);
 slot.midLip           = currentTest(:,17:18);
 slot.allFeaturePoints = currentTest(:,5:18);
+
+slot.glabellaPoint    = (slot.leftInnerCanthus + slot.rightInnerCanthus)/2;
+slot.midNosePoint     = (slot.leftNostrils + slot.rightNostrils)/2;
+slot.vectorNoseEye    = slot.midNosePoint-slot.glabellaPoint;
+slot.vectorLipEye     = slot.midLip-slot.glabellaPoint;
+slot.vectorLipNose    = slot.midLip-slot.midNosePoint;
+slot.noseRatio        = sqrt(sum(slot.vectorNoseEye.^2,2)) ./ sqrt(sum(slot.vectorLipNose.^2,2));
+slot.noseAngle        = rad2deg(acos(sum(slot.vectorNoseEye.*slot.vectorLipNose,2)./ sqrt(sum(slot.vectorNoseEye.^2,2)) ./sqrt(sum(slot.vectorLipNose.^2,2)) ));
+
+vliri = sqrt(sum((slot.leftInnerCanthus - slot.rightInnerCanthus).^2,2));
+vloro = sqrt(sum((slot.leftOuterCanthus - slot.rightOuterCanthus).^2,2));
+vlom = sqrt(sum((slot.leftOuterCanthus - slot.midLip).^2,2));
+vrom = sqrt(sum((slot.rightOuterCanthus - slot.midLip).^2,2));
+vlim = sqrt(sum((slot.leftInnerCanthus - slot.midLip).^2,2));
+vrim = sqrt(sum((slot.rightInnerCanthus - slot.midLip).^2,2));
+vgm = sqrt(sum((slot.glabellaPoint - slot.midLip).^2,2));
+vlog = sqrt(sum((slot.glabellaPoint - slot.leftOuterCanthus).^2,2));
+vrog = sqrt(sum((slot.glabellaPoint - slot.rightOuterCanthus).^2,2));
+vgn  = sqrt(sum((slot.midNosePoint - slot.glabellaPoint).^2,2));
+vlon = sqrt(sum((slot.midNosePoint - slot.leftOuterCanthus).^2,2));
+vron = sqrt(sum((slot.midNosePoint - slot.rightOuterCanthus).^2,2));
+
+slorom = 0.5*(vloro+vlom+vrom)./vloro;
+slirim = 0.5*(vliri+vlim+vrim)./vliri;
+slogm = 0.5*(vlom+vgm+vlog)./vlog;
+srogm = 0.5*(vrom+vgm+vrog)./vrog;
+sloron = 0.5*(vloro+vlon+vron)./vloro;
+slogn = 0.5*(vlon+vgn+vlog)./vlog;
+srogn = 0.5*(vron+vgn+vrog)./vrog;
+
+slot.heronNoseArea = sqrt(sloron.*(sloron-vloro./vloro).*(sloron-vlon./vloro).*(sloron-vron./vloro));
+slot.heronNoseLeft = sqrt(slogn.*(slogn-vlon./vlog).*(slogn-vgn./vlog).*(slogn-vlog./vlog));
+slot.heronNoseRight = sqrt(srogn.*(srogn-vron./vrog).*(srogn-vgn./vrog).*(srogn-vrog./vrog));
+areaRatioSmall = 0.5*(slot.heronNoseLeft./slot.heronNoseRight + slot.heronNoseRight./slot.heronNoseLeft);
+
+slot.heronFaceArea = sqrt(slorom.*(slorom-vloro./vloro).*(slorom-vlom./vloro).*(slorom-vrom./vloro));
+slot.heronFaceAreaLeft = sqrt(slogm.*(slogm-vlom./vlog).*(slogm-vgm./vlog).*(slogm-vlog./vlog));
+slot.heronFaceAreaRight = sqrt(srogm.*(srogm-vrom./vrog).*(srogm-vgm./vrog).*(srogm-vrog./vrog));
+
+slot.heronAreaComperhensive = slot.heronFaceArea + slot.heronNoseArea + slot.heronNoseLeft*0.25 + slot.heronNoseRight*0.25+ slot.heronFaceAreaLeft*0.25 + slot.heronFaceAreaRight *0.25;
+areaRatioBig = 0.5*(slot.heronFaceAreaLeft./slot.heronFaceAreaRight + slot.heronFaceAreaRight./slot.heronFaceAreaLeft);
+slot.symmetryScore = (areaRatioBig+areaRatioSmall-2)*30;
+
+
+slot.edgesRatioLarge       = vloro./vlom + vlom./vloro + vloro./vrom + vrom./vloro + vlom./vrom + vrom./vlom + ...
+                             vloro./vlon + vlon./vloro + vloro./vron + vron./vloro + vlon./vron + vron./vlon ;
 % 17 to 28 is the columns for reprojected points.
 slot.reprojectedFeaturePoints = currentTest(:,19:32);
 % calculate the differences between detected feature coords and reprojected
@@ -74,3 +120,5 @@ end
 slot.quatCtoFace        = quatinv(slot.quatFaceToC);
 % this is the camera position vector in face-center coordinates.
 slot.tc_vec           = -quatrotate(slot.quatCtoFace,slot.tvec);
+slot.testFileName = currentTestFile;
+slot.videoFileName = regexprep(slot.testFileName,'vision\.test.*','vision\.mov');

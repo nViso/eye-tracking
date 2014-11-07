@@ -148,6 +148,37 @@ vector<fs::path> listFilesWithExtension(fs::path folderPath, string prefix, stri
     return files;
 }
 
+vector< vector<float> > parseTextTableFile(string filePath, string delimeters) {
+    vector<vector<float> > datas;
+    vector<string> lines;
+    ifstream fileStream(filePath);
+    if (fileStream.is_open()) {
+        string line;
+        while (fileStream.good()) {
+            getline(fileStream, line);
+            lines.push_back(line);
+        }
+        fileStream.close();
+    } else {
+        cout<<"unable to open file: "<<filePath<<endl;
+    }
+    
+    
+    for (int i = 0; i < lines.size(); i++) {
+        vector<string> numberParts;
+        vector<float> numbers;
+        string line = lines[i];
+        boost::split(numberParts, line, boost::is_any_of(delimeters));
+        if (numberParts.size()<2) continue;
+        for (int j = 0 ; j < numberParts.size(); j++) {
+            numbers.push_back(boost::lexical_cast<float>(numberParts[j]));
+        }
+        datas.push_back(numbers);
+    }
+    return datas;
+
+}
+
 std::string simpleDataFormat(boost::posix_time::ptime date_time, std::string format)
 {
     static boost::posix_time::time_facet * facet =

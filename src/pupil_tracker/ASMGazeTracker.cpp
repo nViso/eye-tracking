@@ -131,8 +131,8 @@ bool ASM_Gaze_Tracker::estimateFacePose() {
         return false;
     }
     vector<Point2f> imagePoints = tracker.points;
-    float maxErrorDistance = norm(imagePoints[2]-imagePoints[3])/25.0f;
-    solvePnPRansac(facialPointsIn3D, imagePoints, cameraMatrix, distCoeffs, rvec, tvec, false, 30,maxErrorDistance,7);
+    float maxErrorDistance = norm(imagePoints[2]-imagePoints[3])/20.0f;
+    solvePnPRansac(facialPointsIn3D, imagePoints, cameraMatrix, distCoeffs, rvec, tvec, false, 20,maxErrorDistance,7);
     this->projectPoints(facialPointsIn3D, reprojectedFacialPointsInImage);
     // change the rvec to rotation matrix, and then reshape the matrix to a row vector.
     // please note that, the opencv reshapes the matrix by the row-first order. However,
@@ -167,6 +167,18 @@ calc_scale(const Mat &X, //scaling basis vector
 // No matter how to optimize the metric, the result is still not better than the manually annotated first image.
 // This is because, the model is not always aligned with true head 3D movement. The ASM model is just a partial 2D fitting for the 3D points.
 void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
+    fs::path faceModelFile = fs::path(tracker.detector.baseDir) / "facial2dmodel.txt";
+    if (fs::exists(faceModelFile)) {
+        vector< vector<float> > datas = parseTextTableFile(faceModelFile.string()," ");
+        vector<Point2f> points;
+        for (int i = 0 ; i < datas.size() ; i ++) {
+            Point2f p(datas[i][0],datas[i][1]);
+            points.push_back(p);
+        }
+        facialPointsIn2D = points;
+        cout<<"from txt:"<<points<<endl;
+    }
+    
     vector<vector<Point2f> > pointsSeries = tracker.smodel.matY2pts();
     vector<Point2f> bestFace;
     if (pointsSeries[0].size()<10) {
@@ -211,7 +223,11 @@ void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
             }
     }
 
-	vector<Point2f> points = bestFace;
+    
+    vector<Point2f> points;
+    if (fs::exists(faceModelFile))
+         points = facialPointsIn2D;
+    else points= bestFace;
 
 	Point2f center = points[0] * 0.5f + points[1] * 0.5f;
 	float normVaue = tracker.annotations.getDistanceBetweenOuterCanthuses()
@@ -233,6 +249,7 @@ void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
 
 	facialPointsIn3D = faceFeatures;
 	facialPointsIn2D = faceFeatures2;
+    cout<<"final:"<<facialPointsIn3D<<endl;
 }
 
 void ASM_Gaze_Tracker::eyeCenterLocalizationImpl(const Mat& image, Point2f & eyeCoord, float coordinateWeight, int kmeansIterations, int kmeansRepeats, float blurSizeRatio) {

@@ -98,14 +98,28 @@ allRMSFunc = @(x) median(((x.reprojectionRMS)));
 peak2rmcFunc = @(x) peak2rms(x.reprojectionRMS);
 distanceFunc = @(x) median(rssq(x.vision.tvec,2));
 rssqAllRMSFunc = @(x) rssq(x.reprojectionRMS);
+noseRatioFunc = @(x) median(x.vision.noseRatio);
+noseAngleFunc = @(x) median(x.vision.noseAngle);
+faceNNAngle1Func = @(x) median(x.faceAngleNN(:,1));
+faceNNAngle2Func = @(x) median(x.faceAngleNN(:,2));
+faceNNAngle3Func = @(x) median(x.faceAngleNN(:,3));
+maxAreaFunc = @(x) max(x.vision.heronFaceArea);
+maxAreaSmallerFunc = @(x) max(x.vision.heronFaceAreaSmall);
 
 xfaceNNDiffStd = squeeze(cellfun(faceAngleDiffFunc,datas));
 xfaceNNStd = squeeze(cellfun(faceAngleStdFunc,datas));
 xreprojectionRMS = squeeze(cellfun(allRMSFunc,datas));
 xnoseRMS = squeeze(cellfun(noseRMSFunc,datas));
 xdistance = squeeze(cellfun(distanceFunc,datas));
+xheronArea = squeeze(cellfun(maxAreaFunc,datas));
+xheronAreaSmall = squeeze(cellfun(maxAreaSmallerFunc,datas));
 xcombine = xfaceNNStd.*xreprojectionRMS.*xfaceNNDiffStd.*xdistance;
 
+xfaceNNangle1 = squeeze(cellfun(faceNNAngle1Func,datas));
+xfaceNNangle2 = squeeze(cellfun(faceNNAngle2Func,datas));
+xfaceNNangle3 = squeeze(cellfun(faceNNAngle3Func,datas));
+
 topxcombine = prctile(xcombine(:),20);
+
 xcombine(xcombine>topxcombine) = 0;
 [r, c,v] = find(xcombine);

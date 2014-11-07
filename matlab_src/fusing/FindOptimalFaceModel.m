@@ -1,6 +1,6 @@
 close all; clc;clear;
 baseDir = '/Users/ZhipingJiang/trackingdata/video_parsing/';
-movFiles = dir([baseDir '*.mov']);
+movFiles = dir([baseDir '141105_1449vision.mov']);
 
 datas = {};
 for i = 1:length(movFiles)
@@ -16,7 +16,7 @@ clearvars -except datas baseDir movFiles;
 h = [];
 for i = 1:length(datas)
     data = datas{i}.vision.allFeaturePoints;
-    d2 = reshape(data',[2 6 size(data,1)]);
+    d2 = reshape(data',[2 7 size(data,1)]);
     for j = 1:size(d2,3) 
         p = pdist2(d2(:,:,j)',d2(:,:,j)');
         distancesum = sum(sum(triu(p)));
@@ -26,19 +26,30 @@ for i = 1:length(datas)
 end
 
 hmedian = median(h,3);
-p = mdscale(hmedian,3);
+p = mdscale(hmedian,2);
 
 %%
 
 
-
-data = [];
-for i = 1:length(datas)
-    data = [data; datas{i}.vision.allFeaturePoints];
+base = datas{1}.vision.allFeaturePoints;
+base = reshape(base',2,7,size(base,1));
+X = base(:,:,1)';
+for i = 1:size(base,3)
+   [~, Z] = procrustes(X,base(:,:,i)');
+   base(:,:,i) = Z';
 end
+base = reshape(base,14,size(base,3))';
 
-samplingGap = 20;
-data = data(1:samplingGap:end,:);
+
+samplingGap = 1;
+data = base(1:samplingGap:end,:);
 data = unique(data,'rows');
 distM = pdist2(data,data);
-p = mdscale(distM,2);
+
+p = mdscale(distM,3);
+
+
+mbase = median(base);
+p2 = reshape(mbase,2,7)';
+
+display('done');
