@@ -154,6 +154,14 @@ void invoke_Scan3DFaceModel(fs::path userProfileDir,fs::path cameraProfilePath, 
     cout<<"------- Invocation Done ------------------------"<<endl;
 }
 
+void invoke_Scan3DFaceModelWithScanSequenceFile(fs::path userProfileDir,fs::path cameraProfilePath, fs::path testFile, fs::path scanSequenceFile) {
+    cout<<"------- Invoking ./Scan3DFaceModel (video parsing) ------------------"<<endl;
+    string cmdpath = (fs::current_path()/"Scan3DFaceModel").string();
+    string cmd = cmdpath+" "+userProfileDir.string()+" "+cameraProfilePath.string()+" "+testFile.string()+" "+scanSequenceFile.string();
+    cout<<cmd<<endl;
+    system(cmd.c_str());
+    cout<<"------- Invocation Done ------------------------"<<endl;
+}
 
 void trainASMModel(fs::path userProfilePath) {
     invoke_annotate(userProfilePath);
@@ -459,7 +467,7 @@ int main(int argc, const char * argv[])
                     continue;
                 }
                 
-                cout << "input scan range \"minNoseHeight maxNoseHeight minMidLipHeight maxMidLipHeight step\":";
+                cout << "input scan range \"minNoseHeight maxNoseHeight minMidLipHeight maxMidLipHeight step (all zero for using ScanSequence.txt file)\":";
                 vector<string> numberParts;
                 cin.get();
                 string input;
@@ -474,7 +482,12 @@ int main(int argc, const char * argv[])
                 for (int i = 0 ; i < videoFilePaths.size(); i++) {
                     fs::path videoFile =videoFilePaths[i];
                     fs::path testFile = videoFile.parent_path() / (videoFile.stem().string()+".test");
-                    invoke_Scan3DFaceModel(targetProfilePath,cameraProfilePath,testFile,minNoseHeight,maxNoseHeight,minMidLipHeight,maxMidLipHeight,step);
+                    if (minNoseHeight+maxNoseHeight+minMidLipHeight+maxMidLipHeight+step != 0)
+                        invoke_Scan3DFaceModel(targetProfilePath,cameraProfilePath,testFile,minNoseHeight,maxNoseHeight,minMidLipHeight,maxMidLipHeight,step);
+                    else {
+                        fs::path scanSequenceFile = videoFile.parent_path() / "ScanSequence.txt";
+                        invoke_Scan3DFaceModelWithScanSequenceFile(targetProfilePath,cameraProfilePath,testFile,scanSequenceFile);
+                    }
                 }
 
             }
