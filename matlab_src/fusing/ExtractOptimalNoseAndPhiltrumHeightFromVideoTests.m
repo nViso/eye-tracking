@@ -91,11 +91,9 @@ status = cellfun(@(x) ~isempty(x), datas);
 [~, closestIdx] = bwdist(status);
 datas(:) = datas(closestIdx);
 
-% noseRMSFunc = @(x) median((rms((x.vision.allFeaturePoints(:,9:end) - x.vision.reprojectedFeaturePoints(:,9:end))')));
-% faceAngleDiffFunc = @(x) sum(std(abs(diff(x.faceAngleBN))));
-% faceAngleStdFunc = @(x) sum(std(((x.faceAngleBN))));
+
 allRMSMedianFunc = @(x) median(((x.reprojectionRMS)));
-allRMSStdFunc = @(x) abs(mad(x.reprojectionRMS,0));
+allRMSStdFunc = @(x) abs(std(x.reprojectionRMS));
 % peak2rmcFunc = @(x) peak2rms(x.reprojectionRMS);
 % distanceFunc = @(x) median(rssq(x.vision.tvec,2));
 % rssqAllRMSFunc = @(x) rssq(x.reprojectionRMS);
@@ -109,6 +107,10 @@ allRMSStdFunc = @(x) abs(mad(x.reprojectionRMS,0));
 
 % xfaceNNDiffStd = squeeze(cellfun(faceAngleDiffFunc,datas));
 % xfaceNNStd = squeeze(cellfun(faceAngleStdFunc,datas));
+noseHeights = squeeze(cellfun(@(x) x.noseHeight,datas));
+noseHeights = noseHeights(:,1);
+philtrumHeights = squeeze(cellfun(@(x) x.philtrumHeight,datas));
+philtrumHeights = philtrumHeights(1,:)';
 xreprojectionRMS = squeeze(cellfun(allRMSMedianFunc,datas));
 xreprojectionRMSstd = squeeze(cellfun(allRMSStdFunc,datas));
 % xnoseRMS = squeeze(cellfun(noseRMSFunc,datas));
@@ -120,7 +122,7 @@ xreprojectionRMSstd = squeeze(cellfun(allRMSStdFunc,datas));
 % xfaceNNangle1 = squeeze(cellfun(faceNNAngle1Func,datas));
 % xfaceNNangle2 = squeeze(cellfun(faceNNAngle2Func,datas));
 % xfaceNNangle3 = squeeze(cellfun(faceNNAngle3Func,datas));
-
+xreprojectionRMS(status == 0) = nan;
 xreprojectionRMS = imresize(xreprojectionRMS,3);
 xreprojectionRMSstd = imresize(xreprojectionRMSstd,3);
 xreprojectionRMSstd = abs(xreprojectionRMSstd);

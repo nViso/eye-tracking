@@ -1,4 +1,6 @@
 close all; clc;clear;
+addpath('../');
+addpath('../IMUProcessing');
 baseDir = '/Users/ZhipingJiang/trackingdata/video_parsing/';
 movFiles = dir([baseDir '*.mov']);
 
