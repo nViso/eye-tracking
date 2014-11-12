@@ -19,6 +19,7 @@ public:
     
     bool calculatePupilCenter();
     
+    void estimatePupilCenterFaceCoordinates();
     bool estimateFacePose();
     void projectPoints(const vector<Point3f> & sourcePoints, vector<Point2f> & destPoints);
     float distanceToCamera();
@@ -29,6 +30,7 @@ public:
     Point2f glabellaPoint;
     float eyePairTileAngle;
     Point2f leftEyePoint, rightEyePoint;
+    Point3f leftCenterInFace, rightCenterInFace;
     vector<Point2f> canthusPts;
     vector<Point2f> nosePts;
     

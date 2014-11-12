@@ -73,6 +73,7 @@ int main(int argc, const char * argv[])
         if (succeeded) {
             pupilTracker.calculatePupilCenter();
             pupilTracker.estimateFacePose();
+            pupilTracker.estimatePupilCenterFaceCoordinates();
         }
         
         printf("\b\rfps: %f, frame count: %d",1.0/timer.tock(), ++frameCount);

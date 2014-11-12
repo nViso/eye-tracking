@@ -22,7 +22,7 @@ vector<float> ASM_Gaze_Tracker::toDataSlot() {
     vector<float> slot;
     
     if (isTrackingSuccess == false) {
-        for (int i = 0; i < 44; i++) {
+        for (int i = 0; i < 48; i++) {
             slot.push_back(0.0f);
         }
         return slot;
@@ -43,9 +43,15 @@ vector<float> ASM_Gaze_Tracker::toDataSlot() {
     for (int i = 0 ; i < 3 ; i ++) {
         slot.push_back((float)tvec.at<double>(i));
     }
+    poseRMatrix = poseRMatrix.t();
+    poseRMatrix = poseRMatrix.reshape(1,1);
     for (int i = 0 ; i < 9 ; i ++) {
         slot.push_back((float)poseRMatrix.at<double>(i));
     }
+    slot.push_back(leftCenterInFace.x);
+    slot.push_back(leftCenterInFace.y);
+    slot.push_back(rightCenterInFace.x);
+    slot.push_back(rightCenterInFace.y);
     
     return slot;
 }
@@ -139,9 +145,34 @@ bool ASM_Gaze_Tracker::estimateFacePose() {
     // please note that, the opencv reshapes the matrix by the row-first order. However,
     // Matlab's reshape is column-first, so, here the matrix is transposed before opencv's reshape.
     Rodrigues(rvec, poseRMatrix);
-    poseRMatrix = poseRMatrix.t();
-    poseRMatrix = poseRMatrix.reshape(1,1);
     return true;
+}
+
+void ASM_Gaze_Tracker::estimatePupilCenterFaceCoordinates() {
+    Point3d facePlanNormInW(0.0f,0.0,100.0);
+    Mat facePlanNormInC = poseRMatrix*(Mat(facePlanNormInW).reshape(1));
+    
+    vector<Point2f> pupilsInPixel;
+    pupilsInPixel.push_back(leftEyePoint);
+    pupilsInPixel.push_back(rightEyePoint);
+    vector<Point3f> pupilsInFace;
+    vector<Point3f> pupilsInHomo;
+    convertPointsToHomogeneous(pupilsInPixel, pupilsInHomo);
+    for (int i = 0 ; i < pupilsInHomo.size() ; i ++) {
+        Point3f pHomo = pupilsInHomo[i];
+        Mat pInFocalPlane;
+        Mat(pHomo).convertTo(pInFocalPlane, CV_64F);
+        pInFocalPlane = (cameraMatrix.inv())*pInFocalPlane;
+        pInFocalPlane = pInFocalPlane / norm(pInFocalPlane);
+        
+        Mat p3DInCamera = pInFocalPlane*facePlanNormInC.dot(Mat(tvec).reshape(1))/facePlanNormInC.dot(pInFocalPlane);
+        Mat p3DtoW = p3DInCamera -  Mat(tvec).reshape(1);
+        Mat p3DInW = poseRMatrix.t()*p3DtoW;
+        pupilsInFace.push_back(Point3f(p3DInW));
+    }
+
+    leftCenterInFace = pupilsInFace[0];
+    rightCenterInFace = pupilsInFace[1];
 }
 
 void ASM_Gaze_Tracker::projectPoints(const vector<Point3f> & sourcePoints, vector<Point2f> & destPoints) {
@@ -150,19 +181,6 @@ void ASM_Gaze_Tracker::projectPoints(const vector<Point3f> & sourcePoints, vecto
 
 float ASM_Gaze_Tracker::distanceToCamera() {
     return norm(tvec);
-}
-
-float //scaling factor
-calc_scale(const Mat &X, //scaling basis vector
-		const float width) //width of desired shape
-		{
-	int n = X.rows / 2;
-	float xmin = X.at<float>(0), xmax = X.at<float>(0);
-	for (int i = 0; i < n; i++) {
-		xmin = min(xmin, X.at<float>(2 * i));
-		xmax = max(xmax, X.at<float>(2 * i));
-	}
-	return width / (xmax - xmin);
 }
 
 // No matter how to optimize the metric, the result is still not better than the manually annotated first image.
