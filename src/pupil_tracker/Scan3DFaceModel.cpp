@@ -76,6 +76,7 @@ int main(int argc, const char * argv[])
             poseTracker.rightEyePoint= featurePoints[k][1];
             poseTracker.tracker.points= vector<Point2f>(featurePoints[k].begin()+2,featurePoints[k].end());
             poseTracker.estimateFacePose();
+            poseTracker.estimatePupilCenterFaceCoordinates();
             csvlogger.addSlot(poseTracker.toDataSlot());
         }
         csvlogger.writeToFile(testFile.parent_path() / (testFile.stem().string() + ".test_"+boost::lexical_cast<string>(i)+"_"+boost::lexical_cast<string>(j)));
