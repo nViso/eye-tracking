@@ -22,7 +22,7 @@ vector<float> ASM_Gaze_Tracker::toDataSlot() {
     vector<float> slot;
     
     if (isTrackingSuccess == false) {
-        for (int i = 0; i < 68; i++) {
+        for (int i = 0; i < 71; i++) {
             slot.push_back(0.0f);
         }
         return slot;
@@ -56,7 +56,7 @@ vector<float> ASM_Gaze_Tracker::toDataSlot() {
     slot.push_back(rightCenterInFace.y);
     slot.push_back(rightCenterInFace.z);
     
-    for (int i = 0 ; i < 6 ; i ++) {
+    for (int i = 0 ; i < facialPointsIn3D.size() ; i ++) {
         slot.push_back(facialPointsIn3D[i].x);
         slot.push_back(facialPointsIn3D[i].y);
         slot.push_back(facialPointsIn3D[i].z);
@@ -174,8 +174,9 @@ void ASM_Gaze_Tracker::estimatePupilCenterFaceCoordinates() {
         Mat(pHomo).convertTo(pInFocalPlane, CV_64F);
         pInFocalPlane = (cameraMatrix.inv())*pInFocalPlane;
         pInFocalPlane = pInFocalPlane / norm(pInFocalPlane);
-        
-        Mat p3DInCamera = pInFocalPlane*facePlanNormInC.dot(Mat(tvec).reshape(1))/facePlanNormInC.dot(pInFocalPlane);
+        Point3d pHeight(0,0,1.0f);
+        Mat pHeightPlanePoint = poseRMatrix*Mat(pHeight).reshape(1) + Mat(tvec).reshape(1);
+        Mat p3DInCamera = pInFocalPlane*facePlanNormInC.dot(pHeightPlanePoint)/facePlanNormInC.dot(pInFocalPlane);
         Mat p3DtoW = p3DInCamera -  Mat(tvec).reshape(1);
         Mat p3DInW = poseRMatrix.t()*p3DtoW;
         pupilsInFace.push_back(Point3f(p3DInW));
@@ -183,6 +184,11 @@ void ASM_Gaze_Tracker::estimatePupilCenterFaceCoordinates() {
 
     leftCenterInFace = pupilsInFace[0];
     rightCenterInFace = pupilsInFace[1];
+//    vector<Point2f> pupilCenterReprojected;
+//    projectPoints(pupilsInFace, pupilCenterReprojected);
+//    cout<<"left error"<<norm(leftEyePoint - pupilCenterReprojected[0])<<" right error"<<norm(rightEyePoint - pupilCenterReprojected[1])<<endl;
+//    cout<<"leftCenterInFace"<<leftCenterInFace<<endl;
+//    cout<<"rightCenterInFace"<<rightCenterInFace<<endl;
 }
 
 void ASM_Gaze_Tracker::projectPoints(const vector<Point3f> & sourcePoints, vector<Point2f> & destPoints) {
