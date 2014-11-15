@@ -43,6 +43,7 @@ public:
     Mat tvec;
     Mat cameraMatrix;
     Mat distCoeffs;
+    Mat leftEyeImageRectified, rightEyeImageRectified;
     vector<Point3f> facialPointsIn3D;
     vector<Point2f> facialPointsIn2D;
     vector<Point2f> reprojectedFacialPointsInImage;

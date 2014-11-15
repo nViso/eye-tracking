@@ -10,11 +10,12 @@ int main(int argc, const char * argv[])
     string windowName;
     VideoCapture cam;
     bool dumpFile = false;
+    bool extractEyeImages = true;
     bool noShow = false;
     fs::path userProfilePath,cameraProfilePath,inputFilePath;
     int videoFrameRotation = 0;
     if (argc<3) {
-        cout<<argv[0]<<" userProfileDir"<<" cameraProfile"<<" [dumping Video file]"<<" [noshow]"<<endl;
+        cout<<argv[0]<<" userProfileDir"<<" cameraProfile"<<" [dumping Video file]"<<" [noshow] [ExtractEyeImages]"<<endl;
         return 0;
     } else if (argc == 3) {
         windowName = "Pupil tracking from camera";
@@ -32,6 +33,15 @@ int main(int argc, const char * argv[])
     } else if(argc == 5 && boost::iequals(string(argv[4]), "noshow")) {
         dumpFile = true;
         noShow = true;
+        userProfilePath = fs::path(argv[1]);
+        cameraProfilePath = fs::path(argv[2]);
+        inputFilePath = fs::path(argv[3]);
+        cam.open(inputFilePath.string());
+        videoFrameRotation = readRotationMetadataForVideo(inputFilePath);
+        windowName = "Pupil tracking from video [" + inputFilePath.string() +"]";
+    } else if(argc >=5 && (boost::iequals(string(argv[4]), "ExtractEyeImage") || boost::iequals(string(argv[5]), "ExtractEyeImages"))) {
+        dumpFile = true;
+        extractEyeImages = true;
         userProfilePath = fs::path(argv[1]);
         cameraProfilePath = fs::path(argv[2]);
         inputFilePath = fs::path(argv[3]);
@@ -76,11 +86,23 @@ int main(int argc, const char * argv[])
             pupilTracker.estimatePupilCenterFaceCoordinates();
         }
         
-        printf("\b\rfps: %f, frame count: %d",1.0/timer.tock(), ++frameCount);
-        fflush(stdout);
+        if (extractEyeImages) {
+            fs::path basePath = inputFilePath.parent_path() / inputFilePath.stem().string();
+            if (fs::exists(basePath)== false) {
+                fs::create_directories(basePath);
+            }
+            fs::path leyePath = basePath / ("L"+boost::lexical_cast<string>(frameCount)+".jpg");
+            fs::path reyePath = basePath / ("R"+boost::lexical_cast<string>(frameCount)+".jpg");
+            cout<<leyePath<<endl;
+            imwrite(leyePath.string(), pupilTracker.leftEyeImageRectified);
+            imwrite(reyePath.string(), pupilTracker.rightEyeImageRectified);
+        }
         
         if (dumpFile)
             csvlogger.addSlot(pupilTracker.toDataSlot());
+        
+        printf("\b\rfps: %f, frame count: %d",1.0/timer.tock(), ++frameCount);
+        fflush(stdout);
         
         if (noShow) {
             continue;

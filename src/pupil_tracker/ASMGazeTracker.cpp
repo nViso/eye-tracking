@@ -119,15 +119,16 @@ bool ASM_Gaze_Tracker::calculatePupilCenter(){
     if (leftEyeRect.area() < 50 || rightEyeRect.area()< 50) {
         return false;
     }
-    
+    cropped(leftEyeRect).copyTo(leftEyeImageRectified);
+    cropped(rightEyeRect).copyTo(rightEyeImageRectified);
     Point2f leftEyeCenter, rightEyeCenter;
     
-//    eyeCenterLocalizationImpl(cropped(leftEyeRect), leftEyeCenter);
-//    eyeCenterLocalizationImpl(cropped(rightEyeRect), rightEyeCenter);
+//    eyeCenterLocalizationImpl(leftEyeImageRectified, leftEyeCenter);
+//    eyeCenterLocalizationImpl(leftEyeImageRectified, rightEyeCenter);
 //    cout<<"debug"<<endl;
     
-    boost::thread leftEyeThread(eyeCenterLocalizationImpl, cropped(leftEyeRect), boost::ref(leftEyeCenter), 0.35,4,3,0.26);
-    boost::thread  rightEyeThread(eyeCenterLocalizationImpl, cropped(rightEyeRect), boost::ref(rightEyeCenter), 0.34,4,3,0.26);
+    boost::thread leftEyeThread(eyeCenterLocalizationImpl, leftEyeImageRectified, boost::ref(leftEyeCenter), 0.35,4,3,0.26);
+    boost::thread  rightEyeThread(eyeCenterLocalizationImpl, leftEyeImageRectified, boost::ref(rightEyeCenter), 0.34,4,3,0.26);
     leftEyeThread.join();
     rightEyeThread.join();
     
