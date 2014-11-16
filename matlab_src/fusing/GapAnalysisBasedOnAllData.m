@@ -15,7 +15,7 @@ end
 clearvars -except datas baseDir movFiles;
 %% estimate error model using linear regression.
 headMobilities = cellfun(@(x) x.headMobility,datas)';
-headImmobileIndex = find(headMobilities <25 & headMobilities >0);
+headImmobileIndex = find(headMobilities <100 & headMobilities >0);
 
 faceAngleC = [];
 gapAngle = [];
@@ -26,6 +26,8 @@ for i  = 1:length(headImmobileIndex)
     faceAngleC = ([faceAngleC ; datas{headImmobileIndex(i)}.faceAngleC]);
     reprojectionRMS = [reprojectionRMS datas{headImmobileIndex(i)}.reprojectionRMS];
 end
+% gapAngle(reprojectionRMS>5,:) = [];
+% faceAngleC(reprojectionRMS>5,:) = [];
 
 gapAngle = unwrap(deg2rad(gapAngle));
 % gaplp = abs(sum([filtfilt(ones(1,10)/10,1,gapAngle)]'));
@@ -36,7 +38,9 @@ faceAngleC = unwrap(deg2rad(faceAngleC));
 g1 = gapAngle(:,1);
 g2 = gapAngle(:,2);
 g3 = gapAngle(:,3);
-
+fa1 = faceAngleC(:,1);
+fa2 = faceAngleC(:,2);
+fa3 = faceAngleC(:,3);
 gap1Model = fitlm(faceAngleC,g1,'RobustOpts','on');
 gap2Model = fitlm(faceAngleC,g2,'RobustOpts','on');
 gap3Model = fitlm(faceAngleC,g3,'RobustOpts','on');

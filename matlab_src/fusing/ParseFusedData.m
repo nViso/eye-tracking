@@ -1,5 +1,6 @@
 function pack = ParseFusedData(pathHeader,gap1Model,gap2Model,gap3Model,density,threshold)
-
+addpath('../');
+addpath('../IMUProcessing');
 
 traceName = pathHeader;
 visionTraceName = [traceName 'vision.test'];
