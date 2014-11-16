@@ -40,6 +40,13 @@ vector<float> ASM_Gaze_Tracker::toDataSlot() {
         slot.push_back(reprojectedFacialPointsInImage[i].x);
         slot.push_back(reprojectedFacialPointsInImage[i].y);
     }
+    
+    Mat temp = cameraMatrix.t();
+    temp = temp.reshape(1,1);
+    for (int i = 0 ; i < 9 ; i ++) {
+        slot.push_back((float)temp.at<double>(i));
+    }
+    
     for (int i = 0 ; i < 3 ; i ++) {
         slot.push_back((float)tvec.at<double>(i));
     }
@@ -47,12 +54,6 @@ vector<float> ASM_Gaze_Tracker::toDataSlot() {
     poseRMatrix = poseRMatrix.reshape(1,1);
     for (int i = 0 ; i < 9 ; i ++) {
         slot.push_back((float)poseRMatrix.at<double>(i));
-    }
-    
-    cameraMatrix = cameraMatrix.t();
-    cameraMatrix = cameraMatrix.reshape(1,1);
-    for (int i = 0 ; i < 9 ; i ++) {
-        slot.push_back((float)cameraMatrix.at<double>(i));
     }
     
     slot.push_back(leftCenterInFace.x);
