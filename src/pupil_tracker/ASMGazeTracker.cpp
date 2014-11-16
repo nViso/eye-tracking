@@ -22,7 +22,7 @@ vector<float> ASM_Gaze_Tracker::toDataSlot() {
     vector<float> slot;
     
     if (isTrackingSuccess == false) {
-        for (int i = 0; i < 71; i++) {
+        for (int i = 0; i < 80; i++) {
             slot.push_back(0.0f);
         }
         return slot;
@@ -47,6 +47,12 @@ vector<float> ASM_Gaze_Tracker::toDataSlot() {
     poseRMatrix = poseRMatrix.reshape(1,1);
     for (int i = 0 ; i < 9 ; i ++) {
         slot.push_back((float)poseRMatrix.at<double>(i));
+    }
+    
+    cameraMatrix = cameraMatrix.t();
+    cameraMatrix = cameraMatrix.reshape(1,1);
+    for (int i = 0 ; i < 9 ; i ++) {
+        slot.push_back((float)cameraMatrix.at<double>(i));
     }
     
     slot.push_back(leftCenterInFace.x);

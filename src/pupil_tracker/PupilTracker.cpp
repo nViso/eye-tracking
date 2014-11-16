@@ -10,7 +10,7 @@ int main(int argc, const char * argv[])
     string windowName;
     VideoCapture cam;
     bool dumpFile = false;
-    bool extractEyeImages = true;
+    bool extractEyeImages = false;
     bool noShow = false;
     fs::path userProfilePath,cameraProfilePath,inputFilePath;
     int videoFrameRotation = 0;
