@@ -1,5 +1,5 @@
 clc;clear;close all;
-baseDir = '/Users/ZhipingJiang/trackingdata/video_parsing/141105_1446vision/';
+baseDir = '/Users/ZhipingJiang/trackingdata/video_parsing/141116_0329vision/';
 
 leftEyeFiles = dir([baseDir 'L*.jpg']);
 RightEyeFiles = dir([baseDir 'R*.jpg']);
@@ -21,16 +21,12 @@ clearvars -except left right;
 
 
 %%
-close all;
-for imageIndex = 20
-    for angles = 7
-        img = left{imageIndex};
-        tic;
-        [r c] = LocatePupilCenter(img,angles);
-        toc;
-        figure;imshow(img);
-        hold on;
-        plot(c,r,'o');
-        hold off;
-    end
+for imageIndex = 30:10:length(right)
+    tic;
+    img = right{imageIndex};
+    [r c] = LocatePupilCenter(img);
+    figure;imshow(img);
+    hold on;
+    plot(c,r,'o');
+    hold off;
 end

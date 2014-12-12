@@ -1,13 +1,12 @@
-function [sr sc] = LocatePupilCenter(original,angleSegs)
-img = original;
-% img= UniformLightEuqualizeRGBImage(original,100);
+function [sr sc] = LocatePupilCenter(img)
+
 imglarge = imresize(img,[ 150/size(img,2)*size(img,1),150]);
 imggrey = rgb2gray(imglarge);
 hgaussian  = fspecial('gaussian',5,5);
 imgfiltered = imfilter(imglarge,hgaussian,'replicate');
 imggreyfiltered = double(imfilter(imggrey,hgaussian,'replicate'));
-    [FX FY] = gradient(double(imggreyfiltered));
-    G1=FX.^2 + FY.^2;
+%     [FX FY] = gradient(double(imggreyfiltered));
+%     G1=FX.^2 + FY.^2;
 I = imgfiltered;
 l1 = I(:,:,1);
 l2 = I(:,:,2);
@@ -54,65 +53,81 @@ bestLayer = 0;
 for i = 1:clusteringTimes
     clayer = layerTable2 >= i;
     
-    ss = regionprops(clayer,'Solidity');
-    if ~isempty(ss) && currentSolidity < max(ss.Solidity) 
-        currentSolidity = ss.Solidity;
-        [r c] = find(clayer);
-        cc = round(mean(c));
-        cr = round(mean(r));
-        massCenter = [cr cc];
+    s = regionprops(clayer,'Solidity');
+    if ~isempty(s) && currentSolidity < max(s.Solidity) 
+        currentSolidity = s.Solidity;
+        [x y] = find(clayer);
+        cy = round(mean(y));
+        cx = round(mean(x));
+        massCenter = [cx cy];
         bestLayer = layerTable2 >= i;
     end
 end
-%% optimize the bestLayer
-cutBestLayer = bestLayer;
-if bestLayer(cr,cc) >0
-    bestLayerDist = bwdistgeodesic(bestLayer,cc,cr);
-    bestLayerDist(isnan(bestLayerDist)) = inf;
-    cutBestLayer = bestLayerDist < 50;
-    [r c] = find(cutBestLayer);
-    cc = round(mean(c));
-    cr = round(mean(r));
-    massCenter = [cr cc];
-    bestLayerDist = bwdistgeodesic(cutBestLayer,cc,cr);
-    bestLayerDist(isnan(bestLayerDist)) = inf;
-    cutBestLayer = bestLayerDist < 40;
-end
-sbb = regionprops(cutBestLayer,'BoundingBox');
-sbb = sbb.BoundingBox;
+
+
 %%
-rbase = cutBestLayer;
-angles = linspace(0,360,angleSegs+1)';
-angles(end) =[];
+rbase = bestLayer;
+angles = [0:40:359]';
 rotatedBase = cell(size(angles));
-% rotatedGrey = cell(size(angles));
+rotatedGrey = cell(size(angles));
 for i = 1:length(angles)
     rotatedBase{i} = imrotate(rbase,angles(i));
-%     rotatedGrey{i} = imrotate(imggreyfiltered,angles(i));
+    rotatedGrey{i} = imrotate(imggreyfiltered,angles(i));
 end
 
-%% linear scan solve
-% areas = [];
-% 
-% for i = 1:2:size(rbase,1)
-%     for j =1:2:size(rbase,2)
-%         areas(i,j) = CircularPupilFinder(angles,rbase, rotatedBase,i,j);
-%     end
-% end
-% 
-% areas(areas==0) = nan;
-% figure;plot(areas(:,end));
-% [~,ind] = nanmin(areas(:));
-% [sr sc] = ind2sub(size(areas),ind);
+dcms = angle2dcm(deg2rad(angles),zeros(size(angles)),zeros(size(angles)));
 
+areas = [];
+solidities = [];
+highestScore = [];
+slope = [];
+for i = 1:2:size(imgfiltered,1)
+    for j =1:2:size(imgfiltered,2)
+        cornerPoints = [[-j; -i ; 0] [-j; size(rbase,1)-i ; 0] [size(rbase,2)-j;size(rbase,1)-i;0] [size(rbase,2)-j; -i ; 0] ];
+        
+        ranges = {};
+        for a = 1:length(angles)
+            rcorners = dcms(:,:,a)*cornerPoints+[j j j j ; i i i i; 0 0 0 0];
+            rcorners(3,:) = [];
+            rcorners = sort(rcorners,2,'ascend');
+            ranges{a} = rcorners(:,[1 end]);
+        end
+        xrefs = cell2mat(cellfun(@(x) x(1,:),ranges','UniformOutput',false));
+        xlims = [min(xrefs(:,1)) max(xrefs(:,2))];
+        yrefs = cell2mat(cellfun(@(x) x(2,:),ranges','UniformOutput',false));
+        ylims = [min(yrefs(:,1)) max(yrefs(:,2))];
+        template = zeros(ceil(ylims(2)-ylims(1)+10),ceil(xlims(2)-xlims(1)+10));
+        greytemp = zeros(ceil(ylims(2)-ylims(1)+10),ceil(xlims(2)-xlims(1))+10);
+        for a = 1:length(angles)
+            [m, n] = worldToSubscript(xlims,ylims,ranges{a}(1,1),ranges{a}(2,1));
+        
+            template(m:m+size(rotatedBase{a},1)-1,n:n+size(rotatedBase{a},2)-1) = template(m:m+size(rotatedBase{a},1)-1,n:n+size(rotatedBase{a},2)-1) + rotatedBase{a};
+            greytemp(m:m+size(rotatedBase{a},1)-1,n:n+size(rotatedBase{a},2)-1) = greytemp(m:m+size(rotatedBase{a},1)-1,n:n+size(rotatedBase{a},2)-1) + 1/length(angles)*rotatedBase{a}.*rotatedGrey{a};
 
-%% optimization problem definition
-testf = @(x) CircularPupilFinder(angles, rbase, rotatedBase, x(1),x(2));
-options = psoptimset('Cache','on','Display','none','TolMesh',0.125);
-th = sbb(2)-2;
-if th <1
-    th = 1;
+            
+        end
+        
+        highestScore(i,j) = nanmax(nanmax(greytemp));
+        
+        st = template;
+        st(st<3) = 0;
+        s = regionprops(st,'BoundingBox');
+        if ~isempty(s)
+            s = s(end);
+            s = s.BoundingBox(3:4);
+        else
+            s = [1 1];
+        end
+        slope(i,j) = bwarea(st) / (s(1)*s(2));
+        
+        template(template>1) = 1;
+        areas(i,j) = bwarea(template);
+    end
 end
-r = patternsearch(testf,massCenter,[],[],[],[],[th sbb(1)],[cr+2 sbb(1)+sbb(3)],options);
-sc = r(2) / (150/size(img,2));
-sr = r(1) / (150/size(img,2));
+
+areas(areas==0) = nan;
+[~,ind] = nanmin(areas(:));
+[sr sc] = ind2sub(size(areas),ind);
+
+sc = sc / (150/size(img,2));
+sr = sr / (150/size(img,2));

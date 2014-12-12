@@ -2,7 +2,7 @@
 clc;clear;
 addpath('../');
 addpath('../IMUProcessing');
-baseDir = '/Users/ZhipingJiang/trackingdata/video_parsing/';
+baseDir = '/Users/ZhipingJiang/trackingdata/video_parsing/multiple/';
 testFiles = dir([baseDir '*.test']);
 noseHeights = [];
 philtrumHeights = [];
@@ -122,7 +122,7 @@ xreprojectionRMSstd = squeeze(cellfun(allRMSStdFunc,datas));
 % xfaceNNangle1 = squeeze(cellfun(faceNNAngle1Func,datas));
 % xfaceNNangle2 = squeeze(cellfun(faceNNAngle2Func,datas));
 % xfaceNNangle3 = squeeze(cellfun(faceNNAngle3Func,datas));
-xreprojectionRMS(status == 0) = nan;
+% xreprojectionRMS(status == 0) = nan;
 xreprojectionRMS = imresize(xreprojectionRMS,3);
 xreprojectionRMSstd = imresize(xreprojectionRMSstd,3);
 xreprojectionRMSstd = abs(xreprojectionRMSstd);
@@ -134,4 +134,4 @@ philtrumHeights = imresize(philtrumHeights,3);
 
 [r c] = find(xcombineG == min(min(xcombineG)));
 
-[noseHeights(r,1) philtrumHeights(c,1)]
+result = [noseHeights(r,1) philtrumHeights(c,1)]

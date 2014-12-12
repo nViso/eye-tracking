@@ -1,11 +1,10 @@
-close all;
-% 
+clc;clear; close all;
+
 eye1 = ParseFusedData('/Users/ZhipingJiang/trackingdata/video_parsing/141115_0112');
 
-% eye1 = metaInfo;
 
 %%
-errorRate =  eye1.reprojectionRMS;
+errorRate = eye1.reprojectionRMS;
 phoneFromO = eye1.vision.tc_vec(errorRate< 4,:);
 pLeftCenter =0.5* ( eye1.vision.featureCoordsInFace(1,:) + eye1.vision.featureCoordsInFace(3,:));
 pRightCenter =0.5* ( eye1.vision.featureCoordsInFace(2,:) + eye1.vision.featureCoordsInFace(4,:));
@@ -26,11 +25,9 @@ plx = phoneInLeftEye(:,1);
 ply = phoneInLeftEye(:,2);
 prx = phoneInRightEye(:,1);
 pry = phoneInRightEye(:,2);
-%%
+
 gazingL = eye1.vision.leftCenterInFace(errorRate< 4,:);
 gazingR = eye1.vision.rightCenterInFace(errorRate< 4,:);
-gazingL = metaInfo.newLeftCenterInFace(errorRate<4,:);
-gazingR = metaInfo.newRightCenterInFace(errorRate<4,:);
 glx = gazingL(:,1);
 gly = gazingL(:,2);
 grx = gazingR(:,1);
@@ -38,13 +35,13 @@ gry = gazingR(:,2);
 gazingL(:,3) = [];
 gazingR(:,3) = [];
 
-leftXModel = fitlm(gazingR,prx,'RobustOpts','on');
-leftYModel = fitlm(gazingR,pry,'RobustOpts','on');
+leftXModel = fitlm(gazingL,plx,'RobustOpts','on');
+leftYModel = fitlm(gazingL,ply,'RobustOpts','on');
 
-predictX = predict(leftXModel,gazingR);
-predictY = predict(leftYModel,gazingR);
-priR = [predictX predictY];
+predictX = predict(leftXModel,gazingL);
+predictY = predict(leftYModel,gazingL);
+priL = [predictX predictY];
 
 figure;coloredScatter(gazingR);
-figure;coloredScatter(phoneInRightEye);
-figure;coloredScatter(priR);
+figure;coloredScatter(phoneInLeftEye);
+figure;coloredScatter(priL);

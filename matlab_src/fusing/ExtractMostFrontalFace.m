@@ -3,6 +3,8 @@ addpath('../');
 addpath('../IMUProcessing');
 baseDir = '/Users/ZhipingJiang/trackingdata/video_parsing/';
 movFiles = dir([baseDir '*.mov']);
+movFiles = movFiles([ 24]);
+%%
 
 datas = {};
 for i = 1:length(movFiles)
@@ -40,16 +42,17 @@ end
 xbestValue = nanmin(cell2mat(minValues));
 xbestVideoIndex = find(cell2mat(minValues) ==xbestValue);
 xbestFrameIndex = indeces{xbestVideoIndex};
+xbestFrameIndex = 360;
 
 xpoints = reshape(datas{xbestVideoIndex}.vision.allFeaturePoints(xbestFrameIndex,:)',[2 7])';
 noseRatio = norm((xpoints(5,:)+xpoints(6,:))/2 - (xpoints(1,:)+xpoints(2,:))/2 )/ norm((xpoints(5,:)+xpoints(6,:))/2 - xpoints(7,:) )
 
+markerInserter = vision.MarkerInserter('FillColor','White','Fill',true,'Size',10,'Opacity',1);
 videoReader = VideoReader(datas{xbestVideoIndex}.vision.videoFileName);
 xbestImage = read(videoReader,xbestFrameIndex);
-figure;imshow(xbestImage);
-hold on;
-coloredScatter(xpoints);
-hold off;
+xmarked = step(markerInserter,xbestImage,int32(xpoints));
+figure;imshow(xmarked);
+
 
 %% fine-grained tuning.
 symmetryCut = 0.05;
