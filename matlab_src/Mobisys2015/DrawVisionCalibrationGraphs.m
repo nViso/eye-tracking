@@ -107,14 +107,14 @@ zlabel('angle density');
 
 s = surfc(xx,yy,density,'Parent',axes1,'FaceColor','interp',...
     'EdgeColor','none');
-alpha(s,'color');
+% alpha(s,'color');
+% 
 
-scatter(x,y,70,z*200,'filled');
 opengl('OpenGLLineSmoothingBug',1);
 set(figure1,'Position',figureSize);
-save2pdf('VisionAnglePDF.eps',gcf,'opengl');
+save2pdf('VialSesnorTccracy.eps',gcf,'opengl');
 path1 = getenv('PATH');
 path1 = [path1 ':/usr/local/bin' ':/usr/texbin'];
 setenv('PATH',path1);
-system('epspdf ./VisionAnglePDF.eps');
-system('rm ./VisionAnglePDF.eps');
+system('epspdf ./VialSesnorTccracy.eps');
+system('rm ./VialSesnorTccracy.eps');
