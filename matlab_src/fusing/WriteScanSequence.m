@@ -1,7 +1,7 @@
 function sequenceGenerator
 heights = [];
 for i = 0:10
-    for j = 0:10
+    for j = 0:20
         heights = [ heights; i+j j];
     end
 end
