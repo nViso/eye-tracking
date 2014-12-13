@@ -80,6 +80,7 @@ bool ASM_Gaze_Tracker::featureTracking(const cv::Mat & im) {
     }
     glabellaPoint = tracker.points[0]*0.5 + tracker.points[1]*0.5;
     im.copyTo(this->im);
+    faceImageRectification();
     isTrackingSuccess = true;
     return true;
     
@@ -96,38 +97,17 @@ bool ASM_Gaze_Tracker::calculatePupilCenter(){
         return false;
     }
     
-    canthusPts = vector<Point2f>(tracker.points.begin(),tracker.points.begin()+4);
-    nosePts = vector<Point2f>(tracker.points.begin()+4,tracker.points.begin()+6);
-    
-    if (canthusPts[3].x < canthusPts[1].x && canthusPts[1].x < canthusPts[0].x && canthusPts[0].x < canthusPts[2].x) {
-    } else {
-        return false;
-    }
-    
-    eyePairTileAngle = calculateEyePairTileAngle(canthusPts);
-    glabellaPoint= caculateEyePairCenter(canthusPts);
-    
-    rotationMatrix = getRotationMatrix2D(glabellaPoint, eyePairTileAngle, 1.0);
-    Mat Mback = getRotationMatrix2D(glabellaPoint, -eyePairTileAngle, 1.0);
-    
-    vector<Point2f> rotatedCanthusPts = rotatePointsByRotationMatrix(canthusPts, rotationMatrix);
-    vector<Point2f> rotatedNosePts = rotatePointsByRotationMatrix(nosePts, rotationMatrix);
-    
-    float eyePairRectWidth =abs(rotatedCanthusPts[2].x - rotatedCanthusPts[3].x)+1;
-    Size2f eyePairRectSize(eyePairRectWidth,eyePairRectWidth/7);
-    Rect cropRect(Point2f(glabellaPoint.x-eyePairRectWidth/2,glabellaPoint.y -eyePairRectWidth/14.0f),eyePairRectSize);
-    
-    warpAffine(im, rotated_img, rotationMatrix, im.size(),CV_INTER_LINEAR);
-    getRectSubPix(rotated_img, eyePairRectSize, glabellaPoint, cropped);
-    
-    Rect rightEyeRect = Rect(0,0,rotatedCanthusPts[1].x-rotatedCanthusPts[3].x,eyePairRectSize.height);
-    Rect leftEyeRect = Rect(rotatedCanthusPts[0].x-rotatedCanthusPts[3].x,0,rotatedCanthusPts[2].x-rotatedCanthusPts[0].x,eyePairRectSize.height);
+    float eyeRectWidth =abs(rectifiedPts[0].x - rectifiedPts[2].x)/2+abs(rectifiedPts[3].x - rectifiedPts[1].x)/2+1;
+    eyeRectWidth = eyeRectWidth*1.2;
+    Size2f eyePairRectSize(-eyeRectWidth,eyeRectWidth*0.7);
+    Rect leftEyeRect = Rect(rectifiedPts[0]-Point2f(eyeRectWidth,eyeRectWidth*0.40),Size2f(eyeRectWidth,eyeRectWidth*0.7));
+    Rect rightEyeRect = Rect(rectifiedPts[1]-Point2f(0,eyeRectWidth*0.4),Size2f(eyeRectWidth,eyeRectWidth*0.7));
     
     if (leftEyeRect.area() < 50 || rightEyeRect.area()< 50) {
         return false;
     }
-    cropped(leftEyeRect).copyTo(leftEyeImageRectified);
-    cropped(rightEyeRect).copyTo(rightEyeImageRectified);
+    rectifiedImage(leftEyeRect).copyTo(leftEyeImageRectified);
+    rectifiedImage(rightEyeRect).copyTo(rightEyeImageRectified);
     Point2f leftEyeCenter, rightEyeCenter;
     
 //    eyeCenterLocalizationImpl(leftEyeImageRectified, leftEyeCenter);
@@ -139,13 +119,14 @@ bool ASM_Gaze_Tracker::calculatePupilCenter(){
     leftEyeThread.join();
     rightEyeThread.join();
     
-    leftEyeCenter += Point2f(leftEyeRect.tl().x,leftEyeRect.tl().y);
-    leftEyeCenter += Point2f(cropRect.tl().x, cropRect.tl().y);
+    leftEyeCenter +=  Point2f(leftEyeRect.tl().x, leftEyeRect.tl().y);
     rightEyeCenter += Point2f(rightEyeRect.tl().x,rightEyeRect.tl().y);
-    rightEyeCenter += Point2f(cropRect.tl().x,cropRect.tl().y);
-    
-    leftEyePoint= rotatePointByRotationMatrix(leftEyeCenter, Mback);
-    rightEyePoint= rotatePointByRotationMatrix(rightEyeCenter, Mback);
+    vector<Point2f> rectpts, originalpts;
+    rectpts.push_back(leftEyeCenter);
+    rectpts.push_back(rightEyeCenter);
+    perspectiveTransform(rectpts, originalpts, rectifyTransformationInv);
+    leftEyePoint = originalpts[0];
+    rightEyePoint = originalpts[1];
     isTrackingSuccess = true;
     return true;
 }
@@ -164,6 +145,24 @@ bool ASM_Gaze_Tracker::estimateFacePose() {
     // Matlab's reshape is column-first, so, here the matrix is transposed before opencv's reshape.
     Rodrigues(rvec, poseRMatrix);
     return true;
+}
+
+void ASM_Gaze_Tracker::faceImageRectification() {
+    if (isTrackingSuccess == false) {
+        return;
+    }
+    float rectifyScale = 2.0f;
+    int recTransX = im.size().width*0.5;
+    int recTransY = im.size().height*0.5;
+    vector<Point2f> templatePoints = facialPointsIn2D;
+    for (int i = 0 ; i < templatePoints.size() ; i ++) {
+        templatePoints[i] = templatePoints[i] * rectifyScale;
+        templatePoints[i] += Point2f(recTransX,recTransY);
+    }
+    rectifyTransformation = findHomography(tracker.points,templatePoints,0);
+    rectifyTransformationInv = rectifyTransformation.inv();
+    warpPerspective(im, rectifiedImage, rectifyTransformation, im.size());
+    perspectiveTransform(tracker.points, rectifiedPts, rectifyTransformation);
 }
 
 void ASM_Gaze_Tracker::estimatePupilCenterFaceCoordinates() {
@@ -207,70 +206,23 @@ float ASM_Gaze_Tracker::distanceToCamera() {
     return norm(tvec);
 }
 
-// No matter how to optimize the metric, the result is still not better than the manually annotated first image.
-// This is because, the model is not always aligned with true head 3D movement. The ASM model is just a partial 2D fitting for the 3D points.
 void ASM_Gaze_Tracker::findBestFrontalFaceShapeIn3D()  {
     fs::path faceModelFile = fs::path(tracker.detector.baseDir) / "facial2dmodel.txt";
+    vector<Point2f> points;
     if (fs::exists(faceModelFile)) {
         vector< vector<float> > datas = parseTextTableFile(faceModelFile.string()," ");
-        vector<Point2f> points;
+        vector<Point2f> filePoints;
         for (int i = 0 ; i < datas.size() ; i ++) {
             Point2f p(datas[i][0],datas[i][1]);
-            points.push_back(p);
+            filePoints.push_back(p);
         }
-        facialPointsIn2D = points;
-        cout<<"from txt:"<<points<<endl;
-    }
-    
-    vector<vector<Point2f> > pointsSeries = tracker.smodel.matY2pts();
-    vector<Point2f> bestFace;
-    if (pointsSeries[0].size()<10) {
-        bestFace = pointsSeries[0];
+        points = filePoints;
+        cout<<"from txt:"<<filePoints<<endl;
     } else {
-        
-        float scale = 1.0f;//calc_scale(tracker.smodel.V.col(0), 200);
-        float tranx = 0.0f;//n * 150.0 / tracker.smodel.V.col(2).dot(Mat::ones(2 * n, 1, CV_32F));
-        float trany = 0.0f;//n * 150.0 / tracker.smodel.V.col(3).dot(Mat::ones(2 * n, 1, CV_32F));
-        
-        float largestRatio = 1000.0f;
-        float largestArea = 0.0f;
-        for (float i = -1.0f ; i <1.0f ; i +=0.02)
-            for (float j = -1.0f ; j <1.0f ; j +=0.02) {
-//                cout<<i<<" "<<j<<endl;
-                Mat p = Mat::zeros(tracker.smodel.V.cols,1,CV_32F);
-                p.at<float>(0) = scale;
-                p.at<float>(2) = tranx;
-                p.at<float>(3) = trany;
-                p.at<float>(4) = scale * i * 3.0 * sqrt(tracker.smodel.e.at<float>(4));
-                p.at<float>(5) = scale * j * 3.0 * sqrt(tracker.smodel.e.at<float>(5));
-                
-                p.copyTo(tracker.smodel.p);
-                vector<Point2f> cp = tracker.smodel.calc_shape();
-                Point2f glabellaPoint  = cp[0] * 0.5f + cp[1] * 0.5f ;
-                Point2f noseCenter     = cp[4] * 0.5f + cp[5] * 0.5f ;
-                Point2f philtrumPoint  = cp[6];
-
-                float noisePhiltrumRatio = norm(glabellaPoint - noseCenter)/norm(noseCenter - philtrumPoint);
-                float area = contourArea(cp);
-//                cout<<"ratio"<<noisePhiltrumRatio<<endl;
-                float verticality = tileRadianBtwn2Pts(cp[2],cp[6]) + tileRadianBtwn2Pts(cp[6], cp[3]) + tileRadianBtwn2Pts(cp[0],cp[6]) + tileRadianBtwn2Pts(cp[6], cp[1]) + tileRadianBtwn2Pts(cp[0], cp[4]) + tileRadianBtwn2Pts(cp[5], cp[1]) + tileRadianBtwn2Pts(cp[2],cp[4]) + tileRadianBtwn2Pts(cp[5], cp[3]);
-                verticality = abs(rad2deg(verticality));
-//                cout<< verticality<<endl;
-                if (verticality < 10 && area > largestArea) {
-                    cout<<i<<" "<<j<<endl;
-                    cout<<"best"<<verticality<<" "<<area<<endl;
-                    bestFace = cp;
-                    largestArea = area;
-                }
-                
-            }
+        vector<vector<Point2f> > pointsSeries = tracker.smodel.matY2pts();
+        points= pointsSeries[0];
+        cout<<"using first training image:"<<points<<endl;
     }
-
-    
-    vector<Point2f> points;
-    if (fs::exists(faceModelFile))
-         points = facialPointsIn2D;
-    else points= bestFace;
 
 	Point2f center = points[0] * 0.5f + points[1] * 0.5f;
 	float normVaue = tracker.annotations.getDistanceBetweenOuterCanthuses()

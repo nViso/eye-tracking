@@ -21,6 +21,7 @@ public:
     
     void estimatePupilCenterFaceCoordinates();
     bool estimateFacePose();
+    void faceImageRectification();
     void projectPoints(const vector<Point3f> & sourcePoints, vector<Point2f> & destPoints);
     float distanceToCamera();
     vector<float> toDataSlot();
@@ -33,9 +34,10 @@ public:
     Point3f leftCenterInFace, rightCenterInFace;
     vector<Point2f> canthusPts;
     vector<Point2f> nosePts;
-    
+    vector<Point2f> rectifiedPts;
+    Mat rectifyTransformation;
+    Mat rectifyTransformationInv;
     Mat poseRMatrix;
-    Mat rotationMatrix;
     bool isTrackingSuccess;
     
     Mat projectionJacobian;
@@ -54,6 +56,7 @@ public:
 private:
     
     Mat im;
+    Mat rectifiedImage;
     Mat rotated_img;
     void findBestFrontalFaceShapeIn3D() ;
     static void eyeCenterLocalizationImpl(const Mat& image, Point2f & eyeCord, float coordinateWeight= 0.35, int kmeansIterations = 4, int kmeansRepeats= 3, float blurSizeRatio=0.26);
