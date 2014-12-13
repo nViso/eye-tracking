@@ -243,7 +243,7 @@ fs::path chooseUserProfile(fs::path userBasePath, bool withNew) {
 }
 
 vector<fs::path> chooseVideoFile(fs::path videoParingPath) {
-    vector<fs::path> videoFiles = listFilesWithExtension(videoParingPath, "", "vision.mov");
+    vector<fs::path> videoFiles = listFilesRecursivelyWithExtension(videoParingPath, "", "vision.mov");
     vector<fs::path> selectedFiles;
     int index = 0;
     while (videoFiles.size()>0) {
